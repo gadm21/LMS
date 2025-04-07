@@ -1,0 +1,12 @@
+# Virtual Environment
+
+venv/
+
+ENV/
+
+
+# Uploads
+
+uploads/
+
+
