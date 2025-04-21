@@ -1,0 +1,222 @@
+#!/usr/bin/env python3
+
+"""
+AI Core Module
+
+This module handles the core AI functionality, including:
+- Communication with the OpenAI API
+- Query generation with context
+- Response processing
+"""
+
+import logging
+import os
+import sys
+from typing import Any, Dict, List, Optional
+import json
+from dotenv import load_dotenv
+from openai import OpenAI
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
+from aiagent.context.reference import read_references
+
+
+def query_openai(
+    query: str,
+    long_term_memory: LongTermMemoryManager,
+    short_term_memory: ShortTermMemoryManager,
+    references: Dict[str, str],
+    max_tokens: int = 1024,
+    temperature: float = 0.7,
+    aux_data: Optional[Dict[str, Any]] = None
+) -> str:
+    """Send a query to OpenAI's GPT-3.5-turbo with context.
+
+    Includes context from:
+    - User profile and preferences stored in long_term_memory.json (if provided).
+    - Content of files found in the 'references' directory.
+    - The conversation will be summarized and stored in short_term_memory.json.
+
+    Args:
+        query: The user's question
+        long_term_memory: User profile and preferences information
+        references: Dictionary of reference documents to include in context
+        max_tokens: Maximum tokens in response (default: 1024)
+        temperature: Response randomness (0-1, default: 0.7)
+
+    Returns:
+        str: The AI's response, or an error message if the query fails.
+    """
+    try:
+        # Initialize OpenAI client
+        client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        if not client.api_key:
+            return "Error: No OpenAI API key found. Set OPENAI_API_KEY in .env"
+
+        # Build context messages from long-term memory
+        messages = []
+        if long_term_memory and isinstance(long_term_memory, dict):
+
+            # json to string
+            user_profile = json.dumps(long_term_memory.get("user_profile", {}))
+            preferences = json.dumps(long_term_memory.get("preferences", {}))
+            aux_data = json.dumps(aux_data)
+            past_conversations = json.dumps(short_term_memory.get("conversations", []))
+            active_url = json.dumps(short_term_memory.get("active_url", {}))
+
+            messages.append(
+                {
+                    "role": "system",
+                    "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nAuxiliary Data: {aux_data}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
+                }
+            )
+
+        # Add reference content to context
+        if references:
+            for filename, content in references.items():
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": f"Reference - {filename}: {content[:500]}...",
+                    }
+                )
+            
+        # Add user query
+        messages.append({"role": "user", "content": query})
+        print(messages)
+        # Query OpenAI
+        logging.info("Sending query to OpenAI")
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+        )
+
+        # Extract and return the AI's response
+        ai_response = response.choices[0].message.content
+        logging.info("Received response from OpenAI")
+        return ai_response
+    except Exception as e:
+        logging.error(f"Error querying OpenAI: {e}")
+        return f"Error querying AI: {str(e)}"
+
+
+def summarize_conversation(query: str, response: str) -> str:
+    """Create a brief summary of the conversation.
+
+    Uses the same AI model to generate a concise summary for memory storage.
+
+    Args:
+        query: The user's question
+        response: The AI's answer
+
+    Returns:
+        str: A brief summary of the conversation
+    """
+    # Initialize client and check API key here
+    try:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            logging.error(
+                "OpenAI API key not found. Please set the OPENAI_API_KEY environment variable."
+            )
+            return "Summary not available - OpenAI API key not found."
+        client = OpenAI(api_key=api_key)
+    except Exception as e:
+        logging.exception(f"Failed to initialize OpenAI client: {e}")
+        return f"Summary not available - Failed to initialize OpenAI client: {e}"
+
+    try:
+        # Create a prompt to summarize the conversation
+        summary_prompt = f"""Summarize the following conversation in a single short paragraph (max 50 words):
+        
+        User: {query}
+        AI: {response}
+        
+        Summary:"""
+
+        # Make the API call with a low max_tokens to ensure brevity
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": summary_prompt}],
+            max_tokens=100,
+            temperature=0.5,
+        )
+
+        # Extract and clean up the summary
+        summary = completion.choices[0].message.content
+
+        # Remove any prefix the model might add like "Summary:" or "Here's a summary:"
+        for prefix in ["Summary:", "Here's a summary:", "Here is a summary:"]:
+            if summary.startswith(prefix):
+                summary = summary[len(prefix) :].strip()
+
+        logging.info(f"Generated conversation summary ({len(summary)} chars)")
+        return summary
+
+    except Exception as e:
+        logging.error(f"Error generating conversation summary: {e}")
+        return "Error generating summary."
+
+
+
+def ask_ai(
+    query: str,
+    max_tokens: int = 1024,
+    temperature: float = 0.7,
+    aux_data: Optional[Dict[str, Any]] = None,
+    update_memory: bool = True,
+) -> str:
+    """
+    Query the AI with a given query and optional auxiliary data.
+
+    Args:
+        query: The user's question
+        aux_data: Optional auxiliary data to include in the context
+        max_tokens: Maximum tokens in response
+        temperature: Response randomness (0.0-1.0)
+        update_memory: Whether to update memory with the conversation
+
+    Returns:
+        str: The AI's response
+    """
+    
+    # Load long-term and short-term memory using managers
+    long_term_manager = LongTermMemoryManager()
+    short_term_manager = ShortTermMemoryManager()
+    long_term_memory = long_term_manager.load()
+    short_term_memory = short_term_manager.load()
+
+    # Read all reference files
+    references = read_references()
+
+    # Query the AI with context
+    response = query_openai(
+        query=query,
+        long_term_memory=long_term_memory,
+        short_term_memory=short_term_memory,
+        aux_data=aux_data,
+        references=references,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+
+    # Only create summary and update memory if query was successful
+    if not response.startswith("Error:") and update_memory:
+        summary = summarize_conversation(query, response)
+        # update short term memory: add to the conversations list
+        short_term_manager.set("conversations", short_term_memory["conversations"] + [{"query": query, "response": response, "summary": summary}])
+        
+    else:
+        logging.warning("Skipping memory update due to query error")
+
+    return response
