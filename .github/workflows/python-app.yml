@@ -37,6 +37,9 @@ jobs:
       - name: Set test env
         run: |
           echo "DATABASE_URL=postgresql://testuser:testpassword@localhost:5432/testdb" >> $GITHUB_ENV
+          echo "SECRET_KEY=test_secret_key_for_ci" >> $GITHUB_ENV
+          echo "ALGORITHM=HS256" >> $GITHUB_ENV
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=60" >> $GITHUB_ENV
       - name: Run tests
         run: |
           pytest test.py
