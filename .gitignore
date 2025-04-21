@@ -5,8 +5,6 @@ venv/
 ENV/
 
 
-# Uploads
 
-uploads/
-
+assets/
 
