@@ -239,6 +239,31 @@
       "query": "what is my name?",
       "response": "Your name is Gad. How can I assist you today?",
       "summary": "The user asks the AI for their name, and the AI responds that it is Gad, then offers assistance."
+    },
+    {
+      "query": "What is AI?",
+      "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
+      "summary": "Summary not available - OpenAI API key not found."
+    },
+    {
+      "query": "What is AI?",
+      "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
+      "summary": "Summary not available - OpenAI API key not found."
+    },
+    {
+      "query": "What is AI?",
+      "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
+      "summary": "Summary not available - OpenAI API key not found."
+    },
+    {
+      "query": "What is AI?",
+      "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
+      "summary": "Summary not available - OpenAI API key not found."
+    },
+    {
+      "query": "What is AI?",
+      "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
+      "summary": "Summary not available - OpenAI API key not found."
     }
   ],
   "active_url": {

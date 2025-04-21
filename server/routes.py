@@ -164,15 +164,7 @@ def tab_info():
         logger.info(f"[SERVER] URL domain: {url.split('/')[2] if '//' in url else 'unknown'}")
         logger.info(f"[SERVER] Title length: {len(title)}")
         
-        # Log MQTT status if available
-        try:
-            from server.mqtt import is_connected, publish_message
-            logger.info(f"[SERVER] MQTT connected: {is_connected()}")
-            if is_connected():
-                logger.info(f"[SERVER] Publishing to MQTT topic: walnut/active_url")
-        except ImportError:
-            logger.info("[SERVER] MQTT module not available")
-        
+
         # Log response
         response = {"status": "success", "message": "Tab info received", "title": title}
         log_response(200, response, '/tab-info')
@@ -412,6 +404,66 @@ def bookmark_extensive_logging():
         log_error(str(e), e, {"endpoint": "/bookmark"}, "/bookmark")
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@main_bp.route("/active_url", methods=["POST"])
+def active_url():
+    """Receive active URL updates from the extension and forward via MQTT.
+    
+    Expected POST data:
+        url (str): The current active URL
+        title (str, optional): The page title
+    
+    Returns:
+        JSON response with status acknowledgment
+    """
+    try:
+        # Log request start
+        log_request_start('/active_url', request.method, request.headers, request.remote_addr)
+        
+        # Get and log payload
+        data = request.get_json(silent=True)
+        log_request_payload(data, '/active_url')
+        
+        # Validate fields
+        url = data.get('url', '') if data else ''
+        title = data.get('title', '') if data else ''
+        
+        log_validation('url', url, bool(url), '/active_url')
+        log_validation('title', title, bool(title), '/active_url')
+        
+        if data is None:
+            log_error("No JSON data provided", None, {"endpoint": "/active_url"}, "/active_url")
+            return jsonify({"error": "No JSON data provided"}), 400
+        if not url:
+            log_error("Missing URL", None, {"endpoint": "/active_url"}, "/active_url")
+            return jsonify({"error": "Missing URL"}), 400
+        
+        # Log URL details
+        logger.info(f"[SERVER] Active URL: {url[:100]}")
+        if title:
+            logger.info(f"[SERVER] Page title: {title[:50]}")
+
+        # Log response
+        response = {"data": {"status": "success"}}
+        log_response(200, response, '/active_url')
+        return jsonify(response), 200
+    except Exception as e:
+        # Log errors
+        log_error(str(e), e, {"endpoint": "/active_url"}, "/active_url")
+        return jsonify({"error": str(e)}), 500
+
+@main_bp.route('/profile', methods=['GET'])
+def profile():
+    """Return hardcoded user profile info as JSON."""
+    return jsonify({
+        "name": "Gad Mohamed",
+        "profession": "AI Engineer",
+        "favorite_color": "Blue",
+        "spirit_animal": "Owl"
+    }), 200
+
+
+
+
 def register_routes(app):
     """Register all API routes with the Flask application.
 
@@ -468,134 +520,3 @@ def register_routes(app):
     # Log completion of route registration
     logger.info(f"[SERVER] Route registration complete at: {datetime.now().isoformat()}")
     logger.info(f"[SERVER] Server ready to handle requests")
-
-# Import handlers
-# from server.handlers import handle_active_url_request, handle_query
-
-@main_bp.route("/active_url", methods=["POST"])
-def active_url():
-    """Receive active URL updates from the extension and forward via MQTT.
-    
-    Expected POST data:
-        url (str): The current active URL
-        title (str, optional): The page title
-    
-    Returns:
-        JSON response with status acknowledgment
-    """
-    try:
-        # Log request start
-        log_request_start('/active_url', request.method, request.headers, request.remote_addr)
-        
-        # Get and log payload
-        data = request.get_json(silent=True)
-        log_request_payload(data, '/active_url')
-        
-        # Validate fields
-        url = data.get('url', '') if data else ''
-        title = data.get('title', '') if data else ''
-        
-        log_validation('url', url, bool(url), '/active_url')
-        log_validation('title', title, bool(title), '/active_url')
-        
-        if data is None:
-            log_error("No JSON data provided", None, {"endpoint": "/active_url"}, "/active_url")
-            return jsonify({"error": "No JSON data provided"}), 400
-        if not url:
-            log_error("Missing URL", None, {"endpoint": "/active_url"}, "/active_url")
-            return jsonify({"error": "Missing URL"}), 400
-        
-        # Log URL details
-        logger.info(f"[SERVER] Active URL: {url[:100]}")
-        if title:
-            logger.info(f"[SERVER] Page title: {title[:50]}")
-        
-        # Attempt MQTT publish if module available
-        try:
-            from server.mqtt import is_connected, publish_message
-            if is_connected():
-                publish_message('walnut/active_url', {'url': url, 'title': title})
-                logger.info(f"[SERVER] Published active URL to MQTT")
-            else:
-                logger.warning(f"[SERVER] MQTT not connected, unable to publish active URL")
-        except ImportError:
-            logger.warning(f"[SERVER] MQTT module not available")
-        
-        # Log response
-        response = {"data": {"status": "success"}}
-        log_response(200, response, '/active_url')
-        return jsonify(response), 200
-    except Exception as e:
-        # Log errors
-        log_error(str(e), e, {"endpoint": "/active_url"}, "/active_url")
-        return jsonify({"error": str(e)}), 500
-
-@main_bp.route("/unique_query", methods=["POST"], endpoint="unique_query")
-def unique_query():
-    """
-    Endpoint for handling AI query requests.
-    Expects a JSON payload with query data.
-    Returns the AI's response to the query.
-    """
-    try:
-        # Log request start
-        log_request_start('/unique_query', request.method, request.headers, request.remote_addr)
-        
-        # Get and log payload
-        data = request.get_json(silent=True)
-        log_request_payload(data, '/unique_query')
-        
-        if not data:
-            log_error("No JSON data provided", None, {"endpoint": "/unique_query"}, "/unique_query")
-            return jsonify({"error": "No JSON data provided"}), 400
-
-        # Extract and validate query
-        query_text = data.get("query", "")
-        log_validation('query', query_text, bool(query_text), '/unique_query')
-        
-        if not query_text:
-            log_error("No query provided", None, {"endpoint": "/unique_query"}, "/unique_query")
-            return jsonify({"error": "No query provided"}), 400
-        
-        # Log other parameters
-        page_content = data.get("page_content", "")
-        if page_content:
-            logger.info(f"[SERVER] Page content length: {len(page_content)}")
-        
- 
-        # Log handler call
-        logger.info(f"[SERVER] Processing query: {query_text[:50]}...")
-        logger.info(f"[SERVER] Calling query handler")
-        
-        # Get AI response with timing
-        start_time = time.time()
-        response = ask_ai(query_text, aux_data={"page_content": page_content})
-        duration = time.time() - start_time
-        
-        # Log AI response information
-        log_ai_response(response, '/unique_query')
-        logger.info(f"[SERVER] Query processing time: {duration:.2f} seconds")
-        
-        # Log response
-        result = {"response": response}
-        log_response(200, result, '/unique_query')
-        
-        return jsonify(result)
-    except ValueError as e:
-        # Log validation errors
-        log_error(f"Invalid JSON format: {str(e)}", e, {"endpoint": "/unique_query"}, "/unique_query")
-        return jsonify({"error": "Invalid JSON format"}), 400
-    except Exception as e:
-        # Log unexpected errors
-        log_error(f"Unexpected error: {str(e)}", e, {"endpoint": "/unique_query"}, "/unique_query")
-        return jsonify({"error": "Internal server error"}), 500
-
-@main_bp.route('/profile', methods=['GET'])
-def profile():
-    """Return hardcoded user profile info as JSON."""
-    return jsonify({
-        "name": "Gad Mohamed",
-        "profession": "AI Engineer",
-        "favorite_color": "Blue",
-        "spirit_animal": "Owl"
-    }), 200
