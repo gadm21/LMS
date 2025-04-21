@@ -1,2 +1,2 @@
 # server/__init__.py
-# Marks the server module as a package for imports.
+# Marks the server module as a package.

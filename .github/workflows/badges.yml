@@ -1,0 +1,11 @@
+# Dummy workflow for test badge demonstration
+name: Test Badge
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-badge:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "Badge test workflow triggered"

@@ -1,8 +1,10 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
-import main
-from main import app, Base, User, ASSETS_FOLDER
+from server import main
+from server.main import app
+from server.db import Base, User
+from server.routes import ASSETS_FOLDER
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
@@ -28,7 +30,8 @@ def override_get_db():
         yield db
     finally:
         db.close()
-app.dependency_overrides[main.get_db] = override_get_db
+from server import auth
+app.dependency_overrides[auth.get_db] = override_get_db
 
 client = TestClient(app)
 
