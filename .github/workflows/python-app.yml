@@ -10,20 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:13
-        env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: testdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.9
@@ -36,7 +22,7 @@ jobs:
           pip install -r requirements.txt
       - name: Set test env
         run: |
-          echo "DATABASE_URL=postgresql://testuser:testpassword@localhost:5432/testdb" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgresql://postgres:thothpassword@db.otjjjagmwzswbinwxmfw.supabase.co:5432/postgres" >> $GITHUB_ENV
           echo "SECRET_KEY=test_secret_key_for_ci" >> $GITHUB_ENV
           echo "ALGORITHM=HS256" >> $GITHUB_ENV
           echo "ACCESS_TOKEN_EXPIRE_MINUTES=60" >> $GITHUB_ENV
