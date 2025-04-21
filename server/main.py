@@ -46,10 +46,12 @@ app.add_middleware(
 )
 
 # DB setup
-DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db")
 Base = declarative_base()
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(bind=engine)
+
+# For Vercel, set DATABASE_URL in your environment. See .env.example for details.
 
 # Folder setup
 ASSETS_FOLDER = "assets"
@@ -359,4 +361,6 @@ def profile():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", port=8000, reload=True)
+    uvicorn.run("server.main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=True)
+
+# To deploy on Vercel, use vercel.json and set up ASGI handler.
