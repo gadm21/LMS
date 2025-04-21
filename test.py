@@ -10,7 +10,8 @@ from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
 
-TEST_DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test"
+TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test")
+print(f"[TEST] Using TEST_DATABASE_URL: {TEST_DATABASE_URL}")
 test_engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(bind=test_engine)
 
