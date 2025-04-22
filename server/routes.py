@@ -62,7 +62,12 @@ def log_ai_call(query, model, endpoint):
 def log_ai_response(response, endpoint):
     logger.info(f"[{endpoint}] AI response: {response}")
 
-ASSETS_FOLDER = "assets"
+# Set ASSETS_FOLDER to /tmp/assets if on Vercel or read-only FS, else use 'assets'
+if os.environ.get("VERCEL") or os.environ.get("READ_ONLY_FS"):
+    ASSETS_FOLDER = "/tmp/assets"
+    logger.warning("[Assets] Using /tmp/assets due to read-only filesystem or Vercel environment.")
+else:
+    ASSETS_FOLDER = "assets"
 os.makedirs(ASSETS_FOLDER, exist_ok=True)
 
 @router.post("/register")
