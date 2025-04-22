@@ -197,10 +197,13 @@
       }
     }
 
+    // Backend base URL config
+    const BACKEND_BASE_URL = window.BACKEND_BASE_URL || 'http://localhost:7050';
+
     function signup() {
       const usernameVal = document.getElementById('reg-username').value;
       const passwordVal = document.getElementById('reg-password').value;
-      axios.post('/api/register', { username: usernameVal, password: passwordVal })
+      axios.post(`${BACKEND_BASE_URL}/register`, { username: usernameVal, password: passwordVal })
         .then(res => showMessage(res.data))
         .catch(err => showMessage(err.response?.data?.detail || err.message));
     }
@@ -210,14 +213,14 @@
       form.append('username', document.getElementById('login-username').value);
       form.append('password', document.getElementById('login-password').value);
       form.append('grant_type', 'password');
-      axios.post('/token', form)
+      axios.post(`${BACKEND_BASE_URL}/token`, form)
         .then(res => {
           token = res.data.access_token;
           username = document.getElementById('login-username').value;
           localStorage.setItem('token', token);
           localStorage.setItem('username', username);
           // Optionally fetch userId from /profile endpoint
-          axios.get('/profile', { headers: { Authorization: 'Bearer ' + token } })
+          axios.get(`${BACKEND_BASE_URL}/profile`, { headers: { Authorization: 'Bearer ' + token } })
             .then(profileRes => {
               userId = profileRes.data.userId || '';
               localStorage.setItem('userId', userId);

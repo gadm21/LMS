@@ -1,0 +1,173 @@
+[12:41:34] INFO [TEST] Using TEST_DATABASE_URL: postgresql://postgres.otjjjagmwzswbinwxmfw:thothpassword@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+[12:41:35] INFO [test_upload_file] START
+[12:41:35] INFO [registerUser] Registering user: None
+[12:41:35] WARNING (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/gadmohamed/Desktop/LMS/.venv/lib/python3.9/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+[12:41:36] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:36] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 408}
+[12:41:36] INFO [loginUser] Logging in user: {'username': 'testuser_8f88e249', 'password': 'testpass123'}
+[12:41:37] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:37] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84Zjg4ZTI0OSIsImV4cCI6MTc0NTM0MzY5N30.Ste7aWe-2WH3y8C7UOWBX5PU0Mh2tgNrjfbFMx1EL5Q', 'token_type': 'bearer'}
+[12:41:37] INFO [test_upload_file] Uploading file: testfile.txt
+[12:41:37] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[12:41:37] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11}
+[12:41:37] INFO [test_upload_file] END
+[12:41:37] INFO HTTP Request: DELETE http://testserver/user/testuser_8f88e249 "HTTP/1.1 200 OK"
+[12:41:37] INFO [test_active_url_success] START
+[12:41:37] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[12:41:37] INFO [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[12:41:37] INFO [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[12:41:37] INFO [/active_url] Validation: url valid=True
+[12:41:37] INFO [/active_url] Validation: title valid=True
+[12:41:37] INFO [SERVER] Active URL: https://example.com
+[12:41:37] INFO [SERVER] Page title: Example Page
+[12:41:37] INFO [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[12:41:37] INFO HTTP Request: POST http://testserver/active_url "HTTP/1.1 200 OK"
+[12:41:37] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
+[12:41:37] INFO [test_active_url_success] END
+[12:41:37] INFO [test_active_url_missing_url] START
+[12:41:37] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
+[12:41:37] INFO [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[12:41:37] INFO [/active_url] Payload: {'title': 'Example Page'}
+[12:41:37] INFO [/active_url] Validation: url valid=False
+[12:41:37] INFO [/active_url] Validation: title valid=True
+[12:41:37] ERROR [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[12:41:37] INFO HTTP Request: POST http://testserver/active_url "HTTP/1.1 400 Bad Request"
+[12:41:37] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
+[12:41:37] INFO [test_active_url_missing_url] END
+[12:41:37] INFO [test_profile] START
+[12:41:37] INFO HTTP Request: GET http://testserver/profile "HTTP/1.1 200 OK"
+[12:41:37] INFO [test_profile] Response status: 200, body: {'name': 'Gad Mohamed', 'profession': 'AI Engineer', 'favorite_color': 'Blue', 'spirit_animal': 'Owl'}
+[12:41:37] INFO [test_profile] END
+[12:41:37] INFO [testQueryEndpoint] START
+[12:41:37] INFO [registerUser] Registering user: None
+[12:41:38] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:38] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 409}
+[12:41:38] INFO [loginUser] Logging in user: {'username': 'testuser_b90882d9', 'password': 'testpass123'}
+[12:41:38] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:38] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9iOTA4ODJkOSIsImV4cCI6MTc0NTM0MzY5OH0.eINe-3AvKplmD1LIdX-hvunRk5PXt1_8lvxgWJWPejI', 'token_type': 'bearer'}
+[12:41:38] INFO [testQueryEndpoint] Case 1: Missing JSON body
+[12:41:38] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[12:41:38] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Missing or invalid JSON body"}
+[12:41:38] INFO [testQueryEndpoint] Case 2: Missing 'query' field
+[12:41:39] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[12:41:39] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
+[12:41:39] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
+[12:41:39] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[12:41:39] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
+[12:41:39] INFO [testQueryEndpoint] Case 4: Valid request
+[12:41:39] INFO [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9iOTA4ODJkOSIsImV4cCI6MTc0NTM0MzY5OH0.eINe-3AvKplmD1LIdX-hvunRk5PXt1_8lvxgWJWPejI', 'content-type': 'application/json', 'content-length': '69'}
+[12:41:39] INFO [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[12:41:39] INFO [/query] Validation: query valid=True
+[12:41:39] INFO Loading memory from directory: assets/409
+[12:41:39] INFO [update_client] Called with client_dir=assets/409
+[12:41:39] INFO [update_client] Paths set: CLIENT_DIR=assets/409, DATA_DIR=assets/409/data, LONG_TERM_MEMORY_FILE=assets/409/data/long_term_memory.json, SHORT_TERM_MEMORY_FILE=assets/409/data/short_term_memory.json, CONTEXT_FILE=assets/409/data/context.json
+[12:41:39] INFO [update_client] Called with client_dir=assets/409
+[12:41:39] INFO [update_client] Paths set: CLIENT_DIR=assets/409, DATA_DIR=assets/409/data, LONG_TERM_MEMORY_FILE=assets/409/data/long_term_memory.json, SHORT_TERM_MEMORY_FILE=assets/409/data/short_term_memory.json, CONTEXT_FILE=assets/409/data/context.json
+[12:41:39] INFO [BaseMemoryManager.load] Loading memory_type=long-term
+[12:41:39] INFO [load_memory] Requested memory_type=long-term
+[12:41:39] INFO [load_memory] Using file: assets/409/data/long_term_memory.json
+[12:41:39] INFO [load_memory] Loading from filepath=assets/409/data/long_term_memory.json
+[12:41:39] INFO [load_memory] Loaded data from assets/409/data/long_term_memory.json (keys: [])
+[12:41:39] INFO Successfully loaded long-term memory
+[12:41:39] INFO [BaseMemoryManager.load] Loading memory_type=short-term
+[12:41:39] INFO [load_memory] Requested memory_type=short-term
+[12:41:39] INFO [load_memory] Using file: assets/409/data/short_term_memory.json
+[12:41:39] INFO [load_memory] Loading from filepath=assets/409/data/short_term_memory.json
+[12:41:39] INFO [load_memory] Loaded data from assets/409/data/short_term_memory.json (keys: [])
+[12:41:39] INFO Successfully loaded short-term memory
+[12:41:39] INFO Reading references from directory: assets/409/references
+[12:41:39] INFO Processed 0 reference files with 0 total characters
+[12:41:39] INFO Context messages: [{'role': 'user', 'content': 'WHO IS GAD?'}]
+[12:41:39] INFO Sending query to OpenAI
+[12:41:40] INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+[12:41:40] INFO Received response from OpenAI
+[12:41:41] INFO HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+[12:41:41] INFO Generated conversation summary (223 chars)
+[12:41:41] INFO [BaseMemoryManager.load] Loading memory_type=short-term
+[12:41:41] INFO [load_memory] Requested memory_type=short-term
+[12:41:41] INFO [load_memory] Using file: assets/409/data/short_term_memory.json
+[12:41:41] INFO [load_memory] Loading from filepath=assets/409/data/short_term_memory.json
+[12:41:41] INFO [load_memory] Loaded data from assets/409/data/short_term_memory.json (keys: [])
+[12:41:41] INFO Successfully loaded short-term memory
+[12:41:41] INFO [BaseMemoryManager.save] Saving memory_type=short-term
+[12:41:41] INFO [save_memory] Successfully saved memory to assets/409/data/short_term_memory.json
+[12:41:41] INFO [/query] Responded with status 200: {'message': 'Query received', 'response': 'Gad is a figure mentioned in the Bible, specifically in the Old Testament. He was one of the 12 sons of Jacob, who later became the patriarch of the Israelite tribe of Gad. Gad is also considered a prophet in Jewish tradition.'}
+[12:41:42] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 200 OK"
+[12:41:42] INFO [testQueryEndpoint] Case 4 Response: 200, {"userId":409,"username":"testuser_b90882d9","query":"WHO IS GAD?","chatId":"chat1","pageContent":"Some content","message":"Query received","response":"Gad is a figure mentioned in the Bible, specifically in the Old Testament. He was one of the 12 sons of Jacob, who later became the patriarch of the Israelite tribe of Gad. Gad is also considered a prophet in Jewish tradition."}
+[12:41:42] INFO HTTP Request: DELETE http://testserver/user/testuser_b90882d9 "HTTP/1.1 200 OK"
+[12:41:42] INFO [testQueryEndpoint] END
+[12:41:42] INFO [test_delete_user] START
+[12:41:42] INFO [test_delete_user] Registering user: {'username': 'testuser_8a9707ad', 'password': 'testpass123'}
+[12:41:42] INFO [registerUser] Registering user: {'username': 'testuser_8a9707ad', 'password': 'testpass123'}
+[12:41:42] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:42] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 410}
+[12:41:42] INFO [loginUser] Logging in user: {'username': 'testuser_8a9707ad', 'password': 'testpass123'}
+[12:41:43] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:43] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84YTk3MDdhZCIsImV4cCI6MTc0NTM0MzcwM30.BkPqwkYanvSBJGCCZh0dy4QiIi62TnDx0hshdFYeoEU', 'token_type': 'bearer'}
+[12:41:43] INFO [test_delete_user] Deleting user testuser_8a9707ad (self-delete)
+[12:41:43] INFO HTTP Request: DELETE http://testserver/user/testuser_8a9707ad "HTTP/1.1 200 OK"
+[12:41:43] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_8a9707ad' deleted successfully."}
+[12:41:43] INFO [test_delete_user] Try deleting user testuser_8a9707ad again (should be not found/unauthorized)
+[12:41:43] INFO HTTP Request: DELETE http://testserver/user/testuser_8a9707ad "HTTP/1.1 401 Unauthorized"
+[12:41:43] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[12:41:43] INFO [test_delete_user] Re-registering user testuser_8a9707ad
+[12:41:43] INFO [registerUser] Registering user: {'username': 'testuser_8a9707ad', 'password': 'testpass123'}
+[12:41:44] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:44] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 411}
+[12:41:44] INFO [test_delete_user] Registering second user: {'username': 'testuser_30385c09', 'password': 'testpass123'}
+[12:41:44] INFO [registerUser] Registering user: {'username': 'testuser_30385c09', 'password': 'testpass123'}
+[12:41:45] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:45] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 412}
+[12:41:45] INFO [loginUser] Logging in user: {'username': 'testuser_30385c09', 'password': 'testpass123'}
+[12:41:45] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:45] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zMDM4NWMwOSIsImV4cCI6MTc0NTM0MzcwNX0.AEKia7CmazqwKNkHi-cctohog9ilBH88Xti-PVhJ0Ac', 'token_type': 'bearer'}
+[12:41:45] INFO [test_delete_user] Second user attempts to delete testuser_8a9707ad
+[12:41:45] INFO HTTP Request: DELETE http://testserver/user/testuser_8a9707ad "HTTP/1.1 403 Forbidden"
+[12:41:45] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
+[12:41:45] INFO [test_delete_user] END
+[12:41:45] INFO [test_list_files] START
+[12:41:45] INFO [registerUser] Registering user: None
+[12:41:46] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:46] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 413}
+[12:41:46] INFO [loginUser] Logging in user: {'username': 'testuser_5ae96d76', 'password': 'testpass123'}
+[12:41:46] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:46] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl81YWU5NmQ3NiIsImV4cCI6MTc0NTM0MzcwNn0.VXIfMKH0-DOm9wl4ha1Z08V68YzrzQF_c4Z8S_JT3zg', 'token_type': 'bearer'}
+[12:41:46] INFO [test_list_files] Listing files
+[12:41:47] INFO HTTP Request: GET http://testserver/files "HTTP/1.1 200 OK"
+[12:41:47] INFO [test_list_files] Response status: 200, body: []
+[12:41:47] INFO HTTP Request: DELETE http://testserver/user/testuser_5ae96d76 "HTTP/1.1 200 OK"
+[12:41:47] INFO [test_list_files] END
+[12:41:47] INFO [test_download_file] START
+[12:41:47] INFO [registerUser] Registering user: None
+[12:41:48] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:48] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 414}
+[12:41:48] INFO [loginUser] Logging in user: {'username': 'testuser_3c3b2b08', 'password': 'testpass123'}
+[12:41:48] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:48] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zYzNiMmIwOCIsImV4cCI6MTc0NTM0MzcwOH0.u8_2om1xHB80ATtpgFSB0C59TvsHL5Lzn-7y-FdJ6ww', 'token_type': 'bearer'}
+[12:41:48] INFO [test_download_file] Uploading file: testfile.txt
+[12:41:48] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[12:41:48] INFO [test_download_file] Downloading file: testfile.txt
+[12:41:48] INFO HTTP Request: GET http://testserver/download/testfile.txt "HTTP/1.1 200 OK"
+[12:41:48] INFO [test_download_file] Response status: 200, length: 11
+[12:41:49] INFO HTTP Request: DELETE http://testserver/user/testuser_3c3b2b08 "HTTP/1.1 200 OK"
+[12:41:49] INFO [test_download_file] END
+[12:41:49] INFO [test_delete_file] START
+[12:41:49] INFO [registerUser] Registering user: None
+[12:41:49] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[12:41:49] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 415}
+[12:41:49] INFO [loginUser] Logging in user: {'username': 'testuser_0d397199', 'password': 'testpass123'}
+[12:41:50] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[12:41:50] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8wZDM5NzE5OSIsImV4cCI6MTc0NTM0MzcxMH0.43x6R2OV-iNTUJkswsTBWXTeHJaRofUjUniAlhAY8IU', 'token_type': 'bearer'}
+[12:41:50] INFO [test_delete_file] Uploading file: testfile.txt
+[12:41:50] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[12:41:50] INFO [test_delete_file] Deleting file: testfile.txt
+[12:41:50] INFO HTTP Request: DELETE http://testserver/delete/testfile.txt "HTTP/1.1 200 OK"
+[12:41:50] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully."}
+[12:41:50] INFO HTTP Request: DELETE http://testserver/user/testuser_0d397199 "HTTP/1.1 200 OK"
+[12:41:50] INFO HTTP Request: GET http://testserver/files "HTTP/1.1 401 Unauthorized"
+[12:41:50] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
+[12:41:50] INFO [test_delete_file] END
