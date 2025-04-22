@@ -50,16 +50,18 @@ def load_memory(memory_type: str) -> Dict[str, Any]:
     try:
         logging.info(f"[load_memory] Loading from filepath={filepath}")
         with open(filepath, 'r', encoding='utf-8') as f:
-            memory = json.load(f)
-        logging.info(f"[load_memory] Loaded data from {filepath} (keys: {list(memory.keys())})")
+            memory_data = json.load(f)
+        logging.info(f"[load_memory] Loaded data from {filepath} (keys: {list(memory_data.keys())})")
         logging.info(f"Successfully loaded {memory_type} memory")
-        return memory
+        return memory_data
     except FileNotFoundError:
         # If file doesn't exist, create it with default empty structure
         logging.warning(f"{memory_type} memory file not found: {filepath}")
         if memory_type == "short-term":
             default_memory = {
                 "conversations": [],
+                "active_url": {},
+                "test": None,
                 "preferences": {}
             }
         else:  # long-term

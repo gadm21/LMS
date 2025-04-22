@@ -14,7 +14,7 @@ from typing import Any, Dict
 
 import aiagent.memory as memory
 
-def save_memory(memory: Dict[str, Any], type: str) -> bool:
+def save_memory(memory: Dict[str, Any], filepath: str) -> bool:
     """Save memory (short-term or long-term) to a JSON file.
 
     Ensures proper formatting and error handling when saving memory data.
@@ -34,22 +34,15 @@ def save_memory(memory: Dict[str, Any], type: str) -> bool:
     :noindex:
     """
     try:
-        if type == "short-term":
-            filepath = memory.SHORT_TERM_MEMORY_FILE
-        elif type == "long-term":
-            filepath = memory.LONG_TERM_MEMORY_FILE
-        else:
-            raise ValueError(f"Invalid memory type: {type}")
-        
         # Ensure the directory exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
 
         # Write the memory data
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(memory, f, indent=2)
-        logging.info(f"[save_memory] Successfully saved {type} memory to {filepath}")
+        logging.info(f"[save_memory] Successfully saved memory to {filepath}")
         return True
     except OSError as e:
-        logging.error(f"Error saving {type} memory to {filepath}: {e}")
+        logging.error(f"Error saving memory to {filepath}: {e}")
         return False
             

@@ -26,7 +26,7 @@ class BaseMemoryManager:
         """Save memory data to file."""
         import logging
         logging.info(f"[BaseMemoryManager.save] Saving memory_type={self.memory_type}")
-        save_memory(data, self.memory_type)
+        save_memory(data, self.memory_file)
 
     def load(self) -> Dict:
         """Load memory data from file."""
@@ -55,13 +55,16 @@ class ShortTermMemoryManager(BaseMemoryManager):
     """
     Manages short-term memory operations.
     """
-    memory_file = SHORT_TERM_MEMORY_FILE
-
+    
     def __init__(self, client_dir: Optional[str] = None):
         if client_dir:
             update_client(client_dir)
         super().__init__(client_dir)
-        
+
+    @property
+    def memory_file(self):
+        from aiagent.memory import SHORT_TERM_MEMORY_FILE
+        return SHORT_TERM_MEMORY_FILE
 
     @property
     def memory_type(self) -> str:
@@ -88,13 +91,16 @@ class LongTermMemoryManager(BaseMemoryManager):
     """
     Manages long-term memory operations.
     """
-    memory_file = LONG_TERM_MEMORY_FILE
-
+    
     def __init__(self, client_dir: Optional[str] = None):
         if client_dir:
             update_client(client_dir)
         super().__init__(client_dir)
-        
+
+    @property
+    def memory_file(self):
+        from aiagent.memory import LONG_TERM_MEMORY_FILE
+        return LONG_TERM_MEMORY_FILE
 
     @property
     def memory_type(self) -> str:

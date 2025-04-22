@@ -221,7 +221,8 @@ def ask_ai(
     if not response.startswith("Error:") and update_memory:
         summary = summarize_conversation(query, response)
         # update short term memory: add to the conversations list
-        short_term_manager.set("conversations", short_term_memory["conversations"] + [{"query": query, "response": response, "summary": summary}])
+        conversations = short_term_memory.get("conversations", [])
+        short_term_manager.set("conversations", conversations + [{"query": query, "response": response, "summary": summary}])
         
     else:
         logging.warning("Skipping memory update due to query error")

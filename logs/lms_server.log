@@ -46,3 +46,67 @@
 [2025-04-22 11:13:03,400] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
 [2025-04-22 11:13:03,400] INFO lms.server: [/query] Validation: query valid=True
 [2025-04-22 11:13:03,428] ERROR lms.server: [/query] ERROR: local variable 'memory' referenced before assignment | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 203, in ask_ai\n    long_term_memory = long_term_manager.load()\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 35, in load\n    return load_memory(self.memory_type)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/loader.py", line 42, in load_memory\n    logging.info(f"[load_memory] Using file: {memory.LONG_TERM_MEMORY_FILE}")\nUnboundLocalError: local variable \'memory\' referenced before assignment\n'}
+[2025-04-22 11:28:15,319] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:28:15,320] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:28:15,320] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:28:15,320] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:28:15,320] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:28:15,320] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:28:15,320] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:28:15,327] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:28:15,327] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:28:15,327] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:28:15,328] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:28:15,328] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:28:16,961] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8xNzMwY2Y5NyIsImV4cCI6MTc0NTMzOTI5Nn0.mptQQXsR_E4bOeQ9MqlmIkDwkHRkOT_W1Gk6GPw3AaU', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:28:16,961] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:28:16,962] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:28:20,244] ERROR lms.server: [/query] ERROR: 'conversations' | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 224, in ask_ai\n    short_term_manager.set("conversations", short_term_memory["conversations"] + [{"query": query, "response": response, "summary": summary}])\nKeyError: \'conversations\'\n'}
+[2025-04-22 11:29:49,957] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:29:49,961] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:29:49,961] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:29:49,961] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:29:49,961] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:29:49,961] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:29:49,961] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:29:49,968] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:29:49,968] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:29:49,968] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:29:49,968] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:29:49,968] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:29:51,856] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl80YjNjMThhNyIsImV4cCI6MTc0NTMzOTM5MX0.yRa9JT7lhHpoJ6p9cpyFkvm7iRLerhx0gGrJ_CU9ODM', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:29:51,857] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:29:51,857] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:29:54,722] ERROR lms.server: [/query] ERROR: 'dict' object has no attribute 'SHORT_TERM_MEMORY_FILE' | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 225, in ask_ai\n    short_term_manager.set("conversations", conversations + [{"query": query, "response": response, "summary": summary}])\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 47, in set\n    self.save(memory)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 29, in save\n    save_memory(data, self.memory_type)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/saver.py", line 38, in save_memory\n    filepath = memory.SHORT_TERM_MEMORY_FILE\nAttributeError: \'dict\' object has no attribute \'SHORT_TERM_MEMORY_FILE\'\n'}
+[2025-04-22 11:37:29,485] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:37:29,486] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:37:29,486] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:37:29,486] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:37:29,486] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:37:29,486] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:37:29,486] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:37:29,489] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:37:29,489] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:37:29,489] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:37:29,489] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:37:29,489] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:37:31,044] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8xMjM3ZDAxYyIsImV4cCI6MTc0NTMzOTg1MH0.gTrnEbTWO10BmTESHr-F-rGcW6oYVwkWHhKA8QpxbWo', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:37:31,044] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:37:31,048] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:37:33,670] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'In the Bible, Gad is a prophet who appears in the books of Samuel and Chronicles. He was a seer and advisor to King David. Gad is also mentioned in the Quran as one of the prophets of Islam.'}
+[2025-04-22 11:41:26,510] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:41:26,510] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:41:26,510] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:41:26,510] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:41:26,510] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:41:26,510] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:41:26,511] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:41:26,514] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:41:26,514] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:41:26,514] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:41:26,514] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:41:26,514] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:41:28,199] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl81OTM5ODQwZCIsImV4cCI6MTc0NTM0MDA4N30.LXSVkc2Dr34jK6wwbH2PqSSBaDKkRcUmsk_aPiXE3BY', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:41:28,200] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:41:28,200] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:41:30,664] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'Gad is a biblical figure who was one of the twelve sons of Jacob and the founder of the Israelite tribe of Gad. He is mentioned in the Old Testament of the Bible in the book of Genesis.'}
