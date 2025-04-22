@@ -21,22 +21,28 @@ router = APIRouter()
 logger = logging.getLogger("lms.server")
 logger.setLevel(logging.INFO)
 
-# --- Logging configuration: print to console and log to file ---
+# --- Logging configuration: print to console and log to file (if possible) ---
 import os
 formatter = logging.Formatter('[%(asctime)s] %(levelname)s %(name)s: %(message)s')
 
-# Console handler
+# Always log to console (stdout), which Vercel captures
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
-# File handler
-log_dir = "logs"
-os.makedirs(log_dir, exist_ok=True)
-log_file = os.path.join(log_dir, "lms_server.log")
-file_handler = logging.FileHandler(log_file)
-file_handler.setFormatter(formatter)
-logger.addHandler(file_handler)
+# Only log to file if not running on Vercel (Vercel sets the VERCEL env var)
+if not os.environ.get("VERCEL"):
+    try:
+        log_dir = "logs"
+        os.makedirs(log_dir, exist_ok=True)
+        log_file = os.path.join(log_dir, "lms_server.log")
+        file_handler = logging.FileHandler(log_file)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    except Exception as e:
+        logger.warning(f"[Logging] Could not set up file logging: {e}")
+else:
+    logger.warning("[Logging] File logging is disabled (running on Vercel or read-only filesystem)")
 # --- End logging configuration ---
 
 # Logging helpers (stubs for demonstration)
