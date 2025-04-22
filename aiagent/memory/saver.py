@@ -12,7 +12,7 @@ import logging
 import os
 from typing import Any, Dict
 
-from aiagent.memory import SHORT_TERM_MEMORY_FILE, LONG_TERM_MEMORY_FILE
+import aiagent.memory as memory
 
 def save_memory(memory: Dict[str, Any], type: str) -> bool:
     """Save memory (short-term or long-term) to a JSON file.
@@ -35,9 +35,9 @@ def save_memory(memory: Dict[str, Any], type: str) -> bool:
     """
     try:
         if type == "short-term":
-            filepath = SHORT_TERM_MEMORY_FILE
+            filepath = memory.SHORT_TERM_MEMORY_FILE
         elif type == "long-term":
-            filepath = LONG_TERM_MEMORY_FILE
+            filepath = memory.LONG_TERM_MEMORY_FILE
         else:
             raise ValueError(f"Invalid memory type: {type}")
         
@@ -47,7 +47,7 @@ def save_memory(memory: Dict[str, Any], type: str) -> bool:
         # Write the memory data
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(memory, f, indent=2)
-        logging.info(f"Successfully saved {type} memory to {filepath}")
+        logging.info(f"[save_memory] Successfully saved {type} memory to {filepath}")
         return True
     except OSError as e:
         logging.error(f"Error saving {type} memory to {filepath}: {e}")

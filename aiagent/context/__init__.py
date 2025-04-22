@@ -15,7 +15,7 @@ Key components:
 
 from aiagent.context.extractor import extract_fields_from_page
 from aiagent.context.page import save_page_content
-from aiagent.context.reference import REFERENCES_DIR, read_references
+from aiagent.context.reference import read_references
 
 __all__ = [
     "read_references",

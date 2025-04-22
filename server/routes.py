@@ -13,11 +13,31 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Body, Request
 import logging
 
+from aiagent.handler import query
+
 router = APIRouter()
 
 # Set up logger
 logger = logging.getLogger("lms.server")
 logger.setLevel(logging.INFO)
+
+# --- Logging configuration: print to console and log to file ---
+import os
+formatter = logging.Formatter('[%(asctime)s] %(levelname)s %(name)s: %(message)s')
+
+# Console handler
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
+
+# File handler
+log_dir = "logs"
+os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, "lms_server.log")
+file_handler = logging.FileHandler(log_file)
+file_handler.setFormatter(formatter)
+logger.addHandler(file_handler)
+# --- End logging configuration ---
 
 # Logging helpers (stubs for demonstration)
 def log_request_start(endpoint, method, headers, client_host):
@@ -86,8 +106,8 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
         f.write(contents)
     return {"filename": file.filename, "size": len(contents)}
 
-@router.post("/query/{userId}")
-async def queryEndpoint(userId: str, request: Request, user: User = Depends(get_current_user)):
+@router.post("/query")
+async def queryEndpoint(request: Request, user: User = Depends(get_current_user)):
     """
     Handle AI queries. Expects a JSON body with at least a 'query' field and a 'chatId'.
     Optionally accepts 'pageContent'.
@@ -111,7 +131,11 @@ async def queryEndpoint(userId: str, request: Request, user: User = Depends(get_
         if not queryText or not queryText.strip():
             log_error("No query provided", None, {"endpoint": "/query"}, "/query")
             return JSONResponse({"error": "No query provided"}, status_code=400)
-        # For demonstration, include userId in the response and also a 'response' key for test compatibility
+        import traceback
+        client_dir = os.path.join(ASSETS_FOLDER, str(user.userId))
+        response = query.ask_ai(queryText, client_dir=client_dir)
+        
+        log_response(200, {"message": "Query received", "response": response}, '/query')
         return JSONResponse({
             "userId": user.userId,
             "username": user.username,
@@ -119,11 +143,14 @@ async def queryEndpoint(userId: str, request: Request, user: User = Depends(get_
             "chatId": chatId,
             "pageContent": pageContent,
             "message": "Query received",
-            "response": f"This is a placeholder response for user {user.userId}"
+            "response": response
         })
     except Exception as e:
-        log_error(str(e), None, {"endpoint": "/query"}, "/query")
-        return JSONResponse({"error": str(e)}, status_code=500)
+        import traceback
+        tb = traceback.format_exc()
+        print("DEBUG: Exception in /query endpoint", e, tb)
+        log_error(str(e), None, {"endpoint": "/query", "traceback": tb}, "/query")
+        return JSONResponse({"error": str(e), "traceback": tb}, status_code=500)
 
 @router.post("/active_url")
 async def active_url(request: Request):

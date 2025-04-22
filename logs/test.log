@@ -1,0 +1,147 @@
+[11:12:59] INFO [TEST] Using TEST_DATABASE_URL: postgresql://postgres.otjjjagmwzswbinwxmfw:thothpassword@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+[11:13:00] INFO [test_upload_file] START
+[11:13:00] INFO [registerUser] Registering user: None
+[11:13:00] WARNING (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/Users/gadmohamed/Desktop/LMS/.venv/lib/python3.9/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+[11:13:00] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:00] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 320}
+[11:13:00] INFO [loginUser] Logging in user: {'username': 'testuser_ab614e4b', 'password': 'testpass123'}
+[11:13:01] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:01] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hYjYxNGU0YiIsImV4cCI6MTc0NTMzODM4MX0.CxRjrnsWx97r9GYqBBj6hCBpOoFxDvIFuSVHYIphIV0', 'token_type': 'bearer'}
+[11:13:01] INFO [test_upload_file] Uploading file: testfile.txt
+[11:13:01] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[11:13:01] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11}
+[11:13:01] INFO [test_upload_file] END
+[11:13:01] INFO HTTP Request: DELETE http://testserver/user/testuser_ab614e4b "HTTP/1.1 200 OK"
+[11:13:01] INFO [test_active_url_success] START
+[11:13:01] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[11:13:01] INFO [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[11:13:01] INFO [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[11:13:01] INFO [/active_url] Validation: url valid=True
+[11:13:01] INFO [/active_url] Validation: title valid=True
+[11:13:01] INFO [SERVER] Active URL: https://example.com
+[11:13:01] INFO [SERVER] Page title: Example Page
+[11:13:01] INFO [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[11:13:01] INFO HTTP Request: POST http://testserver/active_url "HTTP/1.1 200 OK"
+[11:13:01] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
+[11:13:01] INFO [test_active_url_success] END
+[11:13:01] INFO [test_active_url_missing_url] START
+[11:13:01] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
+[11:13:01] INFO [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[11:13:01] INFO [/active_url] Payload: {'title': 'Example Page'}
+[11:13:01] INFO [/active_url] Validation: url valid=False
+[11:13:01] INFO [/active_url] Validation: title valid=True
+[11:13:01] ERROR [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[11:13:01] INFO HTTP Request: POST http://testserver/active_url "HTTP/1.1 400 Bad Request"
+[11:13:01] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
+[11:13:01] INFO [test_active_url_missing_url] END
+[11:13:01] INFO [test_profile] START
+[11:13:01] INFO HTTP Request: GET http://testserver/profile "HTTP/1.1 200 OK"
+[11:13:01] INFO [test_profile] Response status: 200, body: {'name': 'Gad Mohamed', 'profession': 'AI Engineer', 'favorite_color': 'Blue', 'spirit_animal': 'Owl'}
+[11:13:01] INFO [test_profile] END
+[11:13:01] INFO [testQueryEndpoint] START
+[11:13:01] INFO [registerUser] Registering user: None
+[11:13:02] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:02] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 321}
+[11:13:02] INFO [loginUser] Logging in user: {'username': 'testuser_a3ab762e', 'password': 'testpass123'}
+[11:13:02] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:02] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hM2FiNzYyZSIsImV4cCI6MTc0NTMzODM4Mn0.hw3jG0eKVEfzsTsQaB-c6FYMG5ODjQ87x_Eli0eFdFs', 'token_type': 'bearer'}
+[11:13:02] INFO [testQueryEndpoint] Case 1: Missing JSON body
+[11:13:02] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[11:13:02] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Missing or invalid JSON body"}
+[11:13:02] INFO [testQueryEndpoint] Case 2: Missing 'query' field
+[11:13:03] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[11:13:03] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
+[11:13:03] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
+[11:13:03] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 400 Bad Request"
+[11:13:03] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
+[11:13:03] INFO [testQueryEndpoint] Case 4: Valid request
+[11:13:03] INFO [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hM2FiNzYyZSIsImV4cCI6MTc0NTMzODM4Mn0.hw3jG0eKVEfzsTsQaB-c6FYMG5ODjQ87x_Eli0eFdFs', 'content-type': 'application/json', 'content-length': '69'}
+[11:13:03] INFO [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[11:13:03] INFO [/query] Validation: query valid=True
+[11:13:03] INFO Loading memory from directory: assets/321
+[11:13:03] INFO [update_client] Called with client_dir=assets/321
+[11:13:03] INFO [update_client] Paths set: CLIENT_DIR=assets/321, DATA_DIR=assets/321/data, LONG_TERM_MEMORY_FILE=assets/321/data/long_term_memory.json, SHORT_TERM_MEMORY_FILE=assets/321/data/short_term_memory.json, CONTEXT_FILE=assets/321/data/context.json
+[11:13:03] INFO [update_client] Called with client_dir=assets/321
+[11:13:03] INFO [update_client] Paths set: CLIENT_DIR=assets/321, DATA_DIR=assets/321/data, LONG_TERM_MEMORY_FILE=assets/321/data/long_term_memory.json, SHORT_TERM_MEMORY_FILE=assets/321/data/short_term_memory.json, CONTEXT_FILE=assets/321/data/context.json
+[11:13:03] INFO [BaseMemoryManager.load] Loading memory_type=long-term
+[11:13:03] INFO [load_memory] Requested memory_type=long-term
+[11:13:03] ERROR [/query] ERROR: local variable 'memory' referenced before assignment | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 203, in ask_ai\n    long_term_memory = long_term_manager.load()\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 35, in load\n    return load_memory(self.memory_type)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/loader.py", line 42, in load_memory\n    logging.info(f"[load_memory] Using file: {memory.LONG_TERM_MEMORY_FILE}")\nUnboundLocalError: local variable \'memory\' referenced before assignment\n'}
+[11:13:03] INFO HTTP Request: POST http://testserver/query "HTTP/1.1 500 Internal Server Error"
+[11:13:03] INFO [testQueryEndpoint] Case 4 Response: 500, {"error":"local variable 'memory' referenced before assignment","traceback":"Traceback (most recent call last):\n  File \"/Users/gadmohamed/Desktop/LMS/server/routes.py\", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File \"/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py\", line 203, in ask_ai\n    long_term_memory = long_term_manager.load()\n  File \"/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py\", line 35, in load\n    return load_memory(self.memory_type)\n  File \"/Users/gadmohamed/Desktop/LMS/aiagent/memory/loader.py\", line 42, in load_memory\n    logging.info(f\"[load_memory] Using file: {memory.LONG_TERM_MEMORY_FILE}\")\nUnboundLocalError: local variable 'memory' referenced before assignment\n"}
+[11:13:03] INFO HTTP Request: DELETE http://testserver/user/testuser_a3ab762e "HTTP/1.1 200 OK"
+[11:13:03] INFO [testQueryEndpoint] END
+[11:13:03] INFO [test_delete_user] START
+[11:13:03] INFO [test_delete_user] Registering user: {'username': 'testuser_205c983d', 'password': 'testpass123'}
+[11:13:03] INFO [registerUser] Registering user: {'username': 'testuser_205c983d', 'password': 'testpass123'}
+[11:13:04] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:04] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 322}
+[11:13:04] INFO [loginUser] Logging in user: {'username': 'testuser_205c983d', 'password': 'testpass123'}
+[11:13:04] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:04] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yMDVjOTgzZCIsImV4cCI6MTc0NTMzODM4NH0.wQMw5HWXgSolMrc_tb83wddm71Mi0xPx219EsQQVuuk', 'token_type': 'bearer'}
+[11:13:04] INFO [test_delete_user] Deleting user testuser_205c983d (self-delete)
+[11:13:05] INFO HTTP Request: DELETE http://testserver/user/testuser_205c983d "HTTP/1.1 200 OK"
+[11:13:05] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_205c983d' deleted successfully."}
+[11:13:05] INFO [test_delete_user] Try deleting user testuser_205c983d again (should be not found/unauthorized)
+[11:13:05] INFO HTTP Request: DELETE http://testserver/user/testuser_205c983d "HTTP/1.1 401 Unauthorized"
+[11:13:05] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[11:13:05] INFO [test_delete_user] Re-registering user testuser_205c983d
+[11:13:05] INFO [registerUser] Registering user: {'username': 'testuser_205c983d', 'password': 'testpass123'}
+[11:13:05] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:05] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 323}
+[11:13:05] INFO [test_delete_user] Registering second user: {'username': 'testuser_3ea47cc4', 'password': 'testpass123'}
+[11:13:05] INFO [registerUser] Registering user: {'username': 'testuser_3ea47cc4', 'password': 'testpass123'}
+[11:13:06] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:06] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 324}
+[11:13:06] INFO [loginUser] Logging in user: {'username': 'testuser_3ea47cc4', 'password': 'testpass123'}
+[11:13:07] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:07] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zZWE0N2NjNCIsImV4cCI6MTc0NTMzODM4N30.TtwXMEcfyQQdt4cMi1uJ9kzcB4DQDM1y4sg07dW0dvo', 'token_type': 'bearer'}
+[11:13:07] INFO [test_delete_user] Second user attempts to delete testuser_205c983d
+[11:13:07] INFO HTTP Request: DELETE http://testserver/user/testuser_205c983d "HTTP/1.1 403 Forbidden"
+[11:13:07] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
+[11:13:07] INFO [test_delete_user] END
+[11:13:07] INFO [test_list_files] START
+[11:13:07] INFO [registerUser] Registering user: None
+[11:13:07] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:07] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 325}
+[11:13:07] INFO [loginUser] Logging in user: {'username': 'testuser_7b35868d', 'password': 'testpass123'}
+[11:13:08] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:08] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl83YjM1ODY4ZCIsImV4cCI6MTc0NTMzODM4OH0.IS1q4SKYKBArcB8z-ViM6Aw0qQVRLWdNriVyM4YYuiE', 'token_type': 'bearer'}
+[11:13:08] INFO [test_list_files] Listing files
+[11:13:08] INFO HTTP Request: GET http://testserver/files "HTTP/1.1 200 OK"
+[11:13:08] INFO [test_list_files] Response status: 200, body: []
+[11:13:08] INFO HTTP Request: DELETE http://testserver/user/testuser_7b35868d "HTTP/1.1 200 OK"
+[11:13:08] INFO [test_list_files] END
+[11:13:08] INFO [test_download_file] START
+[11:13:08] INFO [registerUser] Registering user: None
+[11:13:09] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:09] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 326}
+[11:13:09] INFO [loginUser] Logging in user: {'username': 'testuser_bcb5db2f', 'password': 'testpass123'}
+[11:13:09] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:09] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9iY2I1ZGIyZiIsImV4cCI6MTc0NTMzODM4OX0._A8PBTCd0VLpQNwd93vV9Tokt_RfFtse0OuZrB_O9zU', 'token_type': 'bearer'}
+[11:13:09] INFO [test_download_file] Uploading file: testfile.txt
+[11:13:09] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[11:13:09] INFO [test_download_file] Downloading file: testfile.txt
+[11:13:10] INFO HTTP Request: GET http://testserver/download/testfile.txt "HTTP/1.1 200 OK"
+[11:13:10] INFO [test_download_file] Response status: 200, length: 11
+[11:13:10] INFO HTTP Request: DELETE http://testserver/user/testuser_bcb5db2f "HTTP/1.1 200 OK"
+[11:13:10] INFO [test_download_file] END
+[11:13:10] INFO [test_delete_file] START
+[11:13:10] INFO [registerUser] Registering user: None
+[11:13:10] INFO HTTP Request: POST http://testserver/register "HTTP/1.1 200 OK"
+[11:13:10] INFO [registerUser] Response status: 200, body: {'message': 'Registered successfully', 'userId': 327}
+[11:13:10] INFO [loginUser] Logging in user: {'username': 'testuser_88730c3e', 'password': 'testpass123'}
+[11:13:11] INFO HTTP Request: POST http://testserver/token "HTTP/1.1 200 OK"
+[11:13:11] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84ODczMGMzZSIsImV4cCI6MTc0NTMzODM5MX0.rptelNC_f5HohW5Xf5ytTFIzvJ-ZZMoEB6vv4TLVS8w', 'token_type': 'bearer'}
+[11:13:11] INFO [test_delete_file] Uploading file: testfile.txt
+[11:13:11] INFO HTTP Request: POST http://testserver/upload "HTTP/1.1 200 OK"
+[11:13:11] INFO [test_delete_file] Deleting file: testfile.txt
+[11:13:11] INFO HTTP Request: DELETE http://testserver/delete/testfile.txt "HTTP/1.1 200 OK"
+[11:13:11] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully."}
+[11:13:11] INFO HTTP Request: DELETE http://testserver/user/testuser_88730c3e "HTTP/1.1 200 OK"
+[11:13:12] INFO HTTP Request: GET http://testserver/files "HTTP/1.1 401 Unauthorized"
+[11:13:12] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
+[11:13:12] INFO [test_delete_file] END

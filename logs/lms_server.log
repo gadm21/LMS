@@ -1,0 +1,48 @@
+[2025-04-22 11:05:33,973] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:05:33,973] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:05:33,973] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:05:33,973] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:05:33,974] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:05:33,974] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:05:33,974] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:05:33,976] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:05:33,976] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:05:33,976] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:05:33,977] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:05:33,977] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:05:35,982] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9mYTYxOWRjOSIsImV4cCI6MTc0NTMzNzkzNX0.4AoBKzi4GRJJypgrDB0kFZ36O80Cg3BQRhMJut4XE_Q', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:05:35,982] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:05:35,982] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:05:35,998] ERROR lms.server: [/query] ERROR: name 'logging' is not defined | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 197, in ask_ai\n    long_term_manager = LongTermMemoryManager(client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 94, in __init__\n    update_client(client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/client.py", line 10, in update_client\n    logging.info(f"[update_client] Called with client_dir={client_dir}")\nNameError: name \'logging\' is not defined\n'}
+[2025-04-22 11:08:05,074] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:08:05,075] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:08:05,075] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:08:05,075] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:08:05,075] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:08:05,076] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:08:05,076] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:08:05,078] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:08:05,079] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:08:05,079] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:08:05,079] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:08:05,079] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:08:06,779] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hMDg5ZTNlNCIsImV4cCI6MTc0NTMzODA4Nn0.of21JkVOZiIMuput2_P6TyWwTuHS0BrII731dWzOR5Y', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:08:06,781] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:08:06,781] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:08:09,591] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'Hello! Gad is the name you go by. How can I assist you today?'}
+[2025-04-22 11:13:01,557] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 11:13:01,558] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 11:13:01,558] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 11:13:01,558] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:13:01,558] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 11:13:01,558] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 11:13:01,558] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 11:13:01,561] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 11:13:01,562] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 11:13:01,562] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 11:13:01,562] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 11:13:01,562] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 11:13:03,400] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hM2FiNzYyZSIsImV4cCI6MTc0NTMzODM4Mn0.hw3jG0eKVEfzsTsQaB-c6FYMG5ODjQ87x_Eli0eFdFs', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 11:13:03,400] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 11:13:03,400] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 11:13:03,428] ERROR lms.server: [/query] ERROR: local variable 'memory' referenced before assignment | Context: {'endpoint': '/query', 'traceback': 'Traceback (most recent call last):\n  File "/Users/gadmohamed/Desktop/LMS/server/routes.py", line 136, in queryEndpoint\n    response = query.ask_ai(queryText, client_dir=client_dir)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/handler/query.py", line 203, in ask_ai\n    long_term_memory = long_term_manager.load()\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/memory_manager.py", line 35, in load\n    return load_memory(self.memory_type)\n  File "/Users/gadmohamed/Desktop/LMS/aiagent/memory/loader.py", line 42, in load_memory\n    logging.info(f"[load_memory] Using file: {memory.LONG_TERM_MEMORY_FILE}")\nUnboundLocalError: local variable \'memory\' referenced before assignment\n'}

@@ -37,16 +37,10 @@ try:
 except ImportError:
     PPTX_SUPPORT = False
 
-# Get the references directory - default to project root references dir
-MODULE_DIR = os.path.dirname(os.path.abspath(__file__))
-AI_AGENT_DIR = os.path.dirname(MODULE_DIR)
-DATA_DIR = os.path.join(AI_AGENT_DIR, "data")
-REFERENCES_DIR = os.path.join(DATA_DIR, "references")
+import aiagent.memory as memory
 
-REFERENCES_DIR = os.environ.get("REFERENCES_DIR", REFERENCES_DIR)
 
-# Ensure references directory exists
-os.makedirs(REFERENCES_DIR, exist_ok=True)
+
 
 
 def read_references(limit: int = 12000, file_paths: Optional[List[str]] = None) -> Dict[str, Any]:
@@ -67,6 +61,8 @@ def read_references(limit: int = 12000, file_paths: Optional[List[str]] = None) 
     total_files_processed = 0
     total_content_chars = 0
 
+    REFERENCES_DIR = memory.REFERENCES_DIR
+    
     logging.info(f"Reading references from directory: {REFERENCES_DIR}")
     files = [] 
     
@@ -77,8 +73,7 @@ def read_references(limit: int = 12000, file_paths: Optional[List[str]] = None) 
     else:
         files = file_paths
         
-    print("files:")
-    print(files)
+    
     for file_path in files:
         filename = os.path.basename(file_path)
         if not os.path.isfile(file_path):

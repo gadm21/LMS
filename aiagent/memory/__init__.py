@@ -19,23 +19,23 @@ from pathlib import Path
 MODULE_DIR = Path(__file__).parent
 AI_AGENT_DIR = Path(__file__).parent.parent
 
-# Define memory file paths relative to the module's location
-DATA_DIR = os.path.join(AI_AGENT_DIR, "data")
+# Provide safe defaults; these will be overwritten by update_client.
+CLIENT_DIR = AI_AGENT_DIR
+DATA_DIR = os.path.join(CLIENT_DIR, "data")
 SHORT_TERM_MEMORY_FILE = os.path.join(DATA_DIR, "short_term_memory.json")
 LONG_TERM_MEMORY_FILE = os.path.join(DATA_DIR,  "long_term_memory.json")
 CONTEXT_FILE = os.path.join(DATA_DIR, "context.json")
 REFERENCES_DIR = os.path.join(DATA_DIR,  "references")
-
-# Ensure memory directory exists
-os.makedirs(DATA_DIR, exist_ok=True)
 
 # Import public functions and variables for module-level access
 from aiagent.memory.loader import load_memory
 
 from aiagent.memory.saver import save_memory
 from aiagent.memory.memory_manager import BaseMemoryManager, ShortTermMemoryManager, LongTermMemoryManager
+from aiagent.memory.client import update_client
 
 __all__ = [
+    "update_client",
     "load_memory",
     "save_memory",
     "SHORT_TERM_MEMORY_FILE",

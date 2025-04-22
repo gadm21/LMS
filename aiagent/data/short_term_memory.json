@@ -264,6 +264,111 @@
       "query": "What is AI?",
       "response": "Error querying AI: The api_key client option must be set either by passing api_key to the client or by setting the OPENAI_API_KEY environment variable",
       "summary": "Summary not available - OpenAI API key not found."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user's name and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by saying that Gad is the name the user goes by and asks how they can assist."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by saying that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by saying that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user's name and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user's own name and offers assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user's name and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user. The AI then offers assistance to the user."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by identifying Gad as the user's name and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user inquires about Gad, and the AI responds by acknowledging Gad as the user's name and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "User asks who Gad is, AI responds by saying that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the user's name and asks how it can help."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today, Gad?",
+      "summary": "The user asks who Gad is, and the AI responds by addressing the user as Gad and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by addressing the user as Gad and offering assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, to which the AI responds by saying that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the name the user goes by and asks how it can assist them."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the user's name and offers assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the user's name and offers assistance."
+    },
+    {
+      "query": "WHO IS GAD?",
+      "response": "Hello! Gad is the name you go by. How can I assist you today?",
+      "summary": "The user asks who Gad is, and the AI responds by acknowledging that Gad is the name the user goes by and offers assistance."
     }
   ],
   "active_url": {

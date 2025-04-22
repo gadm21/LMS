@@ -14,8 +14,7 @@ from typing import Any, Dict, Optional
 
 from aiagent.context.extractor import extract_fields_from_page
 
-# Import local modules
-from aiagent.context.reference import REFERENCES_DIR
+import aiagent.memory as memory
 
 
 def save_page_content(
@@ -39,6 +38,7 @@ def save_page_content(
         >>> print(f"Page content saved: {success}")
         Page content saved: True
     """
+    REFERENCES_DIR = memory.REFERENCES_DIR
     # Create references directory if it doesn't exist
     if not os.path.exists(REFERENCES_DIR):
         logging.info(f"Creating references directory: {REFERENCES_DIR}")

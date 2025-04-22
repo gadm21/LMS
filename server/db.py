@@ -31,4 +31,6 @@ class User(Base):
     hashed_password = Column(String)
     max_file_size = Column(Integer, default=524288000)
 
-Base.metadata.create_all(bind=engine)
+# DO NOT run migrations or create tables at import time in serverless environments!
+# Run this manually in a migration script or CLI, not here:
+# Base.metadata.create_all(bind=engine)

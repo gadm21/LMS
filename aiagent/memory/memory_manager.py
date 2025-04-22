@@ -1,12 +1,14 @@
 
 import json
 import os
+import logging
 from typing import Dict, List, Optional, Any
     
 from aiagent.memory import SHORT_TERM_MEMORY_FILE, LONG_TERM_MEMORY_FILE
 from aiagent.memory.loader import load_memory
 from aiagent.memory.saver import save_memory
-
+from aiagent.memory.client import update_client
+import aiagent.memory as memory
 
 
 class BaseMemoryManager:
@@ -16,16 +18,20 @@ class BaseMemoryManager:
     """
     memory_file: str = None  # To be set by subclasses
 
-    def __init__(self):
+    def __init__(self, client_dir: Optional[str] = None):
         if self.memory_file is None:
             raise ValueError("memory_file must be defined in subclass")
 
     def save(self, data: Dict) -> None:
         """Save memory data to file."""
+        import logging
+        logging.info(f"[BaseMemoryManager.save] Saving memory_type={self.memory_type}")
         save_memory(data, self.memory_type)
 
     def load(self) -> Dict:
         """Load memory data from file."""
+        import logging
+        logging.info(f"[BaseMemoryManager.load] Loading memory_type={self.memory_type}")
         return load_memory(self.memory_type)
 
     @property
@@ -50,6 +56,12 @@ class ShortTermMemoryManager(BaseMemoryManager):
     Manages short-term memory operations.
     """
     memory_file = SHORT_TERM_MEMORY_FILE
+
+    def __init__(self, client_dir: Optional[str] = None):
+        if client_dir:
+            update_client(client_dir)
+        super().__init__(client_dir)
+        
 
     @property
     def memory_type(self) -> str:
@@ -77,6 +89,12 @@ class LongTermMemoryManager(BaseMemoryManager):
     Manages long-term memory operations.
     """
     memory_file = LONG_TERM_MEMORY_FILE
+
+    def __init__(self, client_dir: Optional[str] = None):
+        if client_dir:
+            update_client(client_dir)
+        super().__init__(client_dir)
+        
 
     @property
     def memory_type(self) -> str:

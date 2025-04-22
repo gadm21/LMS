@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any, Dict
 
 # Import memory file paths from package __init__
-from aiagent.memory import LONG_TERM_MEMORY_FILE, SHORT_TERM_MEMORY_FILE
+import aiagent.memory as memory
 
 
 def load_memory(memory_type: str) -> Dict[str, Any]:
@@ -34,18 +34,26 @@ def load_memory(memory_type: str) -> Dict[str, Any]:
 
     :noindex:
     """
+    logging.info(f"[load_memory] Requested memory_type={memory_type}")
+    # Log the file path being used
     if memory_type == "short-term":
-        filepath = SHORT_TERM_MEMORY_FILE
+        logging.info(f"[load_memory] Using file: {memory.SHORT_TERM_MEMORY_FILE}")
     elif memory_type == "long-term":
-        filepath = LONG_TERM_MEMORY_FILE
+        logging.info(f"[load_memory] Using file: {memory.LONG_TERM_MEMORY_FILE}")
+    if memory_type == "short-term":
+        filepath = memory.SHORT_TERM_MEMORY_FILE
+    elif memory_type == "long-term":
+        filepath = memory.LONG_TERM_MEMORY_FILE
     else:
         raise ValueError(f"Invalid memory type: {memory_type}")
     
     try:
+        logging.info(f"[load_memory] Loading from filepath={filepath}")
         with open(filepath, 'r', encoding='utf-8') as f:
             memory = json.load(f)
-            logging.info(f"Successfully loaded {memory_type} memory")
-            return memory
+        logging.info(f"[load_memory] Loaded data from {filepath} (keys: {list(memory.keys())})")
+        logging.info(f"Successfully loaded {memory_type} memory")
+        return memory
     except FileNotFoundError:
         # If file doesn't exist, create it with default empty structure
         logging.warning(f"{memory_type} memory file not found: {filepath}")

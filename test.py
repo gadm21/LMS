@@ -1,6 +1,9 @@
 import os
 import pytest
 from fastapi.testclient import TestClient
+import logging
+logger = logging.getLogger(__name__)
+
 from server import main
 from server.main import app
 from server.db import Base, User
@@ -9,9 +12,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-
-TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test")
-print(f"[TEST] Using TEST_DATABASE_URL: {TEST_DATABASE_URL}")
+LOCAL_DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test"
+TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "")
+logger.info(f"[TEST] Using TEST_DATABASE_URL: {TEST_DATABASE_URL}")
 test_engine = create_engine(TEST_DATABASE_URL)
 TestingSessionLocal = sessionmaker(bind=test_engine)
 
@@ -58,92 +61,122 @@ def setup_module(module):
                 shutil.rmtree(path)
 
 def registerUser(user=None):
+    logger.info(f"[registerUser] Registering user: {user}")
     if user is None:
         user = getUniqueUser()
     resp = client.post("/register", json=user)
-    assert resp.status_code == 200
+    logger.info(f"[registerUser] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[registerUser] Registration failed: {resp.text}"
     assert resp.json()["message"] == "Registered successfully"
     return user
 
 def loginUser(user):
+    logger.info(f"[loginUser] Logging in user: {user}")
     resp = client.post("/token", data=user, headers={"Content-Type": "application/x-www-form-urlencoded"})
-    assert resp.status_code == 200
+    logger.info(f"[loginUser] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[loginUser] Login failed: {resp.text}"
     assert "access_token" in resp.json()
     return resp.json()["access_token"]
 
 def test_upload_file():
+    logger.info("[test_upload_file] START")
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
+    logger.info(f"[test_upload_file] Uploading file: {TEST_FILE_NAME}")
     resp = client.post("/upload", headers=headers, files=files)
-    assert resp.status_code == 200
+    logger.info(f"[test_upload_file] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[test_upload_file] Upload failed: {resp.text}"
     assert resp.json()["filename"] == TEST_FILE_NAME
     assert resp.json()["size"] == len(TEST_FILE_CONTENT)
     # Clean up: delete user
+    logger.info("[test_upload_file] END")
     client.delete(f"/user/{user['username']}", headers=headers)
 
 def test_active_url_success():
+    logger.info("[test_active_url_success] START")
     payload = {"url": "https://example.com", "title": "Example Page"}
+    logger.info(f"[test_active_url_success] Payload: {payload}")
     resp = client.post("/active_url", json=payload)
-    assert resp.status_code == 200
+    logger.info(f"[test_active_url_success] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[test_active_url_success] Failed: {resp.text}"
     assert resp.json() == {"data": {"status": "success"}}
+    logger.info("[test_active_url_success] END")
 
 def test_active_url_missing_url():
+    logger.info("[test_active_url_missing_url] START")
     payload = {"title": "Example Page"}
+    logger.info(f"[test_active_url_missing_url] Payload: {payload}")
     resp = client.post("/active_url", json=payload)
-    assert resp.status_code == 400
+    logger.info(f"[test_active_url_missing_url] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 400, f"[test_active_url_missing_url] Failed: {resp.text}"
     assert "error" in resp.json()
+    logger.info("[test_active_url_missing_url] END")
 
 def test_profile():
+    logger.info("[test_profile] START")
     resp = client.get("/profile")
-    assert resp.status_code == 200
+    logger.info(f"[test_profile] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[test_profile] Failed: {resp.text}"
     data = resp.json()
     assert data["name"] == "Gad Mohamed"
     assert data["profession"] == "AI Engineer"
     assert data["favorite_color"] == "Blue"
     assert data["spirit_animal"] == "Owl"
+    logger.info("[test_profile] END")
 
 def testQueryEndpoint():
     """
     Test the AI query endpoint for various scenarios.
     """
+    logger.info("[testQueryEndpoint] START")
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    userId = user["username"]
-    url = f"/query/{userId}"
+    url = f"/query"
 
     # Case 1: Missing JSON body
+    logger.info("[testQueryEndpoint] Case 1: Missing JSON body")
     resp = client.post(url, headers=headers)
-    assert resp.status_code in (400, 422)
+    logger.info(f"[testQueryEndpoint] Case 1 Response: {resp.status_code}, {resp.text}")
+    assert resp.status_code in (400, 422), f"[testQueryEndpoint] Case 1 failed: {resp.text}"
 
     # Case 2: Missing 'query' field
+    logger.info("[testQueryEndpoint] Case 2: Missing 'query' field")
     resp = client.post(url, headers=headers, json={"chatId": "chat1"})
-    assert resp.status_code == 400
+    logger.info(f"[testQueryEndpoint] Case 2 Response: {resp.status_code}, {resp.text}")
+    assert resp.status_code == 400, f"[testQueryEndpoint] Case 2 failed: {resp.text}"
     assert resp.json()["error"] == "No query provided"
 
     # Case 3: Missing 'chatId' field
-    resp = client.post(url, headers=headers, json={"query": "What is AI?"})
-    assert resp.status_code == 400
+    logger.info("[testQueryEndpoint] Case 3: Missing 'chatId' field")
+    resp = client.post(url, headers=headers, json={"query": "WHO IS GAD?"})
+    logger.info(f"[testQueryEndpoint] Case 3 Response: {resp.status_code}, {resp.text}")
+    assert resp.status_code == 400, f"[testQueryEndpoint] Case 3 failed: {resp.text}"
     assert resp.json()["error"] == "No chat ID provided"
 
     # Case 4: Valid request
-    resp = client.post(url, headers=headers, json={"query": "What is AI?", "chatId": "chat1", "pageContent": "Some content"})
-    assert resp.status_code in (200, 500)
+    logger.info("[testQueryEndpoint] Case 4: Valid request")
+    resp = client.post(url, headers=headers, json={"query": "WHO IS GAD?", "chatId": "chat1", "pageContent": "Some content"})
+    logger.info(f"[testQueryEndpoint] Case 4 Response: {resp.status_code}, {resp.text}")
+    assert resp.status_code in (200, 500), f"[testQueryEndpoint] Case 4 failed: {resp.text}"
     if resp.status_code == 200:
         assert "response" in resp.json()
     else:
         assert "error" in resp.json()
     # Clean up: delete user
     client.delete(f"/user/{user['username']}", headers=headers)
+    logger.info("[testQueryEndpoint] END")
 
 def test_delete_user():
     """
     Test the delete user endpoint for success, forbidden, and not found cases.
     """
+    logger.info("[test_delete_user] START")
     # Use a unique user for this test
     user = getUniqueUser()
+    logger.info(f"[test_delete_user] Registering user: {user}")
     # Register and login
     registerUser(user)
     token = loginUser(user)
@@ -152,58 +185,79 @@ def test_delete_user():
     url = f"/user/{username}"
 
     # Success: user deletes themselves
+    logger.info(f"[test_delete_user] Deleting user {username} (self-delete)")
     resp = client.delete(url, headers=headers)
-    assert resp.status_code == 200
+    logger.info(f"[test_delete_user] Delete response: {resp.status_code}, {resp.text}")
+    assert resp.status_code == 200, f"[test_delete_user] Delete failed: {resp.text}"
     assert resp.json()["message"].startswith(f"User '{username}' deleted successfully.")
 
     # Not found: try deleting again
+    logger.info(f"[test_delete_user] Try deleting user {username} again (should be not found/unauthorized)")
     resp = client.delete(url, headers=headers)
-    assert resp.status_code == 401
+    logger.info(f"[test_delete_user] Second delete response: {resp.status_code}, {resp.text}")
+    assert resp.status_code == 401, f"[test_delete_user] Second delete failed: {resp.text}"
 
     # Forbidden: another user tries to delete test user
-    # Re-register test user
+    logger.info(f"[test_delete_user] Re-registering user {username}")
     registerUser(user)
     # Register a second unique user
     second_user = getUniqueUser()
+    logger.info(f"[test_delete_user] Registering second user: {second_user}")
     registerUser(second_user)
     other_token = loginUser(second_user)
     other_headers = {"Authorization": f"Bearer {other_token}"}
+    logger.info(f"[test_delete_user] Second user attempts to delete {username}")
     resp = client.delete(url, headers=other_headers)
-    assert resp.status_code == 403
+    logger.info(f"[test_delete_user] Forbidden delete response: {resp.status_code}, {resp.text}")
+    assert resp.status_code == 403, f"[test_delete_user] Forbidden delete failed: {resp.text}"
     assert resp.json()["detail"] == "You can only delete your own account."
+    logger.info("[test_delete_user] END")
 
 def test_list_files():
+    logger.info("[test_list_files] START")
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
+    logger.info("[test_list_files] Listing files")
     resp = client.get("/files", headers=headers)
-    assert resp.status_code == 200
+    logger.info(f"[test_list_files] Response status: {resp.status_code}, body: {resp.json()}")
+    assert resp.status_code == 200, f"[test_list_files] Failed: {resp.text}"
     assert isinstance(resp.json(), list)
     # Clean up: delete user
     client.delete(f"/user/{user['username']}", headers=headers)
+    logger.info("[test_list_files] END")
 
 def test_download_file():
+    logger.info("[test_download_file] START")
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
     # First upload a file
+    logger.info(f"[test_download_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     client.post("/upload", headers=headers, files=files)
+    logger.info(f"[test_download_file] Downloading file: {TEST_FILE_NAME}")
     resp = client.get(f"/download/{TEST_FILE_NAME}", headers=headers)
-    assert resp.status_code == 200
+    logger.info(f"[test_download_file] Response status: {resp.status_code}, length: {len(resp.content)}")
+    assert resp.status_code == 200, f"[test_download_file] Download failed: {resp.text}"
     assert resp.content == TEST_FILE_CONTENT
     # Clean up: delete user
     client.delete(f"/user/{user['username']}", headers=headers)
+    logger.info("[test_download_file] END")
 
 def test_delete_file():
+    logger.info("[test_delete_file] START")
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
     # First upload a file
+    logger.info(f"[test_delete_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     client.post("/upload", headers=headers, files=files)
+    logger.info(f"[test_delete_file] Deleting file: {TEST_FILE_NAME}")
     resp = client.delete(f"/delete/{TEST_FILE_NAME}", headers=headers)
-    assert resp.status_code == 200
+    logger.info(f"[test_delete_file] Delete response: {resp.status_code}, {resp.json()}")
+    assert resp.status_code == 200, f"[test_delete_file] Delete failed: {resp.text}"
     resp_json = resp.json()
     # Accept message or detail containing 'deleted'
     msg = resp_json.get("message") or resp_json.get("detail")
@@ -212,4 +266,6 @@ def test_delete_file():
     client.delete(f"/user/{user['username']}", headers=headers)
     # Confirm file is gone
     resp = client.get("/files", headers=headers)
+    logger.info(f"[test_delete_file] File list after delete: {resp.json()}")
     assert TEST_FILE_NAME not in resp.json()
+    logger.info("[test_delete_file] END")

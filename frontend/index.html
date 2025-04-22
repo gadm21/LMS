@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LMS AI Agent</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+      padding: 32px 24px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .auth-section, .chat-section, .file-section {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 20px 24px 16px 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    }
+    .auth-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .auth-row input {
+      padding: 8px 12px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+    }
+    .auth-row button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .auth-row button:hover {
+      background: #1d4ed8;
+    }
+    .logout-btn {
+      background: #ef4444;
+      margin-left: 12px;
+    }
+    .logout-btn:hover {
+      background: #b91c1c;
+    }
+    .chat-window {
+      height: 340px;
+      overflow-y: auto;
+      background: #f1f5f9;
+      border-radius: 8px;
+      padding: 18px 16px;
+      margin-bottom: 12px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .chat-message {
+      max-width: 70%;
+      padding: 10px 16px;
+      border-radius: 16px;
+      margin-bottom: 4px;
+      font-size: 1rem;
+      word-break: break-word;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    }
+    .chat-message.user {
+      background: #2563eb;
+      color: #fff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-message.ai {
+      background: #f3f4f6;
+      color: #222;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #e5e7eb;
+    }
+    .chat-input-row {
+      display: flex;
+      gap: 12px;
+    }
+    .chat-input-row input {
+      flex: 1;
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #d1d5db;
+      font-size: 1rem;
+    }
+    .chat-input-row button {
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 8px 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .chat-input-row button:hover {
+      background: #1d4ed8;
+    }
+    .file-section {
+      margin-top: 8px;
+    }
+    .file-list {
+      margin: 0;
+      padding: 0 0 0 16px;
+    }
+    @media (max-width: 700px) {
+      .container { padding: 10px; }
+      .chat-window { height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Auth Section -->
+    <div class="auth-section">
+      <div id="auth-forms">
+        <div class="auth-row">
+          <input id="reg-username" placeholder="Username">
+          <input id="reg-password" type="password" placeholder="Password">
+          <button onclick="signup()">Sign Up</button>
+        </div>
+        <div class="auth-row">
+          <input id="login-username" placeholder="Username">
+          <input id="login-password" type="password" placeholder="Password">
+          <button onclick="login()">Login</button>
+        </div>
+      </div>
+      <div id="auth-loggedin" style="display:none;">
+        <span id="user-greeting"></span>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+
+    <!-- Chat Section -->
+    <div class="chat-section">
+      <div class="chat-window" id="chat-window"></div>
+      <div class="chat-input-row">
+        <input id="chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter'){sendMessage();}">
+        <button onclick="sendMessage()"><i class="fa fa-paper-plane"></i> Send</button>
+      </div>
+    </div>
+
+    <!-- File Section -->
+    <div class="file-section">
+      <input type="file" id="file-upload">
+      <button onclick="uploadFile()"><i class="fa fa-upload"></i> Upload</button>
+      <ul class="file-list" id="file-list"></ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    let token = localStorage.getItem('token') || '';
+    let username = localStorage.getItem('username') || '';
+    let userId = localStorage.getItem('userId') || '';
+    let chatId = 'chat1';
+
+    function showMessage(msg) {
+      alert(typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg);
+    }
+
+    function updateAuthUI() {
+      if (token) {
+        document.getElementById('auth-forms').style.display = 'none';
+        document.getElementById('auth-loggedin').style.display = '';
+        document.getElementById('user-greeting').textContent = 'Welcome, ' + username + '!';
+        listFiles();
+      } else {
+        document.getElementById('auth-forms').style.display = '';
+        document.getElementById('auth-loggedin').style.display = 'none';
+        document.getElementById('user-greeting').textContent = '';
+        document.getElementById('file-list').innerHTML = '';
+      }
+    }
+
+    function signup() {
+      const usernameVal = document.getElementById('reg-username').value;
+      const passwordVal = document.getElementById('reg-password').value;
+      axios.post('/api/register', { username: usernameVal, password: passwordVal })
+        .then(res => showMessage(res.data))
+        .catch(err => showMessage(err.response?.data?.detail || err.message));
+    }
+
+    function login() {
+      const form = new FormData();
+      form.append('username', document.getElementById('login-username').value);
+      form.append('password', document.getElementById('login-password').value);
+      form.append('grant_type', 'password');
+      axios.post('/token', form)
+        .then(res => {
+          token = res.data.access_token;
+          username = document.getElementById('login-username').value;
+          localStorage.setItem('token', token);
+          localStorage.setItem('username', username);
+          // Optionally fetch userId from /profile endpoint
+          axios.get('/profile', { headers: { Authorization: 'Bearer ' + token } })
+            .then(profileRes => {
+              userId = profileRes.data.userId || '';
+              localStorage.setItem('userId', userId);
+              updateAuthUI();
+            })
+            .catch(() => updateAuthUI());
+        })
+        .catch(err => showMessage(err.response?.data?.detail || err.message));
+    }
+
+    function logout() {
+      token = '';
+      username = '';
+      userId = '';
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      localStorage.removeItem('userId');
+      updateAuthUI();
+    }
+
+    function uploadFile() {
+      if (!token) return showMessage('Please login first');
+      const fileInput = document.getElementById('file-upload');
+      if (fileInput.files.length === 0) return showMessage('No file selected');
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+      axios.post('/upload', formData, {
+        headers: { Authorization: 'Bearer ' + token }
+      })
+        .then(res => {
+          showMessage('Upload successful');
+          listFiles();
+        })
+        .catch(err => showMessage(err.response?.data?.detail || err.message));
+    }
+
+    function listFiles() {
+      if (!token) return;
+      axios.get('/files', { headers: { Authorization: 'Bearer ' + token } })
+        .then(res => {
+          const files = res.data.files || [];
+          const ul = document.getElementById('file-list');
+          ul.innerHTML = '';
+          files.forEach(f => {
+            const li = document.createElement('li');
+            li.textContent = f;
+            ul.appendChild(li);
+          });
+        })
+        .catch(() => {});
+    }
+
+    function appendMessage(role, text) {
+      const chatWindow = document.getElementById('chat-window');
+      const div = document.createElement('div');
+      div.className = 'chat-message ' + (role === 'user' ? 'user' : 'ai');
+      div.textContent = text;
+      chatWindow.appendChild(div);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function sendMessage() {
+      if (!token) return showMessage('Please login to chat.');
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      if (!message) return;
+      appendMessage('user', message);
+      input.value = '';
+      axios.post(`/query/${userId}`, {
+        query: message,
+        chatId: chatId,
+        pageContent: ''
+      }, {
+        headers: { Authorization: 'Bearer ' + token }
+      })
+        .then(res => {
+          appendMessage('ai', res.data.response || '[No response]');
+        })
+        .catch(err => {
+          appendMessage('ai', err.response?.data?.error || err.message);
+        });
+    }
+
+    // Initial UI state
+    updateAuthUI();
+  </script>
+</body>
+</html>

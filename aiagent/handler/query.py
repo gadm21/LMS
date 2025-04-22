@@ -91,7 +91,7 @@ def query_openai(
             
         # Add user query
         messages.append({"role": "user", "content": query})
-        print(messages)
+        logging.info(f"Context messages: {messages}")
         # Query OpenAI
         logging.info("Sending query to OpenAI")
         response = client.chat.completions.create(
@@ -173,6 +173,7 @@ def ask_ai(
     query: str,
     max_tokens: int = 1024,
     temperature: float = 0.7,
+    client_dir: Optional[str] = None,
     aux_data: Optional[Dict[str, Any]] = None,
     update_memory: bool = True,
 ) -> str:
@@ -191,8 +192,14 @@ def ask_ai(
     """
     
     # Load long-term and short-term memory using managers
-    long_term_manager = LongTermMemoryManager()
-    short_term_manager = ShortTermMemoryManager()
+    if client_dir:
+        logging.info(f"Loading memory from directory: {client_dir}")
+        long_term_manager = LongTermMemoryManager(client_dir)
+        short_term_manager = ShortTermMemoryManager(client_dir)
+    else :
+        logging.info("Loading default memory")
+        long_term_manager = LongTermMemoryManager()
+        short_term_manager = ShortTermMemoryManager()
     long_term_memory = long_term_manager.load()
     short_term_memory = short_term_manager.load()
 
