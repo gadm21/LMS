@@ -1,5 +1,7 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
+from fastapi.responses import FileResponse
+import os
 from fastapi.responses import StreamingResponse, JSONResponse
 from .db import User, SessionLocal
 from .schemas import RegisterRequest
@@ -69,6 +71,17 @@ if os.environ.get("VERCEL") or os.environ.get("READ_ONLY_FS"):
 else:
     ASSETS_FOLDER = "assets"
 os.makedirs(ASSETS_FOLDER, exist_ok=True)
+
+@router.get("/")
+def root():
+    return {"message": "LMS API is running"}
+
+@router.get("/favicon.ico")
+def favicon():
+    favicon_path = os.path.join(os.path.dirname(__file__), "../static/favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
+    return {"detail": "No favicon found"}
 
 @router.post("/register")
 def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):

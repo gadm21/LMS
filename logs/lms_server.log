@@ -110,3 +110,19 @@
 [2025-04-22 11:41:28,200] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
 [2025-04-22 11:41:28,200] INFO lms.server: [/query] Validation: query valid=True
 [2025-04-22 11:41:30,664] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'Gad is a biblical figure who was one of the twelve sons of Jacob and the founder of the Israelite tribe of Gad. He is mentioned in the Old Testament of the Bible in the book of Genesis.'}
+[2025-04-22 12:37:21,598] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-04-22 12:37:21,599] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-04-22 12:37:21,600] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-04-22 12:37:21,600] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 12:37:21,600] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-04-22 12:37:21,601] INFO lms.server: [SERVER] Page title: Example Page
+[2025-04-22 12:37:21,601] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-04-22 12:37:21,608] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-04-22 12:37:21,609] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-04-22 12:37:21,609] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-04-22 12:37:21,610] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-04-22 12:37:21,610] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-04-22 12:37:23,319] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9mZTU2ODEzMSIsImV4cCI6MTc0NTM0MzQ0Mn0.BvVDtt_sby31yyP6yPelqWbBQfTfOHVNFWaTn7DkdGY', 'content-type': 'application/json', 'content-length': '69'}
+[2025-04-22 12:37:23,320] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-04-22 12:37:23,320] INFO lms.server: [/query] Validation: query valid=True
+[2025-04-22 12:37:29,008] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'There are several possible meanings for the name Gad:\n\n1. In the Bible, Gad is the name of one of the twelve tribes of Israel.\n2. Gad is also a male given name of Hebrew origin, meaning "luck" or "fortune."\n3. In Hindu mythology, Gad is a deity associated with knowledge and wisdom.\n4. In modern culture, Gad Elmaleh is a French-Moroccan stand-up comedian and actor.\n\nWithout further context, it is difficult to determine which specific Gad you are referring to.'}
