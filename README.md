@@ -1,7 +1,6 @@
 # LMS
 
 [![Python application](https://github.com/gadm21/LMS/actions/workflows/python-app.yml/badge.svg)](https://github.com/gadm21/LMS/actions/workflows/python-app.yml)
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/import/project?template=https://github.com/gadm21/LMS)
 
 A Learning Management System (LMS).
 
