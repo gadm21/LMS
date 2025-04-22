@@ -197,9 +197,12 @@
       }
     }
 
-    // Backend base URL config
-    const BACKEND_BASE_URL = window.BACKEND_BASE_URL || 'http://localhost:7050';
-
+    // === Backend base URL config ===
+    // To test locally with local backend, uncomment the next line:
+    // window.BACKEND_BASE_URL = 'http://localhost:7050';
+    // To test with production backend, uncomment the next line:
+    // window.BACKEND_BASE_URL = 'https://lms-30o7ryg5m-gads-projects-02bd6234.vercel.app';
+    const BACKEND_BASE_URL = window.BACKEND_BASE_URL || 'https://lms-30o7ryg5m-gads-projects-02bd6234.vercel.app';
     function signup() {
       const usernameVal = document.getElementById('reg-username').value;
       const passwordVal = document.getElementById('reg-password').value;
@@ -247,11 +250,11 @@
       if (fileInput.files.length === 0) return showMessage('No file selected');
       const formData = new FormData();
       formData.append('file', fileInput.files[0]);
-      axios.post('/upload', formData, {
+      axios.post(`${BACKEND_BASE_URL}/upload`, formData, {
         headers: { Authorization: 'Bearer ' + token }
       })
         .then(res => {
-          showMessage('Upload successful');
+          showMessage(`File uploaded: ${res.data.filename}`);
           listFiles();
         })
         .catch(err => showMessage(err.response?.data?.detail || err.message));
@@ -259,18 +262,15 @@
 
     function listFiles() {
       if (!token) return;
-      axios.get('/files', { headers: { Authorization: 'Bearer ' + token } })
+      axios.get(`${BACKEND_BASE_URL}/files`, { headers: { Authorization: 'Bearer ' + token } })
         .then(res => {
           const files = res.data.files || [];
-          const ul = document.getElementById('file-list');
-          ul.innerHTML = '';
-          files.forEach(f => {
-            const li = document.createElement('li');
-            li.textContent = f;
-            ul.appendChild(li);
-          });
+          const fileList = document.getElementById('file-list');
+          fileList.innerHTML = files.map(f => `<li>${f}</li>`).join('');
         })
-        .catch(() => {});
+        .catch(() => {
+          document.getElementById('file-list').innerHTML = '';
+        });
     }
 
     function appendMessage(role, text) {
