@@ -142,3 +142,35 @@
 [2025-04-22 12:41:39,225] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
 [2025-04-22 12:41:39,226] INFO lms.server: [/query] Validation: query valid=True
 [2025-04-22 12:41:41,990] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'Gad is a figure mentioned in the Bible, specifically in the Old Testament. He was one of the 12 sons of Jacob, who later became the patriarch of the Israelite tribe of Gad. Gad is also considered a prophet in Jewish tradition.'}
+[2025-05-02 19:37:46,954] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-05-02 19:37:46,956] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-05-02 19:37:46,956] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-05-02 19:37:46,956] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:37:46,956] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-05-02 19:37:46,956] INFO lms.server: [SERVER] Page title: Example Page
+[2025-05-02 19:37:46,957] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-05-02 19:37:46,960] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-05-02 19:37:46,960] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-05-02 19:37:46,960] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-05-02 19:37:46,960] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:37:46,961] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-05-02 19:37:49,197] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hOGYxYzhmZSIsImV4cCI6MTc0NjIzMjY2OH0.cBmQqDbh5aliuKxHp8kXl2lBU_rV_TL0v8F-iyg4NgU', 'content-type': 'application/json', 'content-length': '69'}
+[2025-05-02 19:37:49,197] INFO lms.server: [/query] Payload: {'query': 'WHO IS GAD?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-05-02 19:37:49,197] INFO lms.server: [/query] Validation: query valid=True
+[2025-05-02 19:37:52,404] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'Gad is a biblical figure from the Old Testament, specifically from the Book of Genesis. He was the seventh son of Jacob and the founder of the tribe of Gad, one of the twelve tribes of Israel. Gad is also mentioned in other books of the Bible, including the Book of Numbers and the Book of Chronicles.'}
+[2025-05-02 19:48:43,796] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-05-02 19:48:43,797] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-05-02 19:48:43,797] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-05-02 19:48:43,797] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:48:43,797] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-05-02 19:48:43,797] INFO lms.server: [SERVER] Page title: Example Page
+[2025-05-02 19:48:43,797] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-05-02 19:48:43,800] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-05-02 19:48:43,801] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-05-02 19:48:43,801] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-05-02 19:48:43,801] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:48:43,801] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-05-02 19:48:46,594] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zNDFkZWRjZSIsImV4cCI6MTc0NjIzMzMyNX0.21PmQ5Wo9OiE5ekJ92-KrLWEGWAx_YxqtBgmzw5X0-g', 'content-type': 'application/json', 'content-length': '81'}
+[2025-05-02 19:48:46,594] INFO lms.server: [/query] Payload: {'query': 'what does GAD refer to?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-05-02 19:48:46,594] INFO lms.server: [/query] Validation: query valid=True
+[2025-05-02 19:48:48,513] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'GAD typically refers to Generalized Anxiety Disorder, which is a mental health condition characterized by excessive and persistent worry and anxiety about various aspects of life.'}

@@ -12,7 +12,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
-LOCAL_DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test"
+# LOCAL_DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test"
 TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "")
 logger.info(f"[TEST] Using TEST_DATABASE_URL: {TEST_DATABASE_URL}")
 test_engine = create_engine(TEST_DATABASE_URL)
@@ -151,14 +151,14 @@ def testQueryEndpoint():
 
     # Case 3: Missing 'chatId' field
     logger.info("[testQueryEndpoint] Case 3: Missing 'chatId' field")
-    resp = client.post(url, headers=headers, json={"query": "WHO IS GAD?"})
+    resp = client.post(url, headers=headers, json={"query": "what IS GAD?"})
     logger.info(f"[testQueryEndpoint] Case 3 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 400, f"[testQueryEndpoint] Case 3 failed: {resp.text}"
     assert resp.json()["error"] == "No chat ID provided"
 
     # Case 4: Valid request
     logger.info("[testQueryEndpoint] Case 4: Valid request")
-    resp = client.post(url, headers=headers, json={"query": "WHO IS GAD?", "chatId": "chat1", "pageContent": "Some content"})
+    resp = client.post(url, headers=headers, json={"query": "what does GAD refer to?", "chatId": "chat1", "pageContent": "Some content"})
     logger.info(f"[testQueryEndpoint] Case 4 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code in (200, 500), f"[testQueryEndpoint] Case 4 failed: {resp.text}"
     if resp.status_code == 200:
