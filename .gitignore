@@ -8,3 +8,4 @@ ENV/
 
 .env
 
+server/__pycache__/
