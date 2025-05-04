@@ -299,6 +299,10 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         # Check for required fields
         if not body.get("query"):
             return JSONResponse(status_code=400, content={"error": "No query provided"})
+            
+        # Check for chat_id field
+        if not body.get("chat_id"):
+            return JSONResponse(status_code=400, content={"error": "No chat ID provided"})
         
         user_query = body.get("query")
         chat_id = body.get("chat_id", "")
@@ -721,7 +725,7 @@ def set_file_metadata(fileId: int, update: MetadataUpdate, user: User = Depends(
         log_error(f"Error updating file metadata: {str(e)}", exc=e, endpoint=f"/files/{fileId}/metadata")
         raise HTTPException(status_code=500, detail=f"Error updating file metadata: {str(e)}")
 
-@router.delete("/files/{fileId}")
+@router.delete("/delete/{fileId}")
 def delete_file(fileId: int, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Delete a specific file by its ID.
     
