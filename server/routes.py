@@ -301,7 +301,8 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
             return JSONResponse(status_code=400, content={"error": "No query provided"})
             
         # Check for chat_id field - Make sure this runs BEFORE the try-except for the AI agent
-        chat_id = body.get("chat_id")
+        # Handle both camelCase (chatId) and snake_case (chat_id) formats for compatibility
+        chat_id = body.get("chat_id") or body.get("chatId")
         if chat_id is None or chat_id == "":
             return JSONResponse(status_code=400, content={"error": "No chat ID provided"})
         
