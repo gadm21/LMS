@@ -300,12 +300,12 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         if not body.get("query"):
             return JSONResponse(status_code=400, content={"error": "No query provided"})
             
-        # Check for chat_id field
-        if not body.get("chat_id"):
+        # Check for chat_id field - Make sure this runs BEFORE the try-except for the AI agent
+        chat_id = body.get("chat_id")
+        if chat_id is None or chat_id == "":
             return JSONResponse(status_code=400, content={"error": "No chat ID provided"})
         
         user_query = body.get("query")
-        chat_id = body.get("chat_id", "")
         model = body.get("model", "gpt-3.5-turbo")
         max_tokens = body.get("max_tokens", 1024)
         temperature = body.get("temperature", 0.7)
@@ -760,15 +760,17 @@ def delete_file(fileId: int, user: User = Depends(get_current_user), db: Session
         
         # Delete the file from disk if it exists
         try:
-            if os.path.exists(filepath):
+            # If filepath is None, we're using database storage, so no need to remove from disk
+            if filepath and os.path.exists(filepath):
                 os.remove(filepath)
             else:
-                # Try the standard path pattern as fallback
-                user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-                fallback_path = os.path.join(user_folder, filename)
-                if os.path.exists(fallback_path):
-                    os.remove(fallback_path)
-        except OSError as e:
+                # Try the standard path pattern as fallback (only for non-Vercel environments)
+                if not os.environ.get("VERCEL") and not os.environ.get("READ_ONLY_FS"):
+                    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+                    fallback_path = os.path.join(user_folder, filename)
+                    if os.path.exists(fallback_path):
+                        os.remove(fallback_path)
+        except (OSError, TypeError) as e:
             # Continue even if file removal fails, as we still want to remove the database record
             log_error(f"Error removing file from disk: {str(e)}", exc=e, endpoint=f"/delete/{fileId}")
         
