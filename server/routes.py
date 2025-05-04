@@ -248,7 +248,7 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         
     Returns:
         dict: The AI response along with query details
-        
+
     Raises:
         HTTPException: 400 if required parameters are missing
         HTTPException: 500 if OpenAI API call fails
@@ -268,7 +268,7 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         
         # Check for required fields
         if not body.get("query"):
-            raise HTTPException(status_code=400, detail="Query is required")
+            return JSONResponse(status_code=400, content={"detail": "Query is required"})
         
         user_query = body.get("query")
         chat_id = body.get("chat_id", "")
