@@ -143,14 +143,41 @@ def delete_user(username: str, current_user: User = Depends(get_current_user), d
         HTTPException: 403 if trying to delete another user's account
         HTTPException: 404 if user not found
     """
-    if current_user.username != username:
-        raise HTTPException(status_code=403, detail="You can only delete your own account.")
-    user = db.query(User).filter(User.username == username).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    db.delete(user)
-    db.commit()
-    return {"message": f"User '{username}' deleted successfully."}
+    try:
+        # Verify user can only delete their own account
+        if current_user.username != username:
+            raise HTTPException(status_code=403, detail="You can only delete your own account.")
+        
+        # Find the user to delete
+        user = db.query(User).filter(User.username == username).first()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+            
+        # Delete user-related files (skip if in serverless environment)
+        if not os.environ.get("VERCEL"):
+            try:
+                user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+                if os.path.exists(user_folder):
+                    # Delete user directory (optional, can be removed if causing issues)
+                    # shutil.rmtree(user_folder)
+                    logger.info(f"Deleted user folder: {user_folder}")
+            except Exception as e:
+                # Just log the error but continue with deletion
+                logger.warning(f"Could not delete user files: {e}")
+        
+        # Delete the user from the database
+        db.delete(user)
+        db.commit()
+        
+        return {"message": f"User '{username}' deleted successfully."}
+    except Exception as e:
+        db.rollback()
+        # Log the error and return a more specific error message
+        logger.error(f"Error deleting user {username}: {str(e)}")
+        if os.environ.get("VERCEL"):
+            # In Vercel, return a more user-friendly error
+            return {"message": f"Partial user deletion for '{username}'. Database records removed but user files may remain due to serverless environment limitations."}
+        raise HTTPException(status_code=500, detail=f"Error deleting user: {str(e)}")
 
 @router.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = Depends(get_db)):

@@ -21,7 +21,7 @@ def save_memory(memory: Dict[str, Any], filepath: str) -> bool:
 
     Args:
         memory (Dict[str, Any]): Memory data to save.
-        type (str): Type of memory to save. Must be either 'short-term' or 'long-term'.
+        filepath (str): Path to the file where memory should be saved.
 
     Returns:
         bool: True if save was successful, False otherwise
@@ -33,6 +33,14 @@ def save_memory(memory: Dict[str, Any], filepath: str) -> bool:
 
     :noindex:
     """
+    # Check if we're in a serverless environment with read-only filesystem
+    if os.environ.get("VERCEL"):
+        # Replace any filepath in the read-only /var/task directory with a path in /tmp
+        if filepath.startswith("/var/task/"):
+            original_path = filepath
+            filepath = filepath.replace("/var/task/", "/tmp/")
+            logging.info(f"[save_memory] In serverless environment, redirecting save from {original_path} to {filepath}")
+    
     try:
         # Ensure the directory exists
         os.makedirs(os.path.dirname(filepath), exist_ok=True)
@@ -44,5 +52,8 @@ def save_memory(memory: Dict[str, Any], filepath: str) -> bool:
         return True
     except OSError as e:
         logging.error(f"Error saving memory to {filepath}: {e}")
+        # If in Vercel and still getting errors, provide a more specific message
+        if os.environ.get("VERCEL"):
+            logging.warning("This may be due to serverless filesystem restrictions")
         return False
             

@@ -46,6 +46,18 @@ def load_memory(memory_type: str) -> Dict[str, Any]:
         filepath = memory.LONG_TERM_MEMORY_FILE
     else:
         raise ValueError(f"Invalid memory type: {memory_type}")
+        
+    # Check if we're in a serverless environment
+    if os.environ.get("VERCEL"):
+        # If we're trying to load from a file in the temporary directory but it doesn't exist,
+        # try checking if there's an original file in the /var/task directory
+        tmp_path = filepath
+        if tmp_path.startswith("/tmp/") and not os.path.exists(tmp_path):
+            # Try to find an original file in /var/task
+            original_path = tmp_path.replace("/tmp/", "/var/task/")
+            if os.path.exists(original_path) and os.path.isfile(original_path):
+                logging.info(f"[load_memory] Found original file at {original_path}, will load from there")
+                filepath = original_path
     
     try:
         logging.info(f"[load_memory] Loading from filepath={filepath}")

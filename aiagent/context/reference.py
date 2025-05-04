@@ -71,13 +71,20 @@ def read_references(limit: int = 12000, file_paths: Optional[List[str]] = None) 
         # Check if the references directory exists
         if not os.path.exists(REFERENCES_DIR):
             logging.warning(f"References directory does not exist: {REFERENCES_DIR}")
-            # Try to create it
-            try:
-                os.makedirs(REFERENCES_DIR, exist_ok=True)
-                logging.info(f"Created references directory: {REFERENCES_DIR}")
-            except Exception as e:
-                logging.error(f"Failed to create references directory: {e}")
-            return references  # Return empty references
+            # Check if we're in a serverless environment
+            if os.environ.get("VERCEL"):
+                logging.info("Running in serverless environment with read-only filesystem")
+                # Just return empty references, don't try to create directories
+                # /tmp directory paths should already be set up in memory/__init__.py
+                return references
+            else:
+                # Try to create it in regular environments
+                try:
+                    os.makedirs(REFERENCES_DIR, exist_ok=True)
+                    logging.info(f"Created references directory: {REFERENCES_DIR}")
+                except Exception as e:
+                    logging.error(f"Failed to create references directory: {e}")
+                return references  # Return empty references
             
         # Check if the directory is accessible
         try:

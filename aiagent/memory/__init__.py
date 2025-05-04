@@ -20,8 +20,16 @@ from pathlib import Path
 MODULE_DIR = Path(__file__).parent
 AI_AGENT_DIR = Path(__file__).parent.parent
 
-# Provide safe defaults; these will be overwritten by update_client.
-CLIENT_DIR = AI_AGENT_DIR
+# Check if we're in a serverless environment (like Vercel)
+IN_SERVERLESS = os.environ.get("VERCEL") is not None
+
+# Use /tmp for Vercel environments since it's the only writable directory
+if IN_SERVERLESS:
+    CLIENT_DIR = "/tmp/aiagent"
+    logging.info(f"Using temporary directory for serverless environment: {CLIENT_DIR}")
+else:
+    CLIENT_DIR = AI_AGENT_DIR
+
 DATA_DIR = os.path.join(CLIENT_DIR, "data")
 SHORT_TERM_MEMORY_FILE = os.path.join(DATA_DIR, "short_term_memory.json")
 LONG_TERM_MEMORY_FILE = os.path.join(DATA_DIR,  "long_term_memory.json")
@@ -29,12 +37,22 @@ CONTEXT_FILE = os.path.join(DATA_DIR, "context.json")
 REFERENCES_DIR = os.path.join(DATA_DIR,  "references")
 
 # Create necessary directories if they don't exist
-try:
-    os.makedirs(DATA_DIR, exist_ok=True)
-    os.makedirs(REFERENCES_DIR, exist_ok=True)
-    logging.info(f"Created directory structure: {DATA_DIR} and {REFERENCES_DIR}")
-except Exception as e:
-    logging.warning(f"Could not create directory structure: {e}")
+if IN_SERVERLESS:
+    # In serverless environments, always create directories in /tmp which is writable
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        os.makedirs(REFERENCES_DIR, exist_ok=True)
+        logging.info(f"Created directory structure in /tmp: {DATA_DIR} and {REFERENCES_DIR}")
+    except Exception as e:
+        logging.error(f"Failed to create directories in /tmp: {e}")
+else:
+    # In regular environments, try to create directories but handle failures gracefully
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        os.makedirs(REFERENCES_DIR, exist_ok=True)
+        logging.info(f"Created directory structure: {DATA_DIR} and {REFERENCES_DIR}")
+    except Exception as e:
+        logging.warning(f"Could not create directory structure: {e}")
 
 # Import public functions and variables for module-level access
 from aiagent.memory.loader import load_memory
