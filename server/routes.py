@@ -13,7 +13,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse
 import os
 from fastapi.responses import StreamingResponse, JSONResponse
-from .db import User, SessionLocal
+from .db import User, File, Query, Session, SessionLocal
 from .schemas import RegisterRequest
 from .auth import (
     get_db, get_password_hash, authenticate_user, create_access_token,
@@ -176,14 +176,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = D
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user)):
+async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Upload a file to the system.
     
-    The file is stored in the user's directory within the assets folder.
+    The file is stored in the user's directory within the assets folder and tracked in the database.
     
     Args:
         file: The file to upload
         user: The authenticated user uploading the file
+        db: Database session dependency
         
     Returns:
         dict: Information about the uploaded file
@@ -192,26 +193,58 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
         HTTPException: 400 if file is too large
         HTTPException: 500 if file upload fails
     """
-    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-    os.makedirs(user_folder, exist_ok=True)
-    contents = await file.read()
-    if len(contents) > user.max_file_size:
-        raise HTTPException(status_code=400, detail="File too large")
-    filepath = os.path.join(user_folder, file.filename)
-    with open(filepath, "wb") as f:
-        f.write(contents)
-    return {"filename": file.filename, "size": len(contents)}
+    try:
+        # Create user folder if it doesn't exist
+        user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+        os.makedirs(user_folder, exist_ok=True)
+        
+        # Read file contents
+        contents = await file.read()
+        
+        # Check file size
+        file_size = len(contents)
+        if file_size > user.max_file_size:
+            raise HTTPException(status_code=400, detail="File too large")
+            
+        # Save file to disk
+        filepath = os.path.join(user_folder, file.filename)
+        with open(filepath, "wb") as f:
+            f.write(contents)
+        
+        # Create database record
+        db_file = File(
+            filename=file.filename,
+            userId=user.userId,
+            path=filepath,
+            size=file_size
+        )
+        db.add(db_file)
+        db.commit()
+        db.refresh(db_file)
+        
+        return {
+            "filename": file.filename, 
+            "size": file_size,
+            "fileId": db_file.fileId,
+            "uploaded_at": db_file.uploaded_at
+        }
+    except Exception as e:
+        db.rollback()
+        log_error(f"File upload failed: {str(e)}", exc=e, endpoint="/upload")
+        raise HTTPException(status_code=500, detail=f"Error uploading file: {str(e)}")
 
 @router.post("/query")
-async def queryEndpoint(request: Request, user: User = Depends(get_current_user)):
+async def queryEndpoint(request: Request, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Process an AI query from a user.
     
     Sends the query to the OpenAI API and returns the response. The query and response
     are associated with a chat ID for maintaining conversation context.
+    All queries and responses are stored in the database for future reference.
     
     Args:
         request: The HTTP request containing the query data
         user: The authenticated user making the query
+        db: Database session dependency
         
     Returns:
         dict: The AI response along with query details
@@ -220,49 +253,76 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         HTTPException: 400 if required parameters are missing
         HTTPException: 500 if OpenAI API call fails
     """
-    """
-    Handle AI queries. Expects a JSON body with at least a 'query' field and a 'chatId'.
-    Optionally accepts 'pageContent'.
-    """
-    print(f"[QUERY] userId: {user.userId}, username: {user.username}")
     try:
-        data = await request.json()
-    except Exception:
-        return JSONResponse(status_code=400, content={"error": "Missing or invalid JSON body"})
-    if "query" not in data:
-        return JSONResponse(status_code=400, content={"error": "No query provided"})
-    if "chatId" not in data:
-        return JSONResponse(status_code=400, content={"error": "No chat ID provided"})
-    queryText = data.get('query', '')
-    pageContent = data.get('pageContent', '')
-    chatId = data.get('chatId', '')
-    try:
-        log_request_start('/query', request.method, dict(request.headers), request.client.host if request.client else None)
-        log_request_payload(data, '/query')
-        log_validation('query', queryText, bool(queryText), '/query')
-        if not queryText or not queryText.strip():
-            log_error("No query provided", None, {"endpoint": "/query"}, "/query")
-            return JSONResponse({"error": "No query provided"}, status_code=400)
-        import traceback
-        client_dir = os.path.join(ASSETS_FOLDER, str(user.userId))
-        response = query.ask_ai(queryText, client_dir=client_dir)
+        body = await request.json()
         
-        log_response(200, {"message": "Query received", "response": response}, '/query')
-        return JSONResponse({
-            "userId": user.userId,
+        if not body.get("query"):
+            raise HTTPException(status_code=400, detail="Query is required")
+        
+        user_query = body.get("query")
+        chat_id = body.get("chat_id", "")
+        model = body.get("model", "gpt-3.5-turbo")
+        max_tokens = body.get("max_tokens", 1024)
+        temperature = body.get("temperature", 0.7)
+        
+        # Log the incoming query
+        log_ai_call(user_query, model, "/query")
+        
+        # Create a new query record in the database (without response yet)
+        db_query = Query(
+            userId=user.userId,
+            chatId=chat_id,
+            query_text=user_query
+        )
+        db.add(db_query)
+        db.commit()
+        db.refresh(db_query)
+        
+        from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
+        long_term_memory = LongTermMemoryManager()
+        short_term_memory = ShortTermMemoryManager()
+        
+        # Call your AI agent
+        from aiagent.handler.query import ask_ai
+        
+        # Set up auxiliary data for the AI query
+        aux_data = {
             "username": user.username,
-            "query": queryText,
-            "chatId": chatId,
-            "pageContent": pageContent,
-            "message": "Query received",
-            "response": response
-        })
+            "user_id": user.userId,
+            "chat_id": chat_id,
+            "query_id": db_query.queryId,
+            "client_info": {
+                "model": model,
+                "max_tokens": max_tokens,
+                "temperature": temperature
+            }
+        }
+        
+        # Send query to AI agent
+        response = ask_ai(
+            query=user_query,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            aux_data=aux_data
+        )
+        
+        # Log the response
+        log_ai_response(response, "/query")
+        
+        # Update the query record with the response
+        db_query.response = response
+        db.commit()
+        
+        return {
+            "response": response,
+            "query": user_query,
+            "chat_id": chat_id,
+            "queryId": db_query.queryId
+        }
     except Exception as e:
-        import traceback
-        tb = traceback.format_exc()
-        print("DEBUG: Exception in /query endpoint", e, tb)
-        log_error(str(e), None, {"endpoint": "/query", "traceback": tb}, "/query")
-        return JSONResponse({"error": str(e), "traceback": tb}, status_code=500)
+        db.rollback()  # Rollback transaction on error
+        log_error(f"AI query failed: {str(e)}", exc=e, endpoint="/query")
+        raise HTTPException(status_code=500, detail=f"Error processing query: {str(e)}")
 
 @router.post("/active_url")
 async def active_url(request: Request):

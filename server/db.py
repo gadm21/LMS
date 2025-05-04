@@ -5,8 +5,9 @@ It includes the User model and database connection configuration.
 """
 
 import os
-from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.orm import declarative_base, sessionmaker
+from datetime import datetime
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # Load environment variables from .env if present
 try:
@@ -42,12 +43,88 @@ class User(Base):
         username: Unique username for authentication
         hashed_password: Bcrypt hash of the user's password
         max_file_size: Maximum allowed file size in bytes (default: 500MB)
+        files: Relationship to File objects uploaded by this user
+        queries: Relationship to Query objects created by this user
+        sessions: Relationship to Session objects for this user
     """
-    __tablename__ = "users"
+    __tablename__ = "User"
     userId = Column(Integer, primary_key=True, autoincrement=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String)
     max_file_size = Column(Integer, default=524288000)  # 500MB default max file size
+    
+    # Relationships
+    files = relationship("File", back_populates="user")
+    queries = relationship("Query", back_populates="user")
+    sessions = relationship("Session", back_populates="user")
+
+
+class File(Base):
+    """File model representing files uploaded by users.
+    
+    Attributes:
+        fileId: Unique identifier for the file
+        filename: Name of the uploaded file
+        userId: Foreign key to the user who uploaded the file
+        path: Path where the file is stored on the server
+        size: Size of the file in bytes
+        uploaded_at: Timestamp when the file was uploaded
+        user: Relationship to the User who owns this file
+    """
+    __tablename__ = "File"
+    fileId = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    filename = Column(String, nullable=False)
+    userId = Column(Integer, ForeignKey("User.userId"), nullable=False)
+    path = Column(String, nullable=False)
+    size = Column(Integer, nullable=False)
+    uploaded_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="files")
+
+
+class Query(Base):
+    """Query model representing AI queries made by users.
+    
+    Attributes:
+        queryId: Unique identifier for the query
+        userId: Foreign key to the user who made the query
+        chatId: Identifier for grouping related queries into conversations
+        query_text: The text of the user's query
+        response: The AI response to the query
+        created_at: Timestamp when the query was made
+        user: Relationship to the User who made this query
+    """
+    __tablename__ = "Query"
+    queryId = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    userId = Column(Integer, ForeignKey("User.userId"), nullable=False)
+    chatId = Column(String, nullable=True)
+    query_text = Column(Text, nullable=False)
+    response = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="queries")
+
+
+class Session(Base):
+    """Session model for tracking user login sessions.
+    
+    Attributes:
+        sessionId: Unique identifier for the session
+        userId: Foreign key to the user who owns this session
+        token: Session token for authentication
+        expires_at: Timestamp when the session expires
+        user: Relationship to the User who owns this session
+    """
+    __tablename__ = "Session"
+    sessionId = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    userId = Column(Integer, ForeignKey("User.userId"), nullable=False)
+    token = Column(String, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
+    
+    # Relationships
+    user = relationship("User", back_populates="sessions")
 
 # DO NOT run migrations or create tables at import time in serverless environments!
 # Run this manually in a migration script or CLI, not here:
