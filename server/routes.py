@@ -9,11 +9,11 @@ This module defines all the API endpoints for the LMS platform, including:
 """
 
 import os
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File as FastAPIFile, Request
 from fastapi.responses import FileResponse
 import os
 from fastapi.responses import StreamingResponse, JSONResponse
-from .db import User, File, Query, Session, SessionLocal
+from .db import User, File as DBFile, Query, Session, SessionLocal
 from .schemas import RegisterRequest
 from .auth import (
     get_db, get_password_hash, authenticate_user, create_access_token,
@@ -176,7 +176,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = D
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Upload a file to the system.
     
     The file is stored in the user's directory within the assets folder and tracked in the database.
@@ -212,7 +212,7 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
             f.write(contents)
         
         # Create database record
-        db_file = File()
+        db_file = DBFile()
         db_file.filename = file.filename
         db_file.userId = user.userId
         db_file.path = filepath
@@ -392,7 +392,7 @@ def list_files(user: User = Depends(get_current_user), db: SessionLocal = Depend
     """
     try:
         # Query the database for files owned by this user
-        files = db.query(File).filter(File.userId == user.userId).all()
+        files = db.query(DBFile).filter(DBFile.userId == user.userId).all()
         
         # Format the response with file metadata
         file_list = [
@@ -429,7 +429,7 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
     """
     try:
         # Query the database for the file record
-        file_record = db.query(File).filter(File.fileId == fileId).first()
+        file_record = db.query(DBFile).filter(DBFile.fileId == fileId).first()
         
         # Check if file exists and belongs to the user
         if not file_record:
@@ -487,7 +487,7 @@ def delete_file(fileId: int, user: User = Depends(get_current_user), db: Session
     """
     try:
         # Query the database for the file record
-        file_record = db.query(File).filter(File.fileId == fileId).first()
+        file_record = db.query(DBFile).filter(DBFile.fileId == fileId).first()
         
         # Check if file exists and belongs to the user
         if not file_record:
