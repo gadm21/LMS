@@ -268,7 +268,7 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         
         # Check for required fields
         if not body.get("query"):
-            return JSONResponse(status_code=400, content={"detail": "Query is required"})
+            return JSONResponse(status_code=400, content={"error": "No query provided"})
         
         user_query = body.get("query")
         chat_id = body.get("chat_id", "")
