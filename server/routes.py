@@ -203,14 +203,19 @@ async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(
         if file_size > user.max_file_size:
             raise HTTPException(status_code=400, detail="File too large")
         
-        # Create database record with file content stored in the database
+        # Detect MIME type
+        import mimetypes
+        content_type = mimetypes.guess_type(file.filename)[0] or "application/octet-stream"
+        
+        # Create database record - using the improved schema with content column
         db_file = DBFile()
         db_file.filename = file.filename
         db_file.userId = user.userId
         db_file.size = file_size
         db_file.content = contents  # Store binary content directly in the database
+        db_file.content_type = content_type
         
-        # We'll keep track of the path in case we need to fall back to filesystem in local dev
+        # Also save to filesystem in development environment (not on Vercel) for easier debugging
         if not os.environ.get("VERCEL") and not os.environ.get("READ_ONLY_FS"):
             user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
             os.makedirs(user_folder, exist_ok=True)
@@ -218,14 +223,38 @@ async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(
             with open(filepath, "wb") as f:
                 f.write(contents)
             db_file.path = filepath
+        
+        # Save the file first to get its ID
         db.add(db_file)
         db.commit()
         db.refresh(db_file)
+        
+        # Now create the initial version with the file ID
+        initial_version = FileVersion(
+            fileId=db_file.fileId,
+            userId=user.userId,
+            content=contents,
+            size=file_size,
+            version_number=1
+        )
+        db.add(initial_version)
+        
+        # Add basic metadata
+        content_type_metadata = FileMetadata(
+            fileId=db_file.fileId,
+            key="content_type",
+            value=content_type
+        )
+        db.add(content_type_metadata)
+        
+        db.commit()
         
         return {
             "filename": file.filename, 
             "size": file_size,
             "fileId": db_file.fileId,
+            "content_type": content_type,
+            "version": 1,
             "uploaded_at": db_file.uploaded_at
         }
     except Exception as e:
@@ -463,18 +492,17 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
         if file_record.userId != user.userId:
             raise HTTPException(status_code=403, detail="You don't have permission to access this file")
         
-        # Check if we have the file content in the database
+        # First try to get content directly from the database
         if file_record.content is not None:
-            # Use the content stored in the database
             file_content = file_record.content
         else:
-            # Fall back to filesystem if content is not in the database (for backward compatibility)
+            # Fall back to the filesystem if content is not in the database
             filepath = file_record.path
             if filepath and os.path.exists(filepath):
                 with open(filepath, "rb") as f:
                     file_content = f.read()
             else:
-                # Try standard path as another fallback
+                # Try standard path as fallback
                 user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
                 fallback_path = os.path.join(user_folder, file_record.filename)
                 
@@ -482,7 +510,31 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
                     with open(fallback_path, "rb") as f:
                         file_content = f.read()
                 else:
-                    raise HTTPException(status_code=404, detail="File not found on server")
+                    # Check if we have any versions of this file
+                    latest_version = db.query(FileVersion).filter(
+                        FileVersion.fileId == fileId
+                    ).order_by(FileVersion.version_number.desc()).first()
+                    
+                    if latest_version and latest_version.content is not None:
+                        file_content = latest_version.content
+                    else:
+                        raise HTTPException(status_code=404, detail="File not found on server")
+        
+        # Determine content type
+        content_type = file_record.content_type
+        if not content_type:
+            # Look for content type in metadata
+            metadata = db.query(FileMetadata).filter(
+                FileMetadata.fileId == fileId,
+                FileMetadata.key == "content_type"
+            ).first()
+            
+            if metadata and metadata.value:
+                content_type = metadata.value
+            else:
+                # Guess from filename
+                import mimetypes
+                content_type = mimetypes.guess_type(file_record.filename)[0] or "application/octet-stream"
         
         # Stream the file from memory
         def iterfile():
@@ -490,7 +542,7 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
                 
         return StreamingResponse(
             iterfile(), 
-            media_type="application/octet-stream", 
+            media_type=content_type, 
             headers={"Content-Disposition": f"attachment; filename={quote(file_record.filename)}"}
         )
     except HTTPException:
@@ -498,6 +550,161 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
     except Exception as e:
         log_error(f"Error downloading file: {str(e)}", exc=e, endpoint=f"/download/{fileId}")
         raise HTTPException(status_code=500, detail=f"Error downloading file: {str(e)}")
+
+@router.post("/files/{fileId}/versions")
+async def upload_file_version(fileId: int, file: UploadFile = FastAPIFile(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    """Upload a new version of an existing file.
+    
+    Creates a new version of the file while preserving the original.
+    Only the owner of the file can add new versions.
+    
+    Args:
+        fileId: ID of the file to create a version for
+        file: The new version of the file
+        user: The authenticated user making the request
+        db: Database session dependency
+        
+    Returns:
+        dict: Information about the newly created version
+        
+    Raises:
+        HTTPException: 404 if file not found
+        HTTPException: 403 if user doesn't own the file
+        HTTPException: 400 if file is too large
+    """
+    try:
+        # Check if file exists and belongs to the user
+        original_file = db.query(DBFile).filter(DBFile.fileId == fileId).first()
+        if not original_file:
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        if original_file.userId != user.userId:
+            raise HTTPException(status_code=403, detail="You don't have permission to modify this file")
+        
+        # Read file contents
+        contents = await file.read()
+        
+        # Check file size
+        file_size = len(contents)
+        if file_size > user.max_file_size:
+            raise HTTPException(status_code=400, detail="File too large")
+        
+        # Get the latest version number
+        latest_version = db.query(FileVersion).filter(
+            FileVersion.fileId == fileId
+        ).order_by(FileVersion.version_number.desc()).first()
+        
+        new_version_number = 1
+        if latest_version:
+            new_version_number = latest_version.version_number + 1
+        
+        # Create new version
+        new_version = FileVersion(
+            fileId=fileId,
+            userId=user.userId,
+            content=contents,
+            size=file_size,
+            version_number=new_version_number
+        )
+        
+        db.add(new_version)
+        db.commit()
+        db.refresh(new_version)
+        
+        # Update the main file record with the latest content
+        original_file.content = contents
+        original_file.size = file_size
+        db.commit()
+        
+        return {
+            "fileId": fileId,
+            "filename": original_file.filename,
+            "version": new_version_number,
+            "size": file_size,
+            "created_at": new_version.created_at
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        log_error(f"Error uploading file version: {str(e)}", exc=e, endpoint=f"/files/{fileId}/versions")
+        raise HTTPException(status_code=500, detail=f"Error uploading file version: {str(e)}")
+
+@router.post("/files/{fileId}/metadata")
+def set_file_metadata(fileId: int, metadata: dict, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    """Set or update metadata for a file.
+    
+    Adds or updates metadata key-value pairs for a file.
+    Only the owner of the file can modify metadata.
+    
+    Args:
+        fileId: ID of the file to set metadata for
+        metadata: Dictionary of metadata key-value pairs
+        user: The authenticated user making the request
+        db: Database session dependency
+        
+    Returns:
+        dict: Updated metadata for the file
+        
+    Raises:
+        HTTPException: 404 if file not found
+        HTTPException: 403 if user doesn't own the file
+    """
+    try:
+        # Check if file exists and belongs to the user
+        file_record = db.query(DBFile).filter(DBFile.fileId == fileId).first()
+        if not file_record:
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        if file_record.userId != user.userId:
+            raise HTTPException(status_code=403, detail="You don't have permission to modify this file's metadata")
+        
+        # Add or update metadata entries
+        updated_keys = []
+        for key, value in metadata.items():
+            # Skip invalid keys
+            if not key or not isinstance(key, str):
+                continue
+                
+            # Look for existing metadata with this key
+            existing = db.query(FileMetadata).filter(
+                FileMetadata.fileId == fileId,
+                FileMetadata.key == key
+            ).first()
+            
+            if existing:
+                # Update existing metadata
+                existing.value = str(value)
+                updated_keys.append(key)
+            else:
+                # Create new metadata entry
+                new_metadata = FileMetadata(
+                    fileId=fileId,
+                    key=key,
+                    value=str(value)
+                )
+                db.add(new_metadata)
+                updated_keys.append(key)
+        
+        db.commit()
+        
+        # Get all metadata for this file
+        all_metadata = {}
+        metadata_records = db.query(FileMetadata).filter(FileMetadata.fileId == fileId).all()
+        for record in metadata_records:
+            all_metadata[record.key] = record.value
+        
+        return {
+            "fileId": fileId,
+            "metadata": all_metadata,
+            "updated_keys": updated_keys
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        log_error(f"Error updating file metadata: {str(e)}", exc=e, endpoint=f"/files/{fileId}/metadata")
+        raise HTTPException(status_code=500, detail=f"Error updating file metadata: {str(e)}")
 
 @router.delete("/delete/{fileId}")
 def delete_file(fileId: int, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
