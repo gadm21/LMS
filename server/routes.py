@@ -253,17 +253,18 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         HTTPException: 400 if required parameters are missing
         HTTPException: 500 if OpenAI API call fails
     """
+    # First check if there's any content in the request body
+    body_bytes = await request.body()
+    if not body_bytes:
+        return JSONResponse({"error": "Empty request body"}, status_code=400)
+        
+    # Try to parse the JSON body
     try:
-        # First check if there's any content in the request body
-        body_bytes = await request.body()
-        if not body_bytes:
-            raise HTTPException(status_code=400, detail="Empty request body")
-            
-        # Try to parse the JSON body
-        try:
-            body = await request.json()
-        except json.JSONDecodeError as json_err:
-            raise HTTPException(status_code=400, detail=f"Invalid JSON in request body: {str(json_err)}")
+        body = await request.json()
+    except json.JSONDecodeError as json_err:
+        return JSONResponse({"error": f"Invalid JSON in request body: {str(json_err)}"}, status_code=400)
+        
+    try:
         
         # Check for required fields
         if not body.get("query"):
