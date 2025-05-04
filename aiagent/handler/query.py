@@ -204,7 +204,20 @@ def ask_ai(
     short_term_memory = short_term_manager.load()
 
     # Read all reference files
-    references = read_references()
+    try:
+        references = read_references()
+    except Exception as e:
+        logging.error(f"Error loading references: {e}")
+        references = {}
+        
+    # Check if we're running in a serverless environment
+    if os.environ.get("VERCEL") and not references:
+        logging.info("Running in Vercel environment, providing minimal context due to filesystem limitations")
+        # Add a synthetic reference to explain the limitations
+        references = {
+            "system_info.txt": "This is a limited deployment running on serverless infrastructure. " +
+                            "Some features requiring filesystem access may be restricted."
+        }
 
     # Query the AI with context
     response = query_openai(

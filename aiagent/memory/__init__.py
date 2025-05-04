@@ -13,6 +13,7 @@ Example usage:
 """
 
 import os
+import logging
 from pathlib import Path
 
 # Get the module's directory
@@ -26,6 +27,14 @@ SHORT_TERM_MEMORY_FILE = os.path.join(DATA_DIR, "short_term_memory.json")
 LONG_TERM_MEMORY_FILE = os.path.join(DATA_DIR,  "long_term_memory.json")
 CONTEXT_FILE = os.path.join(DATA_DIR, "context.json")
 REFERENCES_DIR = os.path.join(DATA_DIR,  "references")
+
+# Create necessary directories if they don't exist
+try:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    os.makedirs(REFERENCES_DIR, exist_ok=True)
+    logging.info(f"Created directory structure: {DATA_DIR} and {REFERENCES_DIR}")
+except Exception as e:
+    logging.warning(f"Could not create directory structure: {e}")
 
 # Import public functions and variables for module-level access
 from aiagent.memory.loader import load_memory
