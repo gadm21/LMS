@@ -1,0 +1,11 @@
+{
+  "name": "lms",
+  "version": "1.0.0",
+  "description": "Learning Management System",
+  "scripts": {
+    "build": "./build.sh"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
