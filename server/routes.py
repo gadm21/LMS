@@ -1,3 +1,13 @@
+"""API Routes Module for LMS Platform.
+
+This module defines all the API endpoints for the LMS platform, including:
+- User authentication and management
+- File operations (upload, download, listing, deletion)
+- AI query handling
+- URL tracking
+- User profile information
+"""
+
 import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Request
 from fastapi.responses import FileResponse
@@ -74,6 +84,11 @@ os.makedirs(ASSETS_FOLDER, exist_ok=True)
 
 @router.get("/")
 def root():
+    """Root endpoint that confirms the API is running.
+    
+    Returns:
+        dict: A simple message indicating the API is operational
+    """
     return {"message": "LMS API is running"}
 
 @router.get("/favicon.ico")
@@ -85,6 +100,18 @@ def favicon():
 
 @router.post("/register")
 def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
+    """Register a new user in the system.
+    
+    Args:
+        req: The registration request containing username and password
+        db: Database session dependency
+        
+    Returns:
+        dict: Registration confirmation with userId
+        
+    Raises:
+        HTTPException: 400 error if username already exists
+    """
     if db.query(User).filter(User.username == req.username).first():
         raise HTTPException(status_code=400, detail="User already exists")
     hashed_pw = get_password_hash(req.password)
@@ -98,6 +125,22 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
 
 @router.delete("/user/{username}")
 def delete_user(username: str, current_user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    """Delete a user account.
+    
+    Users can only delete their own accounts, not others.
+    
+    Args:
+        username: The username of the account to delete
+        current_user: The authenticated user making the request
+        db: Database session dependency
+        
+    Returns:
+        dict: Confirmation message
+        
+    Raises:
+        HTTPException: 403 if trying to delete another user's account
+        HTTPException: 404 if user not found
+    """
     if current_user.username != username:
         raise HTTPException(status_code=403, detail="You can only delete your own account.")
     user = db.query(User).filter(User.username == username).first()
@@ -109,6 +152,20 @@ def delete_user(username: str, current_user: User = Depends(get_current_user), d
 
 @router.post("/token")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = Depends(get_db)):
+    """Authenticate user and generate access token.
+    
+    This endpoint conforms to the OAuth2 password flow standard.
+    
+    Args:
+        form_data: OAuth2 form containing username and password
+        db: Database session dependency
+        
+    Returns:
+        dict: JWT access token and token type
+        
+    Raises:
+        HTTPException: 401 if authentication fails
+    """
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(status_code=400, detail="Invalid credentials")
@@ -120,6 +177,21 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = D
 
 @router.post("/upload")
 async def upload_file(file: UploadFile = File(...), user: User = Depends(get_current_user)):
+    """Upload a file to the system.
+    
+    The file is stored in the user's directory within the assets folder.
+    
+    Args:
+        file: The file to upload
+        user: The authenticated user uploading the file
+        
+    Returns:
+        dict: Information about the uploaded file
+        
+    Raises:
+        HTTPException: 400 if file is too large
+        HTTPException: 500 if file upload fails
+    """
     user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
     os.makedirs(user_folder, exist_ok=True)
     contents = await file.read()
@@ -132,6 +204,22 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
 
 @router.post("/query")
 async def queryEndpoint(request: Request, user: User = Depends(get_current_user)):
+    """Process an AI query from a user.
+    
+    Sends the query to the OpenAI API and returns the response. The query and response
+    are associated with a chat ID for maintaining conversation context.
+    
+    Args:
+        request: The HTTP request containing the query data
+        user: The authenticated user making the query
+        
+    Returns:
+        dict: The AI response along with query details
+        
+    Raises:
+        HTTPException: 400 if required parameters are missing
+        HTTPException: 500 if OpenAI API call fails
+    """
     """
     Handle AI queries. Expects a JSON body with at least a 'query' field and a 'chatId'.
     Optionally accepts 'pageContent'.
@@ -178,6 +266,20 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
 
 @router.post("/active_url")
 async def active_url(request: Request):
+    """Track active URL being viewed by user.
+    
+    Records the URL and page title the user is currently viewing.
+    No authentication required for this endpoint.
+    
+    Args:
+        request: The HTTP request containing the URL data
+        
+    Returns:
+        dict: Success status
+        
+    Raises:
+        HTTPException: 400 if URL is missing
+    """
     """
     Receive active URL updates from the extension and return a success response.
     Expected POST data:
@@ -218,12 +320,33 @@ async def active_url(request: Request):
 
 @router.get("/files", response_model=List[str])
 def list_files(user: User = Depends(get_current_user)):
+    """List all files uploaded by the authenticated user.
+    
+    Args:
+        user: The authenticated user whose files to list
+        
+    Returns:
+        list: List of filenames
+    """
     user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
     files = os.listdir(user_folder) if os.path.exists(user_folder) else []
     return files
 
 @router.get("/download/{filename}")
 def download_file(filename: str, user: User = Depends(get_current_user)):
+    """Download a specific file.
+    
+    Args:
+        filename: The name of the file to download
+        user: The authenticated user requesting the download
+        
+    Returns:
+        FileResponse: The file content as a download
+        
+    Raises:
+        HTTPException: 404 if file not found
+        HTTPException: 403 if trying to access another user's file
+    """
     user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
     filepath = os.path.join(user_folder, filename)
     if not os.path.exists(filepath):
@@ -235,6 +358,19 @@ def download_file(filename: str, user: User = Depends(get_current_user)):
 
 @router.delete("/delete/{filename}")
 def delete_file(filename: str, user: User = Depends(get_current_user)):
+    """Delete a specific file.
+    
+    Args:
+        filename: The name of the file to delete
+        user: The authenticated user requesting the deletion
+        
+    Returns:
+        dict: Confirmation message
+        
+    Raises:
+        HTTPException: 404 if file not found
+        HTTPException: 403 if trying to delete another user's file
+    """
     decoded_filename = unquote(filename)
     safe_filename = os.path.basename(decoded_filename)
     user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
@@ -246,6 +382,14 @@ def delete_file(filename: str, user: User = Depends(get_current_user)):
 
 @router.get('/profile')
 def profile():
+    """Get user profile information.
+    
+    This is a static endpoint that returns hardcoded profile information.
+    In a real application, this would fetch data from the database.
+    
+    Returns:
+        dict: Profile information
+    """
     return {
         "name": "Gad Mohamed",
         "profession": "AI Engineer",
