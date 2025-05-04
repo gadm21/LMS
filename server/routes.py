@@ -212,12 +212,11 @@ async def upload_file(file: UploadFile = File(...), user: User = Depends(get_cur
             f.write(contents)
         
         # Create database record
-        db_file = File(
-            filename=file.filename,
-            userId=user.userId,
-            path=filepath,
-            size=file_size
-        )
+        db_file = File()
+        db_file.filename = file.filename
+        db_file.userId = user.userId
+        db_file.path = filepath
+        db_file.size = file_size
         db.add(db_file)
         db.commit()
         db.refresh(db_file)

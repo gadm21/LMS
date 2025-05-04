@@ -226,7 +226,11 @@ def test_list_files():
     resp = requests.get(f"{BASE_URL}/files", headers=headers)
     logger.info(f"[test_list_files] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_list_files] Failed: {resp.text}"
-    assert isinstance(resp.json(), list)
+    # New response format is a dict with 'files' array
+    response_data = resp.json()
+    assert isinstance(response_data, dict)
+    assert "files" in response_data
+    assert isinstance(response_data["files"], list)
     # Clean up: delete user
     requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     logger.info("[test_list_files] END")
@@ -236,15 +240,26 @@ def test_download_file():
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
+    
     # First upload a file
     logger.info(f"[test_download_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
-    requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
-    logger.info(f"[test_download_file] Downloading file: {TEST_FILE_NAME}")
-    resp = requests.get(f"{BASE_URL}/download/{TEST_FILE_NAME}", headers=headers)
+    upload_resp = requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
+    assert upload_resp.status_code == 200, f"[test_download_file] Upload failed: {upload_resp.text}"
+    
+    # Get the fileId from the upload response
+    upload_data = upload_resp.json()
+    logger.info(f"[test_download_file] Upload response: {upload_data}")
+    assert "fileId" in upload_data, "Upload response doesn't include fileId"
+    file_id = upload_data["fileId"]
+    
+    # Download the file using fileId
+    logger.info(f"[test_download_file] Downloading file with ID: {file_id}")
+    resp = requests.get(f"{BASE_URL}/download/{file_id}", headers=headers)
     logger.info(f"[test_download_file] Response status: {resp.status_code}, length: {len(resp.content)}")
     assert resp.status_code == 200, f"[test_download_file] Download failed: {resp.text}"
     assert resp.content == TEST_FILE_CONTENT
+    
     # Clean up: delete user
     requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     logger.info("[test_download_file] END")
@@ -254,22 +269,41 @@ def test_delete_file():
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
+    
     # First upload a file
     logger.info(f"[test_delete_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
-    requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
-    logger.info(f"[test_delete_file] Deleting file: {TEST_FILE_NAME}")
-    resp = requests.delete(f"{BASE_URL}/delete/{TEST_FILE_NAME}", headers=headers)
+    upload_resp = requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
+    assert upload_resp.status_code == 200, f"[test_delete_file] Upload failed: {upload_resp.text}"
+    
+    # Get the fileId from the upload response
+    upload_data = upload_resp.json()
+    logger.info(f"[test_delete_file] Upload response: {upload_data}")
+    assert "fileId" in upload_data, "Upload response doesn't include fileId"
+    file_id = upload_data["fileId"]
+    
+    # Delete the file using fileId
+    logger.info(f"[test_delete_file] Deleting file with ID: {file_id}")
+    resp = requests.delete(f"{BASE_URL}/delete/{file_id}", headers=headers)
     logger.info(f"[test_delete_file] Delete response: {resp.status_code}, {resp.json()}")
     assert resp.status_code == 200, f"[test_delete_file] Delete failed: {resp.text}"
     resp_json = resp.json()
+    
     # Accept message or detail containing 'deleted'
     msg = resp_json.get("message") or resp_json.get("detail")
     assert msg is not None and "deleted" in msg
+    
     # Clean up: delete user
     requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
-    # Confirm file is gone
+    
+    # Confirm file is gone by checking the files list
     resp = requests.get(f"{BASE_URL}/files", headers=headers)
     logger.info(f"[test_delete_file] File list after delete: {resp.json()}")
-    assert TEST_FILE_NAME not in resp.json()
+    files_data = resp.json()
+    
+    # Check that the file with our fileId is not in the list
+    if "files" in files_data and isinstance(files_data["files"], list):
+        file_ids = [file.get("fileId") for file in files_data["files"]]
+        assert file_id not in file_ids, f"File with ID {file_id} was not deleted"
+    
     logger.info("[test_delete_file] END")
