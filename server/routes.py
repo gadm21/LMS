@@ -378,27 +378,48 @@ async def active_url(request: Request):
         log_error(str(e), e, {"endpoint": "/active_url"}, "/active_url")
         return JSONResponse({"error": str(e)}, status_code=500)
 
-@router.get("/files", response_model=List[str])
-def list_files(user: User = Depends(get_current_user)):
+@router.get("/files")
+def list_files(user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """List all files uploaded by the authenticated user.
+    
+    Retrieves files from the database instead of checking the filesystem directly.
     
     Args:
         user: The authenticated user whose files to list
+        db: Database session dependency
         
     Returns:
-        list: List of filenames
+        dict: List of files with their metadata
     """
-    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-    files = os.listdir(user_folder) if os.path.exists(user_folder) else []
-    return files
+    try:
+        # Query the database for files owned by this user
+        files = db.query(File).filter(File.userId == user.userId).all()
+        
+        # Format the response with file metadata
+        file_list = [
+            {
+                "fileId": file.fileId,
+                "filename": file.filename,
+                "size": file.size,
+                "uploaded_at": file.uploaded_at
+            } for file in files
+        ]
+        
+        return {"files": file_list, "count": len(file_list)}
+    except Exception as e:
+        log_error(f"Error listing files: {str(e)}", exc=e, endpoint="/files")
+        raise HTTPException(status_code=500, detail=f"Error listing files: {str(e)}")
 
-@router.get("/download/{filename}")
-def download_file(filename: str, user: User = Depends(get_current_user)):
-    """Download a specific file.
+@router.get("/download/{fileId}")
+def download_file(fileId: int, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    """Download a specific file by its ID.
+    
+    Retrieves the file record from the database before accessing the filesystem.
     
     Args:
-        filename: The name of the file to download
+        fileId: The ID of the file to download
         user: The authenticated user requesting the download
+        db: Database session dependency
         
     Returns:
         FileResponse: The file content as a download
@@ -407,22 +428,56 @@ def download_file(filename: str, user: User = Depends(get_current_user)):
         HTTPException: 404 if file not found
         HTTPException: 403 if trying to access another user's file
     """
-    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-    filepath = os.path.join(user_folder, filename)
-    if not os.path.exists(filepath):
-        raise HTTPException(status_code=404, detail="File not found")
-    def iterfile():
-        with open(filepath, mode="rb") as file_like:
-            yield from file_like
-    return StreamingResponse(iterfile(), media_type="application/octet-stream", headers={"Content-Disposition": f"attachment; filename={quote(filename)}"})
+    try:
+        # Query the database for the file record
+        file_record = db.query(File).filter(File.fileId == fileId).first()
+        
+        # Check if file exists and belongs to the user
+        if not file_record:
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        if file_record.userId != user.userId:
+            raise HTTPException(status_code=403, detail="You don't have permission to access this file")
+        
+        # Check if the file exists on disk
+        filepath = file_record.path
+        if not os.path.exists(filepath):
+            # File exists in DB but not on disk - could happen in serverless environment
+            # Try the standard path pattern as fallback
+            user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+            fallback_path = os.path.join(user_folder, file_record.filename)
+            
+            if os.path.exists(fallback_path):
+                filepath = fallback_path
+            else:
+                raise HTTPException(status_code=404, detail="File not found on server")
+        
+        # Stream the file
+        def iterfile():
+            with open(filepath, mode="rb") as file_like:
+                yield from file_like
+                
+        return StreamingResponse(
+            iterfile(), 
+            media_type="application/octet-stream", 
+            headers={"Content-Disposition": f"attachment; filename={quote(file_record.filename)}"}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        log_error(f"Error downloading file: {str(e)}", exc=e, endpoint=f"/download/{fileId}")
+        raise HTTPException(status_code=500, detail=f"Error downloading file: {str(e)}")
 
-@router.delete("/delete/{filename}")
-def delete_file(filename: str, user: User = Depends(get_current_user)):
-    """Delete a specific file.
+@router.delete("/delete/{fileId}")
+def delete_file(fileId: int, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+    """Delete a specific file by its ID.
+    
+    Deletes both the database record and the file on disk.
     
     Args:
-        filename: The name of the file to delete
+        fileId: The ID of the file to delete
         user: The authenticated user requesting the deletion
+        db: Database session dependency
         
     Returns:
         dict: Confirmation message
@@ -431,14 +486,46 @@ def delete_file(filename: str, user: User = Depends(get_current_user)):
         HTTPException: 404 if file not found
         HTTPException: 403 if trying to delete another user's file
     """
-    decoded_filename = unquote(filename)
-    safe_filename = os.path.basename(decoded_filename)
-    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-    path = os.path.join(user_folder, safe_filename)
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="File not found")
-    os.remove(path)
-    return {"message": f"File '{safe_filename}' deleted successfully."}
+    try:
+        # Query the database for the file record
+        file_record = db.query(File).filter(File.fileId == fileId).first()
+        
+        # Check if file exists and belongs to the user
+        if not file_record:
+            raise HTTPException(status_code=404, detail="File not found")
+            
+        if file_record.userId != user.userId:
+            raise HTTPException(status_code=403, detail="You don't have permission to delete this file")
+        
+        # Get file information before deleting
+        filename = file_record.filename
+        filepath = file_record.path
+        
+        # Delete the file from disk if it exists
+        try:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            else:
+                # Try the standard path pattern as fallback
+                user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+                fallback_path = os.path.join(user_folder, filename)
+                if os.path.exists(fallback_path):
+                    os.remove(fallback_path)
+        except OSError as e:
+            # Continue even if file removal fails, as we still want to remove the database record
+            log_error(f"Error removing file from disk: {str(e)}", exc=e, endpoint=f"/delete/{fileId}")
+        
+        # Delete the database record
+        db.delete(file_record)
+        db.commit()
+        
+        return {"message": f"File '{filename}' deleted successfully.", "fileId": fileId}
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        log_error(f"Error deleting file: {str(e)}", exc=e, endpoint=f"/delete/{fileId}")
+        raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
 
 @router.get('/profile')
 def profile():
