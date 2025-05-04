@@ -52,8 +52,14 @@ class BaseMemoryManager:
         return memory.get(key, None)
 
 class ShortTermMemoryManager(BaseMemoryManager):
-    """
-    Manages short-term memory operations.
+    """Manages short-term memory operations.
+    
+    Short-term memory stores recent user interactions, current context,
+    active URLs, and conversation history. This memory is more volatile
+    and focuses on the immediate context of user interactions.
+    
+    Attributes:
+        memory_file (str): Path to the short-term memory storage file
     """
     
     def __init__(self, client_dir: Optional[str] = None):
@@ -88,8 +94,14 @@ class ShortTermMemoryManager(BaseMemoryManager):
         return conversations[-limit:]
 
 class LongTermMemoryManager(BaseMemoryManager):
-    """
-    Manages long-term memory operations.
+    """Manages long-term memory operations.
+    
+    Long-term memory stores persistent user preferences, profile information,
+    learning history, and important insights that should be remembered across
+    multiple sessions. This memory provides continuity in the user experience.
+    
+    Attributes:
+        memory_file (str): Path to the long-term memory storage file
     """
     
     def __init__(self, client_dir: Optional[str] = None):

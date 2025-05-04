@@ -1,13 +1,9 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server/main.py", "use": "@vercel/python" },
-    { "src": "docs_build/**", "use": "@vercel/static" }
+    { "src": "server/main.py", "use": "@vercel/python" }
   ],
   "routes": [
-    { "src": "/docs", "dest": "docs_build/index.html" },
-    { "src": "/docs/(.*)", "dest": "docs_build/$1" },
-    { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "server/main.py" }
   ]
 }

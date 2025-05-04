@@ -183,8 +183,19 @@ def fill_fields(html_content: str, fields: List[Dict]) -> str:
     return html_content
 
 
-def beatifulJsonPrint(json_data: Dict) -> None:
-    print(json.dumps(json_data, indent=4))
+def beautifulJsonPrint(json_data: Dict) -> None:
+    """Print JSON data in a formatted, human-readable format.
+    
+    This utility function formats JSON data with proper indentation
+    for improved readability during debugging and development.
+    
+    Args:
+        json_data (Dict): The JSON data to format and print
+        
+    Returns:
+        None: This function prints to stdout but does not return a value
+    """
+    print(json.dumps(json_data, indent=2))
 
 
 
