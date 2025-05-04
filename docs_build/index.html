@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>LMS Documentation - Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2979ff;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 10px 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>LMS Documentation</h1>
+    
+    <div class="success">
+        <p><strong>Success!</strong> This test page confirms that static file serving is working correctly.</p>
+    </div>
+    
+    <div class="card">
+        <h2>Documentation Status</h2>
+        <p>This is a test page to verify that the Vercel static file serving configuration is working properly for the <code>/docs</code> path.</p>
+        <p>If you're seeing this page, it means:</p>
+        <ul>
+            <li>Your Vercel routing configuration is correctly set up</li>
+            <li>Static files are being served from the <code>docs_build</code> directory</li>
+            <li>The docs path is not conflicting with the FastAPI docs</li>
+        </ul>
+    </div>
+    
+    <div class="card">
+        <h2>Next Steps</h2>
+        <p>To replace this test page with your full MkDocs documentation:</p>
+        <ol>
+            <li>Ensure the build script (<code>build.sh</code>) is correctly running during deployment</li>
+            <li>Verify that MkDocs is generating the documentation in the <code>docs_build</code> directory</li>
+            <li>Check the Vercel deployment logs for any errors during the build process</li>
+        </ol>
+    </div>
+    
+    <p>Created: <script>document.write(new Date().toLocaleString());</script></p>
+</body>
+</html>

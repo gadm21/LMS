@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "Learning Management System",
   "scripts": {
-    "build": "./build.sh"
+    "build": "chmod +x ./build.sh && ./build.sh",
+    "vercel-build": "chmod +x ./build.sh && ./build.sh"
   },
   "engines": {
     "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "mkdocs": "^1.4.0"
   }
 }
