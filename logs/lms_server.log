@@ -1,0 +1,48 @@
+[2025-05-02 19:55:12,780] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-05-02 19:55:12,780] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-05-02 19:55:12,780] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-05-02 19:55:12,780] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:55:12,780] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-05-02 19:55:12,780] INFO lms.server: [SERVER] Page title: Example Page
+[2025-05-02 19:55:12,780] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-05-02 19:55:12,783] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-05-02 19:55:12,784] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-05-02 19:55:12,784] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-05-02 19:55:12,784] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 19:55:12,784] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-05-02 19:55:37,930] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9jOGNlYmY4NiIsImV4cCI6MTc0NjIzMzczNn0.9PCcNau7U7xFcQaxeqKeMYVCSTat5slpzacCgqWA0QI', 'content-type': 'application/json', 'content-length': '81'}
+[2025-05-02 19:55:37,931] INFO lms.server: [/query] Payload: {'query': 'what does GAD refer to?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-05-02 19:55:37,931] INFO lms.server: [/query] Validation: query valid=True
+[2025-05-02 19:55:40,201] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'GAD stands for Generalized Anxiety Disorder, which is a common mental health condition characterized by excessive and persistent worry and anxiety about everyday things.'}
+[2025-05-02 20:00:48,291] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-05-02 20:00:48,291] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-05-02 20:00:48,291] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-05-02 20:00:48,291] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 20:00:48,292] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-05-02 20:00:48,292] INFO lms.server: [SERVER] Page title: Example Page
+[2025-05-02 20:00:48,292] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-05-02 20:00:48,295] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-05-02 20:00:48,295] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-05-02 20:00:48,295] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-05-02 20:00:48,295] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-02 20:00:48,295] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-05-02 20:00:50,312] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl85NmU5OGU2ZSIsImV4cCI6MTc0NjIzNDA0OX0.z5G4asoMHrNvxa_II5ArFW2vx5UJloQUtCr5O2Jbzy4', 'content-type': 'application/json', 'content-length': '81'}
+[2025-05-02 20:00:50,313] INFO lms.server: [/query] Payload: {'query': 'what does GAD refer to?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-05-02 20:00:50,313] INFO lms.server: [/query] Validation: query valid=True
+[2025-05-02 20:00:52,440] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'GAD stands for Generalized Anxiety Disorder, which is a common mental health condition characterized by excessive and uncontrollable worry and anxiety about everyday things.'}
+[2025-05-03 22:52:45,143] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '52', 'content-type': 'application/json'}
+[2025-05-03 22:52:45,144] INFO lms.server: [/active_url] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[2025-05-03 22:52:45,144] INFO lms.server: [/active_url] Validation: url valid=True
+[2025-05-03 22:52:45,144] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-03 22:52:45,144] INFO lms.server: [SERVER] Active URL: https://example.com
+[2025-05-03 22:52:45,145] INFO lms.server: [SERVER] Page title: Example Page
+[2025-05-03 22:52:45,145] INFO lms.server: [/active_url] Responded with status 200: {'data': {'status': 'success'}}
+[2025-05-03 22:52:45,149] INFO lms.server: [/active_url] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'content-length': '24', 'content-type': 'application/json'}
+[2025-05-03 22:52:45,149] INFO lms.server: [/active_url] Payload: {'title': 'Example Page'}
+[2025-05-03 22:52:45,150] INFO lms.server: [/active_url] Validation: url valid=False
+[2025-05-03 22:52:45,150] INFO lms.server: [/active_url] Validation: title valid=True
+[2025-05-03 22:52:45,150] ERROR lms.server: [/active_url] ERROR: Missing URL | Context: {'endpoint': '/active_url'}
+[2025-05-03 22:52:46,489] INFO lms.server: [/query] POST request from testclient, headers: {'host': 'testserver', 'accept': '*/*', 'accept-encoding': 'gzip, deflate', 'connection': 'keep-alive', 'user-agent': 'testclient', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zZjY1YWVlZSIsImV4cCI6MTc0NjMzMDc2NX0.FckXOtIfW9MtNytMyWHsi6owQOPZ3GL-FUPBrdUJcEo', 'content-type': 'application/json', 'content-length': '81'}
+[2025-05-03 22:52:46,490] INFO lms.server: [/query] Payload: {'query': 'what does GAD refer to?', 'chatId': 'chat1', 'pageContent': 'Some content'}
+[2025-05-03 22:52:46,490] INFO lms.server: [/query] Validation: query valid=True
+[2025-05-03 22:52:49,208] INFO lms.server: [/query] Responded with status 200: {'message': 'Query received', 'response': 'GAD typically refers to Generalized Anxiety Disorder, which is a mental health condition characterized by excessive and persistent worry and anxiety about everyday events and activities.'}

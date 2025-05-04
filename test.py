@@ -1,43 +1,32 @@
 import os
 import pytest
-from fastapi.testclient import TestClient
 import logging
+import requests
+import uuid
+import shutil
+
 logger = logging.getLogger(__name__)
 
-from server import main
-from server.main import app
-from server.db import Base, User
+# Define the deployed server base URL
+BASE_URL = "https://lms-swart-five.vercel.app"  # or use lms-k9p7yj9xx-gads-projects-02bd6234.vercel.app
+
+def test_server_health():
+    """Test if the server is reachable and responds to a simple request"""
+    logger.info("[test_server_health] Testing server health")
+    
+    # Test the profile endpoint which should be static and not require DB access
+    resp = requests.get(f"{BASE_URL}/profile")
+    logger.info(f"[test_server_health] Profile endpoint response: {resp.status_code}, {resp.text}")
+    
+    # Try to get the root endpoint
+    root_resp = requests.get(f"{BASE_URL}/")
+    logger.info(f"[test_server_health] Root endpoint response: {root_resp.status_code}, {root_resp.text[:100]}")
+    
+    # If we get here without exceptions, the server is responding
+    logger.info("[test_server_health] Server is responding to requests")
+
+# For local file handling, we still need some imports
 from server.routes import ASSETS_FOLDER
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from fastapi.testclient import TestClient
-
-# LOCAL_DATABASE_URL = "postgresql+psycopg2://lms_user:lms_password@localhost:5432/lms_db_test"
-TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "")
-logger.info(f"[TEST] Using TEST_DATABASE_URL: {TEST_DATABASE_URL}")
-test_engine = create_engine(TEST_DATABASE_URL)
-TestingSessionLocal = sessionmaker(bind=test_engine)
-
-# Patch main.py's engine and SessionLocal to use the test versions
-main.engine = test_engine
-main.SessionLocal = TestingSessionLocal
-
-# Now create tables using the test engine
-Base.metadata.create_all(bind=test_engine)
-
-# Patch app dependencies to use the test DB
-app.dependency_overrides = {}
-
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-from server import auth
-app.dependency_overrides[auth.get_db] = override_get_db
-
-client = TestClient(app)
 
 import uuid
 
@@ -64,15 +53,30 @@ def registerUser(user=None):
     logger.info(f"[registerUser] Registering user: {user}")
     if user is None:
         user = getUniqueUser()
-    resp = client.post("/register", json=user)
-    logger.info(f"[registerUser] Response status: {resp.status_code}, body: {resp.json()}")
-    assert resp.status_code == 200, f"[registerUser] Registration failed: {resp.text}"
-    assert resp.json()["message"] == "Registered successfully"
-    return user
+    logger.info(f"[registerUser] Sending request to {BASE_URL}/register with user data: {user}")
+    resp = requests.post(f"{BASE_URL}/register", json=user)
+    logger.info(f"[registerUser] Response status: {resp.status_code}, raw response: {resp.text}")
+    
+    if resp.status_code != 200:
+        raise Exception(f"[registerUser] Registration failed with status {resp.status_code}: {resp.text}")
+    
+    try:
+        json_resp = resp.json()
+        logger.info(f"[registerUser] JSON response: {json_resp}")
+        assert json_resp["message"] == "Registered successfully"
+        return user
+    except Exception as e:
+        logger.error(f"[registerUser] Error parsing response: {e}")
+        logger.error(f"[registerUser] Raw response: {resp.text}")
+        raise
 
 def loginUser(user):
     logger.info(f"[loginUser] Logging in user: {user}")
-    resp = client.post("/token", data=user, headers={"Content-Type": "application/x-www-form-urlencoded"})
+    resp = requests.post(
+        f"{BASE_URL}/token", 
+        data=user, 
+        headers={"Content-Type": "application/x-www-form-urlencoded"}
+    )
     logger.info(f"[loginUser] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[loginUser] Login failed: {resp.text}"
     assert "access_token" in resp.json()
@@ -85,20 +89,20 @@ def test_upload_file():
     headers = {"Authorization": f"Bearer {token}"}
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     logger.info(f"[test_upload_file] Uploading file: {TEST_FILE_NAME}")
-    resp = client.post("/upload", headers=headers, files=files)
+    resp = requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
     logger.info(f"[test_upload_file] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_upload_file] Upload failed: {resp.text}"
     assert resp.json()["filename"] == TEST_FILE_NAME
     assert resp.json()["size"] == len(TEST_FILE_CONTENT)
     # Clean up: delete user
     logger.info("[test_upload_file] END")
-    client.delete(f"/user/{user['username']}", headers=headers)
+    requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
 
 def test_active_url_success():
     logger.info("[test_active_url_success] START")
     payload = {"url": "https://example.com", "title": "Example Page"}
     logger.info(f"[test_active_url_success] Payload: {payload}")
-    resp = client.post("/active_url", json=payload)
+    resp = requests.post(f"{BASE_URL}/active_url", json=payload)
     logger.info(f"[test_active_url_success] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_active_url_success] Failed: {resp.text}"
     assert resp.json() == {"data": {"status": "success"}}
@@ -108,7 +112,7 @@ def test_active_url_missing_url():
     logger.info("[test_active_url_missing_url] START")
     payload = {"title": "Example Page"}
     logger.info(f"[test_active_url_missing_url] Payload: {payload}")
-    resp = client.post("/active_url", json=payload)
+    resp = requests.post(f"{BASE_URL}/active_url", json=payload)
     logger.info(f"[test_active_url_missing_url] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 400, f"[test_active_url_missing_url] Failed: {resp.text}"
     assert "error" in resp.json()
@@ -116,7 +120,7 @@ def test_active_url_missing_url():
 
 def test_profile():
     logger.info("[test_profile] START")
-    resp = client.get("/profile")
+    resp = requests.get(f"{BASE_URL}/profile")
     logger.info(f"[test_profile] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_profile] Failed: {resp.text}"
     data = resp.json()
@@ -134,31 +138,31 @@ def testQueryEndpoint():
     user = registerUser()
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
-    url = f"/query"
+    url = f"{BASE_URL}/query"
 
     # Case 1: Missing JSON body
     logger.info("[testQueryEndpoint] Case 1: Missing JSON body")
-    resp = client.post(url, headers=headers)
+    resp = requests.post(url, headers=headers)
     logger.info(f"[testQueryEndpoint] Case 1 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code in (400, 422), f"[testQueryEndpoint] Case 1 failed: {resp.text}"
 
     # Case 2: Missing 'query' field
     logger.info("[testQueryEndpoint] Case 2: Missing 'query' field")
-    resp = client.post(url, headers=headers, json={"chatId": "chat1"})
+    resp = requests.post(url, headers=headers, json={"chatId": "chat1"})
     logger.info(f"[testQueryEndpoint] Case 2 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 400, f"[testQueryEndpoint] Case 2 failed: {resp.text}"
     assert resp.json()["error"] == "No query provided"
 
     # Case 3: Missing 'chatId' field
     logger.info("[testQueryEndpoint] Case 3: Missing 'chatId' field")
-    resp = client.post(url, headers=headers, json={"query": "what IS GAD?"})
+    resp = requests.post(url, headers=headers, json={"query": "what IS GAD?"})
     logger.info(f"[testQueryEndpoint] Case 3 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 400, f"[testQueryEndpoint] Case 3 failed: {resp.text}"
     assert resp.json()["error"] == "No chat ID provided"
 
     # Case 4: Valid request
     logger.info("[testQueryEndpoint] Case 4: Valid request")
-    resp = client.post(url, headers=headers, json={"query": "what does GAD refer to?", "chatId": "chat1", "pageContent": "Some content"})
+    resp = requests.post(url, headers=headers, json={"query": "what does GAD refer to?", "chatId": "chat1", "pageContent": "Some content"})
     logger.info(f"[testQueryEndpoint] Case 4 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code in (200, 500), f"[testQueryEndpoint] Case 4 failed: {resp.text}"
     if resp.status_code == 200:
@@ -166,7 +170,7 @@ def testQueryEndpoint():
     else:
         assert "error" in resp.json()
     # Clean up: delete user
-    client.delete(f"/user/{user['username']}", headers=headers)
+    requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     logger.info("[testQueryEndpoint] END")
 
 def test_delete_user():
@@ -182,18 +186,18 @@ def test_delete_user():
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
     username = user["username"]
-    url = f"/user/{username}"
+    url = f"{BASE_URL}/user/{username}"
 
     # Success: user deletes themselves
     logger.info(f"[test_delete_user] Deleting user {username} (self-delete)")
-    resp = client.delete(url, headers=headers)
+    resp = requests.delete(url, headers=headers)
     logger.info(f"[test_delete_user] Delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 200, f"[test_delete_user] Delete failed: {resp.text}"
     assert resp.json()["message"].startswith(f"User '{username}' deleted successfully.")
 
     # Not found: try deleting again
     logger.info(f"[test_delete_user] Try deleting user {username} again (should be not found/unauthorized)")
-    resp = client.delete(url, headers=headers)
+    resp = requests.delete(url, headers=headers)
     logger.info(f"[test_delete_user] Second delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 401, f"[test_delete_user] Second delete failed: {resp.text}"
 
@@ -207,7 +211,7 @@ def test_delete_user():
     other_token = loginUser(second_user)
     other_headers = {"Authorization": f"Bearer {other_token}"}
     logger.info(f"[test_delete_user] Second user attempts to delete {username}")
-    resp = client.delete(url, headers=other_headers)
+    resp = requests.delete(url, headers=other_headers)
     logger.info(f"[test_delete_user] Forbidden delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 403, f"[test_delete_user] Forbidden delete failed: {resp.text}"
     assert resp.json()["detail"] == "You can only delete your own account."
@@ -219,12 +223,12 @@ def test_list_files():
     token = loginUser(user)
     headers = {"Authorization": f"Bearer {token}"}
     logger.info("[test_list_files] Listing files")
-    resp = client.get("/files", headers=headers)
+    resp = requests.get(f"{BASE_URL}/files", headers=headers)
     logger.info(f"[test_list_files] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_list_files] Failed: {resp.text}"
     assert isinstance(resp.json(), list)
     # Clean up: delete user
-    client.delete(f"/user/{user['username']}", headers=headers)
+    requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     logger.info("[test_list_files] END")
 
 def test_download_file():
@@ -235,14 +239,14 @@ def test_download_file():
     # First upload a file
     logger.info(f"[test_download_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
-    client.post("/upload", headers=headers, files=files)
+    requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
     logger.info(f"[test_download_file] Downloading file: {TEST_FILE_NAME}")
-    resp = client.get(f"/download/{TEST_FILE_NAME}", headers=headers)
+    resp = requests.get(f"{BASE_URL}/download/{TEST_FILE_NAME}", headers=headers)
     logger.info(f"[test_download_file] Response status: {resp.status_code}, length: {len(resp.content)}")
     assert resp.status_code == 200, f"[test_download_file] Download failed: {resp.text}"
     assert resp.content == TEST_FILE_CONTENT
     # Clean up: delete user
-    client.delete(f"/user/{user['username']}", headers=headers)
+    requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     logger.info("[test_download_file] END")
 
 def test_delete_file():
@@ -253,9 +257,9 @@ def test_delete_file():
     # First upload a file
     logger.info(f"[test_delete_file] Uploading file: {TEST_FILE_NAME}")
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
-    client.post("/upload", headers=headers, files=files)
+    requests.post(f"{BASE_URL}/upload", headers=headers, files=files)
     logger.info(f"[test_delete_file] Deleting file: {TEST_FILE_NAME}")
-    resp = client.delete(f"/delete/{TEST_FILE_NAME}", headers=headers)
+    resp = requests.delete(f"{BASE_URL}/delete/{TEST_FILE_NAME}", headers=headers)
     logger.info(f"[test_delete_file] Delete response: {resp.status_code}, {resp.json()}")
     assert resp.status_code == 200, f"[test_delete_file] Delete failed: {resp.text}"
     resp_json = resp.json()
@@ -263,9 +267,9 @@ def test_delete_file():
     msg = resp_json.get("message") or resp_json.get("detail")
     assert msg is not None and "deleted" in msg
     # Clean up: delete user
-    client.delete(f"/user/{user['username']}", headers=headers)
+    requests.delete(f"{BASE_URL}/user/{user['username']}", headers=headers)
     # Confirm file is gone
-    resp = client.get("/files", headers=headers)
+    resp = requests.get(f"{BASE_URL}/files", headers=headers)
     logger.info(f"[test_delete_file] File list after delete: {resp.json()}")
     assert TEST_FILE_NAME not in resp.json()
     logger.info("[test_delete_file] END")
