@@ -1,12 +1,10 @@
 # Installation Guide
 
-This guide explains how to install and set up the LMS system locally for development or testing purposes.
+![Installation Image](https://images.unsplash.com/photo-1551434678-e076c223a692?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
 
-## System Requirements
+## Prerequisites
 
-- Python 3.9 or higher
-- PostgreSQL database
-- Git (for cloning the repository)
+Before installing the LMS platform, make sure you have the following prerequisites:
 
 ## Installation Steps
 
@@ -79,13 +77,67 @@ The database tables will be created automatically when you first run the applica
 
 ## Running the Application
 
-Start the application with:
+### 5. Start the Application
 
 ```bash
 uvicorn server.main:app --reload --port 7050
 ```
 
 The application will be available at [http://localhost:7050](http://localhost:7050).
+
+## Vercel Deployment
+
+![Vercel Deployment](https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
+
+The LMS platform can be deployed to Vercel for a serverless production environment. Follow these steps for deployment:
+
+### 1. Set up Vercel CLI
+
+```bash
+npm install -g vercel
+vercel login
+```
+
+### 2. Configure Environment Variables
+
+In your Vercel project settings, add the following environment variables:
+
+```
+DATABASE_URL=postgresql://postgres.otjjjagmwzswbinwxmfw:thothpassword@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+SECRET_KEY=your_secret_key_here
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+OPENAI_API_KEY=your_openai_api_key
+```
+
+!!! warning "Important Database Connection Note"
+    For Vercel deployments, you **must** use the Supabase Transaction pooler URL format as shown above, not the direct connection URL. This is because Vercel's serverless functions require IPv4 connectivity which the direct connection doesn't support.
+
+### 3. Deploy the Application
+
+```bash
+vercel
+```
+
+### 4. Set up API Routes
+
+Ensure your `vercel.json` file has the correct configuration for FastAPI routes:
+
+```json
+{
+  "version": 2,
+  "builds": [
+    { "src": "server/main.py", "use": "@vercel/python" },
+    { "src": "docs_build/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/docs/(.*)", "dest": "docs_build/$1" },
+    { "src": "/(.*)", "dest": "server/main.py" }
+  ]
+}
+```
+
+This configuration enables serving both your FastAPI application and static documentation from the same Vercel domain.
 
 ## Verifying the Installation
 

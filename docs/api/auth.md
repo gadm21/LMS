@@ -1,10 +1,33 @@
 # Authentication API
 
-This section documents the authentication endpoints of the LMS API.
+![Authentication](https://images.unsplash.com/photo-1555066931-4365d14bab8c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
 
 ## Overview
 
-The authentication system uses JWT (JSON Web Tokens) for secure user authentication.
+The LMS Platform uses JWT (JSON Web Token) based authentication to secure API endpoints. This approach provides stateless authentication with secure token exchange.
+
+## Authentication Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    
+    Client->>API: POST /register (credentials)
+    API->>Database: Create User
+    Database-->>API: User Created
+    API-->>Client: Success Response
+    
+    Client->>API: POST /token (credentials)
+    API->>Database: Validate Credentials
+    Database-->>API: Credentials Valid
+    API-->>Client: JWT Access Token
+    
+    Client->>API: Request with Bearer Token
+    API->>API: Validate Token
+    API-->>Client: Protected Resource
+```
 
 ## API Endpoints
 

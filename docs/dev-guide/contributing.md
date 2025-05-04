@@ -1,6 +1,30 @@
 # Contributing Guide
 
-This document provides guidelines for contributing to the LMS project.
+![Collaboration Image](https://images.unsplash.com/photo-1531498860502-7c67cf02f657?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
+
+## Welcome to the LMS Community
+
+Thank you for your interest in contributing to the LMS platform! This document provides guidelines and instructions for contributing to the project. Whether you're fixing bugs, adding features, or improving documentation, your contributions are greatly appreciated.
+
+## Development Workflow
+
+```mermaid
+flowchart LR
+    A[Fork Repository] --> B[Create Branch]
+    B --> C[Make Changes]
+    C --> D[Run Tests]
+    D --> E[Submit PR]
+    E --> F[Code Review]
+    F --> G[Merge]
+    
+    style A fill:#d1c4e9,stroke:#333,stroke-width:1px
+    style B fill:#c8e6c9,stroke:#333,stroke-width:1px
+    style C fill:#bbdefb,stroke:#333,stroke-width:1px
+    style D fill:#ffecb3,stroke:#333,stroke-width:1px
+    style E fill:#f8bbd0,stroke:#333,stroke-width:1px
+    style F fill:#d7ccc8,stroke:#333,stroke-width:1px
+    style G fill:#b2dfdb,stroke:#333,stroke-width:1px
+```
 
 ## Getting Started
 

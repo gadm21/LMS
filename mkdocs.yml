@@ -24,6 +24,9 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+  custom_dir: docs/assets
+  extra_css:
+    - assets/css/custom.css
   features:
     - navigation.instant
     - navigation.tracking

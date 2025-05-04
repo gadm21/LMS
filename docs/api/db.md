@@ -1,12 +1,12 @@
 # Database Models
 
-This section documents the database models used in the LMS platform.
+![Database Architecture](https://images.unsplash.com/photo-1544383835-bda2bc66a55d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
 
 ## Overview
 
-The LMS uses SQLAlchemy as an ORM (Object-Relational Mapper) to interact with a PostgreSQL database. The database schema consists of several models representing the core entities in the system.
+The LMS platform uses SQLAlchemy as its ORM (Object-Relational Mapping) layer to interact with a PostgreSQL database. The models defined here represent the database schema and provide an abstraction layer for database operations.
 
-## Entity Relationship Diagram
+## Database Schema
 
 ```mermaid
 erDiagram

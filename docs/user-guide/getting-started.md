@@ -1,12 +1,49 @@
 # Getting Started
 
-This guide will help you get started with using the LMS platform.
+![Getting Started](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
+
+## Overview
+
+Welcome to the LMS Platform! This guide will help you quickly set up and start using our powerful learning management system.
+
+## Quick Start
+
+=== "For Instructors"
+    1. **Create an Account** - Register using your institution email
+    2. **Set Up Your Course** - Create a new course and add modules
+    3. **Add Content** - Upload learning materials and assignments
+    4. **Invite Students** - Generate and share enrollment codes
+
+=== "For Students"
+    1. **Create an Account** - Register with your student email
+    2. **Join a Course** - Use the enrollment code from your instructor
+    3. **Access Materials** - Browse through course content
+    4. **Submit Assignments** - Complete and upload assignments
+
+## System Requirements
+
+| Component | Minimum Requirements | Recommended |
+| --------- | -------------------- | ----------- |
+| Browser   | Chrome 80+, Firefox 72+, Edge 80+ | Latest version |
+| Internet  | 1 Mbps connection | 5+ Mbps connection |
+| Display   | 1280 x 720 resolution | 1920 x 1080 or higher |
+| Disk Space| 100 MB for cached content | 1 GB for offline features |
+
+!!! tip "Pro Tip"
+    Enable browser notifications to receive instant updates about grades, announcements, and upcoming deadlines.
+
+## First-time Login
+
+1. Navigate to [https://lms-swart-five.vercel.app](https://lms-swart-five.vercel.app)
+2. Click on "Register" to create a new account
+3. Verify your email address
+4. Complete your user profile
+5. Start exploring the platform
 
 ## Overview
 
 The Learning Management System (LMS) provides a set of tools for managing learning resources, including file management, user authentication, and AI-assisted learning support.
 
-## Prerequisites
 
 Before you begin, make sure you have:
 

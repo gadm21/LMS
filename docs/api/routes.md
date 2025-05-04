@@ -1,12 +1,12 @@
 # API Routes
 
-This section documents the main API endpoints of the LMS platform.
+![API Routes](https://images.unsplash.com/photo-1580894732444-8ecded7900cd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
 
-## File Management
+## Overview
 
-### Upload File
+The LMS Platform provides a comprehensive REST API for interacting with the system. All endpoints require authentication via JWT token (except for registration and login).
 
-Upload a file to the system.
+## Base URL
 
 **Endpoint**: `/upload`  
 **Method**: `POST`  

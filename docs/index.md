@@ -64,6 +64,30 @@ The LMS is deployed on Vercel:
 
 - **Production URL**: [lms-swart-five.vercel.app](https://lms-swart-five.vercel.app)
 
+## Welcome to the LMS Platform
+
+<div class="grid cards" markdown>
+
+- :material-school: **Modern Learning Experience**  
+  Engaging platform designed for effective education delivery and management
+  
+- :material-account-group: **Personalized Learning**  
+  AI-driven content adaptation to optimize student engagement and success
+  
+- :material-chart-line: **Advanced Analytics**  
+  Comprehensive insights to track progress and improve outcomes
+  
+- :material-shield-account: **Secure & Reliable**  
+  Enterprise-grade security for your sensitive educational data
+
+</div>
+
+## Platform Overview
+
+![LMS Platform Overview](https://via.placeholder.com/800x400?text=LMS+Platform+Overview)
+
+The LMS Platform is a next-generation learning management system built with modern technologies. Our solution combines powerful AI capabilities with intuitive design to enhance the educational experience for both educators and learners.
+
 ## API Documentation
 
 The REST API documentation is available at:

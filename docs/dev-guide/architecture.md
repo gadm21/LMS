@@ -1,6 +1,54 @@
 # System Architecture
 
-This document provides an overview of the LMS system architecture.
+![Architecture Overview](https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
+
+The LMS platform follows a modern microservices architecture built with Python FastAPI for the backend and a lightweight frontend. This scalable design enables rapid iteration and robust performance.
+
+## System Components
+
+```mermaid
+flowchart TD
+    Client[Client Browser] ---> Frontend[Frontend SPA]
+    Frontend ---> API[FastAPI Backend]
+    API ---> Auth[Authentication Service]
+    API ---> DB[(PostgreSQL Database)]
+    API ---> AI[AI Processing Service]
+    API ---> Files[File Storage Service]
+    
+    subgraph Cloud Infrastructure
+        API
+        Auth
+        DB
+        AI
+        Files
+    end
+    
+    style Client fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style Frontend fill:#d1c4e9,stroke:#333,stroke-width:2px
+    style API fill:#bbdefb,stroke:#333,stroke-width:2px
+    style Auth fill:#c8e6c9,stroke:#333,stroke-width:2px
+    style DB fill:#ffecb3,stroke:#333,stroke-width:2px
+    style AI fill:#f8bbd0,stroke:#333,stroke-width:2px
+    style Files fill:#d7ccc8,stroke:#333,stroke-width:2px
+```
+
+## Key Technologies
+
+<div class="grid cards" markdown>
+
+- :material-api: **FastAPI**  
+  High-performance API framework with automatic documentation
+  
+- :simple-postgresql: **PostgreSQL**  
+  Robust relational database for structured data storage
+  
+- :simple-openai: **OpenAI Integration**  
+  AI capabilities for enhanced learning experiences
+  
+- :simple-vercel: **Vercel Deployment**  
+  Serverless infrastructure for scalable performance
+
+</div>
 
 ## High-Level Architecture
 

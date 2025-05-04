@@ -1,8 +1,17 @@
+"""LMS Platform Main Application Module.
+
+This module initializes the FastAPI application, sets up CORS middleware,
+and includes routes. It serves as the entry point for the LMS platform.
+"""
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from server.routes import router
 
-app = FastAPI()
+app = FastAPI(
+    docs_url="/api-docs",  # Change FastAPI automatic docs URL to avoid conflict with MkDocs
+    redoc_url="/api-redoc"
+)
 
 app.add_middleware(
     CORSMiddleware,

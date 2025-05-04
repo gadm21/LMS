@@ -1,12 +1,42 @@
 # Configuration Guide
 
-This guide details how to configure the LMS platform for various deployments and use cases.
+![Configuration](https://images.unsplash.com/photo-1607706189992-eae578626c86?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080)
 
 ## Environment Variables
 
-The LMS application is configured primarily through environment variables. Below is a description of each variable and its purpose:
+The LMS platform uses environment variables for configuration. These can be set in a `.env` file for local development or as environment variables in your production environment.
+
+### Required Environment Variables
 
 | Variable | Description | Example |
+| -------- | ----------- | ------- |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:password@localhost:5432/lms` |
+| `SECRET_KEY` | JWT signing key (keep this secret!) | `your-256-bit-secret-key` |
+| `OPENAI_API_KEY` | OpenAI API key for AI features | `sk-...` |
+
+### Optional Environment Variables
+
+| Variable | Description | Default | Example |
+| -------- | ----------- | ------- | ------- |
+| `ALGORITHM` | JWT signing algorithm | `HS256` | `HS256` |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT expiration time in minutes | `60` | `120` |
+| `PORT` | Server port | `7050` | `8000` |
+| `VERCEL` | Flag indicating Vercel deployment | `null` | `1` |
+
+## Configuration Examples
+
+### Local Development
+
+Create a `.env` file in the project root with your configuration:
+
+```
+DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/thoth
+SECRET_KEY=your-256-bit-secret-key
+OPENAI_API_KEY=your-openai-api-key
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+ALGORITHM=HS256
+PORT=7050
+```
 |----------|-------------|---------|
 | `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:password@localhost:5432/lms_db` |
 | `SECRET_KEY` | Secret key for JWT token generation | `your-secure-secret-key` |
