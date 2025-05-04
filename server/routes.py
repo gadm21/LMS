@@ -178,7 +178,7 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: SessionLocal = D
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+async def upload_file(file: FastAPIFile = File(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Upload a file to the system.
     
     The file is stored in the user's directory within the assets folder and tracked in the database.
@@ -563,7 +563,7 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
         raise HTTPException(status_code=500, detail=f"Error downloading file: {str(e)}")
 
 @router.post("/files/{fileId}/versions")
-async def upload_file_version(fileId: int, file: UploadFile = FastAPIFile(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+async def upload_file_version(fileId: int, file: FastAPIFile = File(...), user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Upload a new version of an existing file.
     
     Creates a new version of the file while preserving the original.
