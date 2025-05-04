@@ -9,6 +9,7 @@ This module defines all the API endpoints for the LMS platform, including:
 """
 
 import os
+import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File as FastAPIFile, Request
 from fastapi.responses import FileResponse
 import os
@@ -253,8 +254,18 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         HTTPException: 500 if OpenAI API call fails
     """
     try:
-        body = await request.json()
+        # First check if there's any content in the request body
+        body_bytes = await request.body()
+        if not body_bytes:
+            raise HTTPException(status_code=400, detail="Empty request body")
+            
+        # Try to parse the JSON body
+        try:
+            body = await request.json()
+        except json.JSONDecodeError as json_err:
+            raise HTTPException(status_code=400, detail=f"Invalid JSON in request body: {str(json_err)}")
         
+        # Check for required fields
         if not body.get("query"):
             raise HTTPException(status_code=400, detail="Query is required")
         
@@ -350,9 +361,20 @@ async def active_url(request: Request):
     try:
         # Log request start
         log_request_start('/active_url', request.method, dict(request.headers), request.client.host if request.client else None)
-        # Get and log payload
-        data = await request.json()
-        log_request_payload(data, '/active_url')
+        
+        # First check if there's any content in the request body
+        body_bytes = await request.body()
+        if not body_bytes:
+            log_error("Empty request body", None, {"endpoint": "/active_url"}, "/active_url")
+            return JSONResponse({"error": "Empty request body"}, status_code=400)
+            
+        # Try to parse the JSON body
+        try:
+            data = await request.json()
+            log_request_payload(data, '/active_url')
+        except json.JSONDecodeError as json_err:
+            log_error(f"Invalid JSON: {str(json_err)}", json_err, {"endpoint": "/active_url"}, "/active_url")
+            return JSONResponse({"error": f"Invalid JSON in request body: {str(json_err)}"}, status_code=400)
         # Validate fields
         url = data.get('url', '') if data else ''
         title = data.get('title', '') if data else ''
@@ -372,6 +394,8 @@ async def active_url(request: Request):
         response = {"data": {"status": "success"}}
         log_response(200, response, '/active_url')
         return JSONResponse(response, status_code=200)
+    except json.JSONDecodeError as json_err:
+        return JSONResponse({"error": f"Invalid JSON in request body: {str(json_err)}"}, status_code=400)
     except Exception as e:
         # Log errors
         log_error(str(e), e, {"endpoint": "/active_url"}, "/active_url")
