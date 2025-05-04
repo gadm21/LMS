@@ -88,7 +88,7 @@ class File(Base):
     # Relationships
     user = relationship("User", back_populates="files")
     versions = relationship("FileVersion", back_populates="file", cascade="all, delete-orphan")
-    metadata = relationship("FileMetadata", back_populates="file", cascade="all, delete-orphan")
+    file_metadata = relationship("FileMetadata", back_populates="file", cascade="all, delete-orphan")
 
 
 class Query(Base):
@@ -182,7 +182,7 @@ class FileMetadata(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    file = relationship("File", back_populates="metadata")
+    file = relationship("File", back_populates="file_metadata")
     
     # Ensure each file can only have one entry for a specific key
     __table_args__ = (UniqueConstraint('fileId', 'key', name='_file_metadata_key_uc'),)
