@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <article class="md-content__inner md-typeset api-doc">
+    <h1>{{ page.title }}</h1>
+    
+    <div class="hero">
+      <p>
+        Comprehensive and secure REST API documentation for the LMS platform.
+        All API endpoints require authentication unless explicitly stated otherwise.
+      </p>
+    </div>
+    
+    {{ page.content }}
+    
+    <div class="admonition note">
+      <p class="admonition-title">Looking for help?</p>
+      <p>
+        For any questions about API usage, please refer to our <a href="../dev-guide/contributing.html">contributing guide</a>
+        or reach out to the development team.
+      </p>
+    </div>
+  </article>
+{% endblock %}

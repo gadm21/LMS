@@ -745,6 +745,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-technologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Technologies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#high-level-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       High-Level Architecture
@@ -912,6 +930,24 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#system-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Components
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#key-technologies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key Technologies
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#high-level-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       High-Level Architecture
@@ -1033,7 +1069,53 @@
 
 
 <h1 id="system-architecture">System Architecture<a class="headerlink" href="#system-architecture" title="Permanent link">&para;</a></h1>
-<p>This document provides an overview of the LMS system architecture.</p>
+<p><img alt="Architecture Overview" src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080" /></p>
+<p>The LMS platform follows a modern microservices architecture built with Python FastAPI for the backend and a lightweight frontend. This scalable design enables rapid iteration and robust performance.</p>
+<h2 id="system-components">System Components<a class="headerlink" href="#system-components" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart TD
+    Client[Client Browser] ---&gt; Frontend[Frontend SPA]
+    Frontend ---&gt; API[FastAPI Backend]
+    API ---&gt; Auth[Authentication Service]
+    API ---&gt; DB[(PostgreSQL Database)]
+    API ---&gt; AI[AI Processing Service]
+    API ---&gt; Files[File Storage Service]
+
+    subgraph Cloud Infrastructure
+        API
+        Auth
+        DB
+        AI
+        Files
+    end
+
+    style Client fill:#f9f9f9,stroke:#333,stroke-width:2px
+    style Frontend fill:#d1c4e9,stroke:#333,stroke-width:2px
+    style API fill:#bbdefb,stroke:#333,stroke-width:2px
+    style Auth fill:#c8e6c9,stroke:#333,stroke-width:2px
+    style DB fill:#ffecb3,stroke:#333,stroke-width:2px
+    style AI fill:#f8bbd0,stroke:#333,stroke-width:2px
+    style Files fill:#d7ccc8,stroke:#333,stroke-width:2px</code></pre>
+<h2 id="key-technologies">Key Technologies<a class="headerlink" href="#key-technologies" title="Permanent link">&para;</a></h2>
+<div class="grid cards">
+<ul>
+<li>
+<p>:material-api: <strong>FastAPI</strong><br />
+  High-performance API framework with automatic documentation</p>
+</li>
+<li>
+<p>:simple-postgresql: <strong>PostgreSQL</strong><br />
+  Robust relational database for structured data storage</p>
+</li>
+<li>
+<p>:simple-openai: <strong>OpenAI Integration</strong><br />
+  AI capabilities for enhanced learning experiences</p>
+</li>
+<li>
+<p>:simple-vercel: <strong>Vercel Deployment</strong><br />
+  Serverless infrastructure for scalable performance</p>
+</li>
+</ul>
+</div>
 <h2 id="high-level-architecture">High-Level Architecture<a class="headerlink" href="#high-level-architecture" title="Permanent link">&para;</a></h2>
 <p>The LMS is built using a modern web application architecture with a clear separation between backend and frontend components.</p>
 <pre class="mermaid"><code>graph TD

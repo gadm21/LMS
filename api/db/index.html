@@ -544,9 +544,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#entity-relationship-diagram" class="md-nav__link">
+  <a href="#database-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      Entity Relationship Diagram
+      Database Schema
     </span>
   </a>
   
@@ -942,9 +942,9 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#entity-relationship-diagram" class="md-nav__link">
+  <a href="#database-schema" class="md-nav__link">
     <span class="md-ellipsis">
-      Entity Relationship Diagram
+      Database Schema
     </span>
   </a>
   
@@ -1075,10 +1075,10 @@
 
 
 <h1 id="database-models">Database Models<a class="headerlink" href="#database-models" title="Permanent link">&para;</a></h1>
-<p>This section documents the database models used in the LMS platform.</p>
+<p><img alt="Database Architecture" src="https://images.unsplash.com/photo-1544383835-bda2bc66a55d?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080" /></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The LMS uses SQLAlchemy as an ORM (Object-Relational Mapper) to interact with a PostgreSQL database. The database schema consists of several models representing the core entities in the system.</p>
-<h2 id="entity-relationship-diagram">Entity Relationship Diagram<a class="headerlink" href="#entity-relationship-diagram" title="Permanent link">&para;</a></h2>
+<p>The LMS platform uses SQLAlchemy as its ORM (Object-Relational Mapping) layer to interact with a PostgreSQL database. The models defined here represent the database schema and provide an abstraction layer for database operations.</p>
+<h2 id="database-schema">Database Schema<a class="headerlink" href="#database-schema" title="Permanent link">&para;</a></h2>
 <pre class="mermaid"><code>erDiagram
     User {
         int id PK

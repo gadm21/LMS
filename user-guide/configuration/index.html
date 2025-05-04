@@ -670,6 +670,54 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -960,6 +1008,54 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Environment Variables">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#optional-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      Optional Environment Variables
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration Examples
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1117,9 +1213,10 @@
 
 
 <h1 id="configuration-guide">Configuration Guide<a class="headerlink" href="#configuration-guide" title="Permanent link">&para;</a></h1>
-<p>This guide details how to configure the LMS platform for various deployments and use cases.</p>
+<p><img alt="Configuration" src="https://images.unsplash.com/photo-1607706189992-eae578626c86?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080" /></p>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h2>
-<p>The LMS application is configured primarily through environment variables. Below is a description of each variable and its purpose:</p>
+<p>The LMS platform uses environment variables for configuration. These can be set in a <code>.env</code> file for local development or as environment variables in your production environment.</p>
+<h3 id="required-environment-variables">Required Environment Variables<a class="headerlink" href="#required-environment-variables" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
@@ -1132,66 +1229,105 @@
 <tr>
 <td><code>DATABASE_URL</code></td>
 <td>PostgreSQL connection string</td>
-<td><code>postgresql://user:password@localhost:5432/lms_db</code></td>
+<td><code>postgresql://user:password@localhost:5432/lms</code></td>
 </tr>
 <tr>
 <td><code>SECRET_KEY</code></td>
-<td>Secret key for JWT token generation</td>
-<td><code>your-secure-secret-key</code></td>
+<td>JWT signing key (keep this secret!)</td>
+<td><code>your-256-bit-secret-key</code></td>
 </tr>
 <tr>
 <td><code>OPENAI_API_KEY</code></td>
-<td>API key for OpenAI integration</td>
+<td>OpenAI API key for AI features</td>
 <td><code>sk-...</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="optional-environment-variables">Optional Environment Variables<a class="headerlink" href="#optional-environment-variables" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Description</th>
+<th>Default</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ALGORITHM</code></td>
+<td>JWT signing algorithm</td>
+<td><code>HS256</code></td>
+<td><code>HS256</code></td>
 </tr>
 <tr>
 <td><code>ACCESS_TOKEN_EXPIRE_MINUTES</code></td>
-<td>Token expiration time in minutes</td>
+<td>JWT expiration time in minutes</td>
 <td><code>60</code></td>
-</tr>
-<tr>
-<td><code>ALGORITHM</code></td>
-<td>JWT token algorithm</td>
-<td><code>HS256</code></td>
+<td><code>120</code></td>
 </tr>
 <tr>
 <td><code>PORT</code></td>
 <td>Server port</td>
 <td><code>7050</code></td>
+<td><code>8000</code></td>
+</tr>
+<tr>
+<td><code>VERCEL</code></td>
+<td>Flag indicating Vercel deployment</td>
+<td><code>null</code></td>
+<td><code>1</code></td>
 </tr>
 </tbody>
 </table>
-<h2 id="configuration-methods">Configuration Methods<a class="headerlink" href="#configuration-methods" title="Permanent link">&para;</a></h2>
-<p>There are several ways to set these environment variables:</p>
-<h3 id="1-environment-file-env">1. Environment File (.env)<a class="headerlink" href="#1-environment-file-env" title="Permanent link">&para;</a></h3>
-<p>Create a <code>.env</code> file in the project root:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/lms_db
-</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>SECRET_KEY=your-secret-key-here
+<h2 id="configuration-examples">Configuration Examples<a class="headerlink" href="#configuration-examples" title="Permanent link">&para;</a></h2>
+<h3 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
+<p>Create a <code>.env</code> file in the project root with your configuration:</p>
+<p><div class="language-text highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/thoth
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>SECRET_KEY=your-256-bit-secret-key
 </span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a>OPENAI_API_KEY=your-openai-api-key
 </span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a>ACCESS_TOKEN_EXPIRE_MINUTES=60
 </span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a>ALGORITHM=HS256
 </span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a>PORT=7050
+</span></code></pre></div>
+|----------|-------------|---------|
+| <code>DATABASE_URL</code> | PostgreSQL connection string | <code>postgresql://user:password@localhost:5432/lms_db</code> |
+| <code>SECRET_KEY</code> | Secret key for JWT token generation | <code>your-secure-secret-key</code> |
+| <code>OPENAI_API_KEY</code> | API key for OpenAI integration | <code>sk-...</code> |
+| <code>ACCESS_TOKEN_EXPIRE_MINUTES</code> | Token expiration time in minutes | <code>60</code> |
+| <code>ALGORITHM</code> | JWT token algorithm | <code>HS256</code> |
+| <code>PORT</code> | Server port | <code>7050</code> |</p>
+<h2 id="configuration-methods">Configuration Methods<a class="headerlink" href="#configuration-methods" title="Permanent link">&para;</a></h2>
+<p>There are several ways to set these environment variables:</p>
+<h3 id="1-environment-file-env">1. Environment File (.env)<a class="headerlink" href="#1-environment-file-env" title="Permanent link">&para;</a></h3>
+<p>Create a <code>.env</code> file in the project root:</p>
+<div class="language-text highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/lms_db
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>SECRET_KEY=your-secret-key-here
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>OPENAI_API_KEY=your-openai-api-key
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>ACCESS_TOKEN_EXPIRE_MINUTES=60
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>ALGORITHM=HS256
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>PORT=7050
 </span></code></pre></div>
 <h3 id="2-system-environment-variables">2. System Environment Variables<a class="headerlink" href="#2-system-environment-variables" title="Permanent link">&para;</a></h3>
 <p>Set variables directly in your shell session:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">macOS/Linux</label><label for="__tabbed_1_2">Windows</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="language-bash highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;postgresql://lms_user:lms_password@localhost:5432/lms_db&quot;</span>
-</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SECRET_KEY</span><span class="o">=</span><span class="s2">&quot;your-secret-key-here&quot;</span>
-</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-openai-api-key&quot;</span>
-</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ACCESS_TOKEN_EXPIRE_MINUTES</span><span class="o">=</span><span class="m">60</span>
-</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ALGORITHM</span><span class="o">=</span><span class="s2">&quot;HS256&quot;</span>
-</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">7050</span>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="nb">export</span><span class="w"> </span><span class="nv">DATABASE_URL</span><span class="o">=</span><span class="s2">&quot;postgresql://lms_user:lms_password@localhost:5432/lms_db&quot;</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="nb">export</span><span class="w"> </span><span class="nv">SECRET_KEY</span><span class="o">=</span><span class="s2">&quot;your-secret-key-here&quot;</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="nb">export</span><span class="w"> </span><span class="nv">OPENAI_API_KEY</span><span class="o">=</span><span class="s2">&quot;your-openai-api-key&quot;</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ACCESS_TOKEN_EXPIRE_MINUTES</span><span class="o">=</span><span class="m">60</span>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="nb">export</span><span class="w"> </span><span class="nv">ALGORITHM</span><span class="o">=</span><span class="s2">&quot;HS256&quot;</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="nb">export</span><span class="w"> </span><span class="nv">PORT</span><span class="o">=</span><span class="m">7050</span>
 </span></code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="language-text highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>set DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/lms_db
-</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a>set SECRET_KEY=your-secret-key-here
-</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a>set OPENAI_API_KEY=your-openai-api-key
-</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>set ACCESS_TOKEN_EXPIRE_MINUTES=60
-</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a>set ALGORITHM=HS256
-</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a>set PORT=7050
+<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>set DATABASE_URL=postgresql://lms_user:lms_password@localhost:5432/lms_db
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>set SECRET_KEY=your-secret-key-here
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>set OPENAI_API_KEY=your-openai-api-key
+</span><span id="__span-3-4"><a id="__codelineno-3-4" name="__codelineno-3-4" href="#__codelineno-3-4"></a>set ACCESS_TOKEN_EXPIRE_MINUTES=60
+</span><span id="__span-3-5"><a id="__codelineno-3-5" name="__codelineno-3-5" href="#__codelineno-3-5"></a>set ALGORITHM=HS256
+</span><span id="__span-3-6"><a id="__codelineno-3-6" name="__codelineno-3-6" href="#__codelineno-3-6"></a>set PORT=7050
 </span></code></pre></div>
 </div>
 </div>
@@ -1208,10 +1344,10 @@
 <h2 id="database-configuration">Database Configuration<a class="headerlink" href="#database-configuration" title="Permanent link">&para;</a></h2>
 <h3 id="postgresql-connection-string">PostgreSQL Connection String<a class="headerlink" href="#postgresql-connection-string" title="Permanent link">&para;</a></h3>
 <p>The PostgreSQL connection string format is:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>postgresql://[username]:[password]@[host]:[port]/[database]
+<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>postgresql://[username]:[password]@[host]:[port]/[database]
 </span></code></pre></div>
 <p>For Supabase deployments with Vercel, use the Transaction pooler connection:</p>
-<div class="language-text highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+<div class="language-text highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
 </span></code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">IPv4 Compatibility</p>
@@ -1236,10 +1372,10 @@
 </ol>
 <h3 id="cors-configuration">CORS Configuration<a class="headerlink" href="#cors-configuration" title="Permanent link">&para;</a></h3>
 <p>Configure Cross-Origin Resource Sharing (CORS) based on your frontend domains:</p>
-<div class="language-python highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="n">origins</span> <span class="o">=</span> <span class="p">[</span>
-</span><span id="__span-5-2"><a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>    <span class="s2">&quot;http://localhost:7040&quot;</span><span class="p">,</span>
-</span><span id="__span-5-3"><a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>    <span class="s2">&quot;https://your-frontend-domain.com&quot;</span>
-</span><span id="__span-5-4"><a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="p">]</span>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">origins</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="s2">&quot;http://localhost:7040&quot;</span><span class="p">,</span>
+</span><span id="__span-6-3"><a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="s2">&quot;https://your-frontend-domain.com&quot;</span>
+</span><span id="__span-6-4"><a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a><span class="p">]</span>
 </span></code></pre></div>
 <h2 id="openai-api-configuration">OpenAI API Configuration<a class="headerlink" href="#openai-api-configuration" title="Permanent link">&para;</a></h2>
 <p>The OpenAI integration requires:</p>

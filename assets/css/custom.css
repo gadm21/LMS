@@ -1,0 +1,138 @@
+/* Custom styles for LMS documentation */
+
+:root {
+  --md-primary-fg-color: #2979ff;
+  --md-primary-fg-color--light: #75a7ff;
+  --md-primary-fg-color--dark: #004ecb;
+  --md-accent-fg-color: #2979ff;
+}
+
+.md-typeset h1 {
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--md-primary-fg-color--dark);
+}
+
+.md-typeset .admonition {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.md-typeset .admonition:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.grid.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.grid.cards .card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.grid.cards .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Hero banner styling */
+.hero {
+  margin: 2rem 0;
+  padding: 3rem 2rem;
+  background-color: #f5f7f9;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  max-width: 40rem;
+  margin: 0 auto 1.5rem;
+}
+
+img {
+  max-width: 100%;
+  border-radius: 6px;
+  margin: 1.5rem 0;
+}
+
+/* API endpoint styling */
+.endpoint {
+  background-color: #f5f7f9;
+  border-left: 4px solid var(--md-primary-fg-color);
+  padding: 1rem;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+}
+
+.endpoint h3 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+.endpoint .method {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+
+.endpoint .method.get {
+  background-color: #61affe;
+  color: white;
+}
+
+.endpoint .method.post {
+  background-color: #49cc90;
+  color: white;
+}
+
+.endpoint .method.put {
+  background-color: #fca130;
+  color: white;
+}
+
+.endpoint .method.delete {
+  background-color: #f93e3e;
+  color: white;
+}
+
+/* Feature list styling */
+.features {
+  margin: 2rem 0;
+}
+
+.feature {
+  display: flex;
+  margin-bottom: 1.5rem;
+  align-items: flex-start;
+}
+
+.feature-icon {
+  flex: 0 0 3rem;
+  font-size: 1.5rem;
+  color: var(--md-primary-fg-color);
+  text-align: center;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.feature-content h3 {
+  margin-top: 0;
+}

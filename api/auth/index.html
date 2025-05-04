@@ -498,6 +498,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#authentication-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       API Endpoints
@@ -963,6 +972,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#authentication-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#api-endpoints" class="md-nav__link">
     <span class="md-ellipsis">
       API Endpoints
@@ -1117,9 +1135,28 @@
 
 
 <h1 id="authentication-api">Authentication API<a class="headerlink" href="#authentication-api" title="Permanent link">&para;</a></h1>
-<p>This section documents the authentication endpoints of the LMS API.</p>
+<p><img alt="Authentication" src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?crop=entropy&amp;cs=tinysrgb&amp;fit=max&amp;fm=jpg&amp;q=80&amp;w=1080" /></p>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
-<p>The authentication system uses JWT (JSON Web Tokens) for secure user authentication.</p>
+<p>The LMS Platform uses JWT (JSON Web Token) based authentication to secure API endpoints. This approach provides stateless authentication with secure token exchange.</p>
+<h2 id="authentication-flow">Authentication Flow<a class="headerlink" href="#authentication-flow" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+
+    Client-&gt;&gt;API: POST /register (credentials)
+    API-&gt;&gt;Database: Create User
+    Database--&gt;&gt;API: User Created
+    API--&gt;&gt;Client: Success Response
+
+    Client-&gt;&gt;API: POST /token (credentials)
+    API-&gt;&gt;Database: Validate Credentials
+    Database--&gt;&gt;API: Credentials Valid
+    API--&gt;&gt;Client: JWT Access Token
+
+    Client-&gt;&gt;API: Request with Bearer Token
+    API-&gt;&gt;API: Validate Token
+    API--&gt;&gt;Client: Protected Resource</code></pre>
 <h2 id="api-endpoints">API Endpoints<a class="headerlink" href="#api-endpoints" title="Permanent link">&para;</a></h2>
 <h3 id="register">Register<a class="headerlink" href="#register" title="Permanent link">&para;</a></h3>
 <p>Register a new user in the system.</p>
