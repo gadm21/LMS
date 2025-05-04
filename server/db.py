@@ -6,7 +6,7 @@ It includes the User model and database connection configuration.
 
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, LargeBinary
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # Load environment variables from .env if present
@@ -75,8 +75,9 @@ class File(Base):
     fileId = Column(Integer, primary_key=True, autoincrement=True, index=True)
     filename = Column(String, nullable=False)
     userId = Column(Integer, ForeignKey("User.userId"), nullable=False)
-    path = Column(String, nullable=False)
+    path = Column(String, nullable=True)  # Making path nullable since we'll store content in DB
     size = Column(Integer, nullable=False)
+    content = Column(LargeBinary, nullable=True)  # Binary content of the file
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

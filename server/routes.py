@@ -195,10 +195,6 @@ async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(
         HTTPException: 500 if file upload fails
     """
     try:
-        # Create user folder if it doesn't exist
-        user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-        os.makedirs(user_folder, exist_ok=True)
-        
         # Read file contents
         contents = await file.read()
         
@@ -206,18 +202,22 @@ async def upload_file(file: UploadFile = FastAPIFile(...), user: User = Depends(
         file_size = len(contents)
         if file_size > user.max_file_size:
             raise HTTPException(status_code=400, detail="File too large")
-            
-        # Save file to disk
-        filepath = os.path.join(user_folder, file.filename)
-        with open(filepath, "wb") as f:
-            f.write(contents)
         
-        # Create database record
+        # Create database record with file content stored in the database
         db_file = DBFile()
         db_file.filename = file.filename
         db_file.userId = user.userId
-        db_file.path = filepath
         db_file.size = file_size
+        db_file.content = contents  # Store binary content directly in the database
+        
+        # We'll keep track of the path in case we need to fall back to filesystem in local dev
+        if not os.environ.get("VERCEL") and not os.environ.get("READ_ONLY_FS"):
+            user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+            os.makedirs(user_folder, exist_ok=True)
+            filepath = os.path.join(user_folder, file.filename)
+            with open(filepath, "wb") as f:
+                f.write(contents)
+            db_file.path = filepath
         db.add(db_file)
         db.commit()
         db.refresh(db_file)
@@ -463,23 +463,30 @@ def download_file(fileId: int, user: User = Depends(get_current_user), db: Sessi
         if file_record.userId != user.userId:
             raise HTTPException(status_code=403, detail="You don't have permission to access this file")
         
-        # Check if the file exists on disk
-        filepath = file_record.path
-        if not os.path.exists(filepath):
-            # File exists in DB but not on disk - could happen in serverless environment
-            # Try the standard path pattern as fallback
-            user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
-            fallback_path = os.path.join(user_folder, file_record.filename)
-            
-            if os.path.exists(fallback_path):
-                filepath = fallback_path
+        # Check if we have the file content in the database
+        if file_record.content is not None:
+            # Use the content stored in the database
+            file_content = file_record.content
+        else:
+            # Fall back to filesystem if content is not in the database (for backward compatibility)
+            filepath = file_record.path
+            if filepath and os.path.exists(filepath):
+                with open(filepath, "rb") as f:
+                    file_content = f.read()
             else:
-                raise HTTPException(status_code=404, detail="File not found on server")
+                # Try standard path as another fallback
+                user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+                fallback_path = os.path.join(user_folder, file_record.filename)
+                
+                if os.path.exists(fallback_path):
+                    with open(fallback_path, "rb") as f:
+                        file_content = f.read()
+                else:
+                    raise HTTPException(status_code=404, detail="File not found on server")
         
-        # Stream the file
+        # Stream the file from memory
         def iterfile():
-            with open(filepath, mode="rb") as file_like:
-                yield from file_like
+            yield file_content
                 
         return StreamingResponse(
             iterfile(), 
