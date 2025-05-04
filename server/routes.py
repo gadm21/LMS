@@ -10,11 +10,12 @@ This module defines all the API endpoints for the LMS platform, including:
 
 import os
 import json
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File as FastAPIFile, Request
-from fastapi.responses import FileResponse
-import os
+from fastapi import APIRouter, Depends, HTTPException, UploadFile as FastAPIFile, File, Request, Header
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from pydantic import BaseModel
+from typing import Dict, List, Optional
 from fastapi.responses import StreamingResponse, JSONResponse
-from .db import User, File as DBFile, Query, Session, SessionLocal
+from .db import User, File as DBFile, Query, Session, SessionLocal, FileVersion, FileMetadata
 from .schemas import RegisterRequest
 from .auth import (
     get_db, get_password_hash, authenticate_user, create_access_token,
@@ -322,29 +323,39 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         long_term_memory = LongTermMemoryManager()
         short_term_memory = ShortTermMemoryManager()
         
-        # Call your AI agent
-        from aiagent.handler.query import ask_ai
-        
-        # Set up auxiliary data for the AI query
-        aux_data = {
-            "username": user.username,
-            "user_id": user.userId,
-            "chat_id": chat_id,
-            "query_id": db_query.queryId,
-            "client_info": {
-                "model": model,
-                "max_tokens": max_tokens,
-                "temperature": temperature
+        # Call your AI agent with try/except to handle Vercel environment limitations
+        try:
+            from aiagent.handler.query import ask_ai
+            
+            # Set up auxiliary data for the AI query
+            aux_data = {
+                "username": user.username,
+                "user_id": user.userId,
+                "chat_id": chat_id,
+                "query_id": db_query.queryId,
+                "client_info": {
+                    "model": model,
+                    "max_tokens": max_tokens,
+                    "temperature": temperature
+                }
             }
-        }
-        
-        # Send query to AI agent
-        response = ask_ai(
-            query=user_query,
-            max_tokens=max_tokens,
-            temperature=temperature,
-            aux_data=aux_data
-        )
+            
+            # Send query to AI agent
+            response = ask_ai(
+                query=user_query,
+                max_tokens=max_tokens,
+                temperature=temperature,
+                aux_data=aux_data
+            )
+        except FileNotFoundError as file_err:
+            # Handle missing files in Vercel environment
+            log_error(f"AI agent file not found: {str(file_err)}", exc=file_err, endpoint="/query")
+            if os.environ.get("VERCEL"):
+                # In Vercel, return a graceful error message for testing purposes
+                response = "The AI agent is not fully configured in this environment. This is a test instance."
+            else:
+                # In non-Vercel environments, still raise the error
+                raise file_err
         
         # Log the response
         log_ai_response(response, "/query")
@@ -630,8 +641,12 @@ async def upload_file_version(fileId: int, file: UploadFile = FastAPIFile(...), 
         log_error(f"Error uploading file version: {str(e)}", exc=e, endpoint=f"/files/{fileId}/versions")
         raise HTTPException(status_code=500, detail=f"Error uploading file version: {str(e)}")
 
+# Create a Pydantic model for metadata validation
+class MetadataUpdate(BaseModel):
+    metadata: Dict[str, str]
+    
 @router.post("/files/{fileId}/metadata")
-def set_file_metadata(fileId: int, metadata: dict, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
+def set_file_metadata(fileId: int, update: MetadataUpdate, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Set or update metadata for a file.
     
     Adds or updates metadata key-value pairs for a file.
@@ -661,7 +676,7 @@ def set_file_metadata(fileId: int, metadata: dict, user: User = Depends(get_curr
         
         # Add or update metadata entries
         updated_keys = []
-        for key, value in metadata.items():
+        for key, value in update.metadata.items():
             # Skip invalid keys
             if not key or not isinstance(key, str):
                 continue
@@ -706,7 +721,7 @@ def set_file_metadata(fileId: int, metadata: dict, user: User = Depends(get_curr
         log_error(f"Error updating file metadata: {str(e)}", exc=e, endpoint=f"/files/{fileId}/metadata")
         raise HTTPException(status_code=500, detail=f"Error updating file metadata: {str(e)}")
 
-@router.delete("/delete/{fileId}")
+@router.delete("/files/{fileId}")
 def delete_file(fileId: int, user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
     """Delete a specific file by its ID.
     
