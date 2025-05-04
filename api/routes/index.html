@@ -3889,7 +3889,7 @@ Only the owner of the file can modify metadata.</p>
 
 
 <h4 id="server.routes.upload_file" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">upload_file</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">FastAPIFile</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">))</span></code>
+            <code class="highlight language-python"><span class="n">upload_file</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">FastAPIFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">))</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-async"><code>async</code></small>
@@ -3920,7 +3920,7 @@ Only the owner of the file can modify metadata.</p>
                 <code>file</code>
             </td>
             <td>
-                  <code><span title="UploadFile">UploadFile</span></code>
+                  <code><span title="fastapi.UploadFile">UploadFile</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3928,7 +3928,7 @@ Only the owner of the file can modify metadata.</p>
               </div>
             </td>
             <td>
-                  <code><span title="fastapi.UploadFile">UploadFile</span>(...)</code>
+                  <code><span title="fastapi.File">File</span>(...)</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -4113,7 +4113,7 @@ Only the owner of the file can modify metadata.</p>
 <span class="normal"><a href="#__codelineno-0-262">262</a></span>
 <span class="normal"><a href="#__codelineno-0-263">263</a></span>
 <span class="normal"><a href="#__codelineno-0-264">264</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-180"><a id="__codelineno-0-180" name="__codelineno-0-180"></a><span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/upload&quot;</span><span class="p">)</span>
-</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">FastAPIFile</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">)):</span>
+</span><span id="__span-0-181"><a id="__codelineno-0-181" name="__codelineno-0-181"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="n">FastAPIFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">)):</span>
 </span><span id="__span-0-182"><a id="__codelineno-0-182" name="__codelineno-0-182"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Upload a file to the system.</span>
 </span><span id="__span-0-183"><a id="__codelineno-0-183" name="__codelineno-0-183"></a>
 </span><span id="__span-0-184"><a id="__codelineno-0-184" name="__codelineno-0-184"></a><span class="sd">    The file is stored in the user&#39;s directory within the assets folder and tracked in the database.</span>
@@ -4207,7 +4207,7 @@ Only the owner of the file can modify metadata.</p>
 
 
 <h4 id="server.routes.upload_file_version" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">upload_file_version</span><span class="p">(</span><span class="n">fileId</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">FastAPIFile</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">))</span></code>
+            <code class="highlight language-python"><span class="n">upload_file_version</span><span class="p">(</span><span class="n">fileId</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">FastAPIFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">))</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-async"><code>async</code></small>
@@ -4255,7 +4255,7 @@ Only the owner of the file can add new versions.</p>
                 <code>file</code>
             </td>
             <td>
-                  <code><span title="UploadFile">UploadFile</span></code>
+                  <code><span title="fastapi.UploadFile">UploadFile</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4263,7 +4263,7 @@ Only the owner of the file can add new versions.</p>
               </div>
             </td>
             <td>
-                  <code><span title="fastapi.UploadFile">UploadFile</span>(...)</code>
+                  <code><span title="fastapi.File">File</span>(...)</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -4451,7 +4451,7 @@ Only the owner of the file can add new versions.</p>
 <span class="normal"><a href="#__codelineno-0-640">640</a></span>
 <span class="normal"><a href="#__codelineno-0-641">641</a></span>
 <span class="normal"><a href="#__codelineno-0-642">642</a></span></pre></div></td><td class="code"><div><pre><span></span><code><span id="__span-0-565"><a id="__codelineno-0-565" name="__codelineno-0-565"></a><span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/files/</span><span class="si">{fileId}</span><span class="s2">/versions&quot;</span><span class="p">)</span>
-</span><span id="__span-0-566"><a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file_version</span><span class="p">(</span><span class="n">fileId</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">UploadFile</span> <span class="o">=</span> <span class="n">FastAPIFile</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">)):</span>
+</span><span id="__span-0-566"><a id="__codelineno-0-566" name="__codelineno-0-566"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">upload_file_version</span><span class="p">(</span><span class="n">fileId</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="n">FastAPIFile</span> <span class="o">=</span> <span class="n">File</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="n">user</span><span class="p">:</span> <span class="n">User</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_current_user</span><span class="p">),</span> <span class="n">db</span><span class="p">:</span> <span class="n">SessionLocal</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_db</span><span class="p">)):</span>
 </span><span id="__span-0-567"><a id="__codelineno-0-567" name="__codelineno-0-567"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;Upload a new version of an existing file.</span>
 </span><span id="__span-0-568"><a id="__codelineno-0-568" name="__codelineno-0-568"></a>
 </span><span id="__span-0-569"><a id="__codelineno-0-569" name="__codelineno-0-569"></a><span class="sd">    Creates a new version of the file while preserving the original.</span>
