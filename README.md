@@ -1,8 +1,5 @@
 # LMS
 
-[![Python application](https://github.com/gadm21/LMS/actions/workflows/python-app.yml/badge.svg)](https://github.com/gadm21/LMS/actions/workflows/python-app.yml)
-
-A Learning Management System (LMS).
 
 ---
 
