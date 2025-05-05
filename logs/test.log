@@ -1,0 +1,68 @@
+[17:26:40] INFO Created directory structure: /Users/gadmohamed/Desktop/LMS/aiagent/data and /Users/gadmohamed/Desktop/LMS/aiagent/data/references
+[17:26:41] INFO [test_server_health] Testing server health
+[17:26:42] INFO [test_server_health] Profile endpoint response: 200, {"name":"Gad Mohamed","profession":"AI Engineer","favorite_color":"Blue","spirit_animal":"Owl"}
+[17:26:42] INFO [test_server_health] Root endpoint response: 200, {"message":"LMS API is running"}
+[17:26:42] INFO [test_server_health] Server is responding to requests
+[17:26:42] INFO [test_upload_file] START
+[17:26:42] INFO [registerUser] Registering user: None
+[17:26:42] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_e6c15db7', 'password': 'testpass123'}
+[17:26:42] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":689}
+[17:26:42] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 689}
+[17:26:42] INFO [loginUser] Logging in user: {'username': 'testuser_e6c15db7', 'password': 'testpass123'}
+[17:26:43] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9lNmMxNWRiNyIsImV4cCI6MTc0NjQ4NDAwNX0.dRQiH8r7UQ6SQOuoNv8onANdD_VMEmc6kj-ZhuM8_JY', 'token_type': 'bearer'}
+[17:26:43] INFO [test_upload_file] Uploading file: testfile.txt
+[17:26:43] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11, 'fileId': 45, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-05T21:26:45.796557'}
+[17:26:43] INFO [test_upload_file] END
+[17:26:44] INFO [test_active_url_success] START
+[17:26:44] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[17:26:44] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
+[17:26:44] INFO [test_active_url_success] END
+[17:26:44] INFO [test_active_url_missing_url] START
+[17:26:44] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
+[17:26:44] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
+[17:26:44] INFO [test_active_url_missing_url] END
+[17:26:44] INFO [test_profile] START
+[17:26:44] INFO [test_profile] Response status: 200, body: {'name': 'Gad Mohamed', 'profession': 'AI Engineer', 'favorite_color': 'Blue', 'spirit_animal': 'Owl'}
+[17:26:44] INFO [test_profile] END
+[17:26:44] INFO [testQueryEndpoint] START
+[17:26:44] INFO [registerUser] Registering user: None
+[17:26:44] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_0826a4fd', 'password': 'testpass123'}
+[17:26:45] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":690}
+[17:26:45] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 690}
+[17:26:45] INFO [loginUser] Logging in user: {'username': 'testuser_0826a4fd', 'password': 'testpass123'}
+[17:26:45] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8wODI2YTRmZCIsImV4cCI6MTc0NjQ4NDAwOH0.hmgoMxgIzT8lszqXfwsfnMTihpG5bGWTmk_97ixHJLs', 'token_type': 'bearer'}
+[17:26:45] INFO [testQueryEndpoint] Case 1: Missing JSON body
+[17:26:46] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Empty request body"}
+[17:26:46] INFO [testQueryEndpoint] Case 2: Missing 'query' field
+[17:26:46] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
+[17:26:46] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
+[17:26:46] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
+[17:26:46] INFO [testQueryEndpoint] Case 4: Valid request
+[17:26:48] INFO [testQueryEndpoint] Case 4 Response: 200, {"response":"In your context, \"Gad\" refers to your name as per your user profile. If you have a different context or specific topic related to \"Gad\" that you would like to explore, please provide more details so I can offer a more precise explanation.","query":"what does GAD refer to?","chat_id":"chat1","queryId":21}
+[17:26:48] INFO [testQueryEndpoint] END
+[17:26:48] INFO [test_delete_user] START
+[17:26:48] INFO [test_delete_user] Registering user: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:48] INFO [registerUser] Registering user: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:48] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:49] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":691}
+[17:26:49] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 691}
+[17:26:49] INFO [loginUser] Logging in user: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:50] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8wNWI2MmEzNSIsImV4cCI6MTc0NjQ4NDAxMn0.n5cu_4ZzY_LJ6et20xbD4WEzPiHsTw_UeNvafwEuq20', 'token_type': 'bearer'}
+[17:26:50] INFO [test_delete_user] Deleting user testuser_05b62a35 (self-delete)
+[17:26:50] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_05b62a35' deleted successfully."}
+[17:26:50] INFO [test_delete_user] Try deleting user testuser_05b62a35 again (should be not found/unauthorized)
+[17:26:50] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[17:26:50] INFO [test_delete_user] Re-registering user testuser_05b62a35
+[17:26:50] INFO [registerUser] Registering user: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:50] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_05b62a35', 'password': 'testpass123'}
+[17:26:51] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":692}
+[17:26:51] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 692}
+[17:26:51] INFO [test_delete_user] Registering second user: {'username': 'testuser_7ce52daf', 'password': 'testpass123'}
+[17:26:51] INFO [registerUser] Registering user: {'username': 'testuser_7ce52daf', 'password': 'testpass123'}
+[17:26:51] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_7ce52daf', 'password': 'testpass123'}
+[17:26:52] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":693}
+[17:26:52] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 693}
+[17:26:52] INFO [loginUser] Logging in user: {'username': 'testuser_7ce52daf', 'password': 'testpass123'}
+[17:26:52] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl83Y2U1MmRhZiIsImV4cCI6MTc0NjQ4NDAxNH0.pVizp1Biarn_C58lLB3HjOxTF_uHo0v5Lx1fxT-hbQI', 'token_type': 'bearer'}
+[17:26:52] INFO [test_delete_user] Second user attempts to delete testuser_05b62a35
+[17:26:52] INFO [test_delete_user] Forbidden delete response: 200, {"message":"Partial user deletion for 'testuser_05b62a35'. Database records removed but user files may remain due to serverless environment limitations."}
