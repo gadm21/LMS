@@ -18,9 +18,10 @@ class BaseMemoryManager:
     """
     memory_file: str = None  # To be set by subclasses
 
-    def __init__(self, client_dir: Optional[str] = None):
+    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
         if self.memory_file is None:
             raise ValueError("memory_file must be defined in subclass")
+        self._memory_content = memory_content
 
     def save(self, data: Dict) -> None:
         """Save memory data to file."""
@@ -29,9 +30,12 @@ class BaseMemoryManager:
         save_memory(data, self.memory_file)
 
     def load(self) -> Dict:
-        """Load memory data from file."""
+        """Load memory data from file or provided content."""
         import logging
         logging.info(f"[BaseMemoryManager.load] Loading memory_type={self.memory_type}")
+        if hasattr(self, '_memory_content') and self._memory_content is not None:
+            logging.info(f"[BaseMemoryManager.load] Using provided memory_content for {self.memory_type}")
+            return self._memory_content
         return load_memory(self.memory_type)
 
     @property
@@ -62,10 +66,10 @@ class ShortTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the short-term memory storage file
     """
     
-    def __init__(self, client_dir: Optional[str] = None):
+    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
         if client_dir:
             update_client(client_dir)
-        super().__init__(client_dir)
+        super().__init__(client_dir, memory_content)
 
     @property
     def memory_file(self):
@@ -104,10 +108,10 @@ class LongTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the long-term memory storage file
     """
     
-    def __init__(self, client_dir: Optional[str] = None):
+    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
         if client_dir:
             update_client(client_dir)
-        super().__init__(client_dir)
+        super().__init__(client_dir, memory_content)
 
     @property
     def memory_file(self):

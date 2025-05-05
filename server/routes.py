@@ -123,6 +123,32 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     db.refresh(user)
     user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
     os.makedirs(user_folder, exist_ok=True)
+    
+    # Create shortterm and longterm memory files for the user
+    shortterm_memory = {"conversations": [], "active_url": {}}
+    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"]}
+    
+    # Save memory files to the database
+    shortterm_memory_file = DBFile(
+        filename="short_term_memory.json",
+        userId=user.userId,
+        size=len(json.dumps(shortterm_memory)),
+        content=json.dumps(shortterm_memory).encode('utf-8'),
+        content_type="application/json"
+    )
+    
+    longterm_memory_file = DBFile(
+        filename="long_term_memory.json",
+        userId=user.userId,
+        size=len(json.dumps(longterm_memory)),
+        content=json.dumps(longterm_memory).encode('utf-8'),
+        content_type="application/json"
+    )
+    
+    db.add(shortterm_memory_file)
+    db.add(longterm_memory_file)
+    db.commit()
+    
     return {"message": "Registered successfully", "userId": user.userId}
 
 @router.delete("/user/{username}")
@@ -351,13 +377,37 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         db.commit()
         db.refresh(db_query)
         
+        # Retrieve memory files from the database
+        shortterm_file = db.query(DBFile).filter(
+            DBFile.userId == user.userId,
+            DBFile.filename == "short_term_memory.json"
+        ).first()
+        
+        longterm_file = db.query(DBFile).filter(
+            DBFile.userId == user.userId,
+            DBFile.filename == "long_term_memory.json"
+        ).first()
+        
+        # Initialize memory managers with memory content from files
         from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
-        long_term_memory = LongTermMemoryManager()
-        short_term_memory = ShortTermMemoryManager()
+        
+        # Parse JSON content from files if they exist
+        shortterm_content = {}
+        longterm_content = {}
+        
+        if shortterm_file and shortterm_file.content:
+            shortterm_content = json.loads(shortterm_file.content.decode('utf-8'))
+        
+        if longterm_file and longterm_file.content:
+            longterm_content = json.loads(longterm_file.content.decode('utf-8'))
+        
+        # Initialize memory managers with the content
+        short_term_memory = ShortTermMemoryManager(memory_content=shortterm_content)
+        long_term_memory = LongTermMemoryManager(memory_content=longterm_content)
         
         # Call your AI agent with try/except to handle Vercel environment limitations
         try:
-            from aiagent.handler.query import ask_ai
+            from aiagent.handler.query import query_openai
             
             # Set up auxiliary data for the AI query
             aux_data = {
@@ -372,13 +422,44 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                 }
             }
             
-            # Send query to AI agent
-            response = ask_ai(
+            # Read references
+            from aiagent.context.reference import read_references
+            try:
+                references = read_references()
+            except Exception as e:
+                logging.error(f"Error loading references: {e}")
+                references = {}
+            
+            # Send query to AI agent using query_openai instead of ask_ai
+            response = query_openai(
                 query=user_query,
+                long_term_memory=longterm_content,
+                short_term_memory=shortterm_content,
+                aux_data=aux_data,
+                references=references,
                 max_tokens=max_tokens,
                 temperature=temperature,
-                aux_data=aux_data
             )
+            
+            # If the query was successful, update the memory
+            if not response.startswith("Error:"):
+                # Update shortterm memory
+                conversations = shortterm_content.get("conversations", [])
+                # Create a summary
+                from aiagent.handler.query import summarize_conversation
+                summary = summarize_conversation(user_query, response)
+                
+                # Update conversations
+                shortterm_content["conversations"] = conversations + [{
+                    "query": user_query, 
+                    "response": response, 
+                    "summary": summary
+                }]
+                
+                # Save updated shortterm memory back to the database
+                shortterm_file.content = json.dumps(shortterm_content).encode('utf-8')
+                shortterm_file.size = len(shortterm_file.content)
+                db.commit()
         except FileNotFoundError as file_err:
             # Handle missing files in Vercel environment
             log_error(f"AI agent file not found: {str(file_err)}", exc=file_err, endpoint="/query")
