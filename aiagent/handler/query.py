@@ -65,19 +65,30 @@ def query_openai(
         messages = []
 
         # json to string
-        user_profile = json.dumps(long_term_memory.get("user_profile", {}))
-        preferences = json.dumps(long_term_memory.get("preferences", {}))
-        values = json.dumps(long_term_memory.get("values", {}))
-        beliefs = json.dumps(long_term_memory.get("beliefs", {}))
+        user_profile_data = long_term_memory.get("user_profile")
+        user_profile = json.dumps(user_profile_data if user_profile_data is not None else {})
 
-        aux_data = json.dumps(aux_data)
-        past_conversations = json.dumps(short_term_memory.get("conversations", []))
-        active_url = json.dumps(short_term_memory.get("active_url", {}))
+        preferences_data = long_term_memory.get("preferences")
+        preferences = json.dumps(preferences_data if preferences_data is not None else {})
+
+        values_data = long_term_memory.get("values")
+        values = json.dumps(values_data if values_data is not None else {})
+
+        beliefs_data = long_term_memory.get("beliefs")
+        beliefs = json.dumps(beliefs_data if beliefs_data is not None else {})
+
+        aux_data_str = json.dumps(aux_data if aux_data is not None else {})
+        
+        past_conversations_data = short_term_memory.get("conversations")
+        past_conversations = json.dumps(past_conversations_data if past_conversations_data is not None else [])
+        
+        active_url_data = short_term_memory.get("active_url")
+        active_url = json.dumps(active_url_data if active_url_data is not None else {})
 
         messages.append(
             {
                 "role": "system",
-                "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nValues: {values}\nBeliefs: {beliefs}\nAuxiliary Data: {aux_data}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
+                "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nValues: {values}\nBeliefs: {beliefs}\nAuxiliary Data: {aux_data_str}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
             }
         )
 
