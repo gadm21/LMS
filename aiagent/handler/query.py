@@ -63,21 +63,25 @@ def query_openai(
 
         # Build context messages from long-term memory
         messages = []
-        if long_term_memory and isinstance(long_term_memory, dict):
 
-            # json to string
-            user_profile = json.dumps(long_term_memory.get("user_profile", {}))
-            preferences = json.dumps(long_term_memory.get("preferences", {}))
-            aux_data = json.dumps(aux_data)
-            past_conversations = json.dumps(short_term_memory.get("conversations", []))
-            active_url = json.dumps(short_term_memory.get("active_url", {}))
+        # json to string
+        user_profile = json.dumps(long_term_memory.get("user_profile", {}))
+        preferences = json.dumps(long_term_memory.get("preferences", {}))
+        values = json.dumps(long_term_memory.get("values", {}))
+        beliefs = json.dumps(long_term_memory.get("beliefs", {}))
 
-            messages.append(
-                {
-                    "role": "system",
-                    "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nAuxiliary Data: {aux_data}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
-                }
-            )
+        aux_data = json.dumps(aux_data)
+        past_conversations = json.dumps(short_term_memory.get("conversations", []))
+        active_url = json.dumps(short_term_memory.get("active_url", {}))
+
+        messages.append(
+            {
+                "role": "system",
+                "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nValues: {values}\nBeliefs: {beliefs}\nAuxiliary Data: {aux_data}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
+            }
+        )
+
+        print("messages:", messages) 
 
         # Add reference content to context
         if references:

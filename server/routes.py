@@ -347,6 +347,9 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
     except json.JSONDecodeError as json_err:
         return JSONResponse({"error": f"Invalid JSON in request body: {str(json_err)}"}, status_code=400)
         
+
+    print("body:", body)
+
     try:
         
         # Check for required fields
@@ -433,8 +436,8 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
             # Send query to AI agent using query_openai instead of ask_ai
             response = query_openai(
                 query=user_query,
-                long_term_memory=longterm_content,
-                short_term_memory=shortterm_content,
+                long_term_memory=long_term_memory,
+                short_term_memory=short_term_memory,
                 aux_data=aux_data,
                 references=references,
                 max_tokens=max_tokens,
