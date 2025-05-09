@@ -460,8 +460,19 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                 }]
                 
                 # Save updated shortterm memory back to the database
-                shortterm_file.content = json.dumps(shortterm_content).encode('utf-8')
-                shortterm_file.size = len(shortterm_file.content)
+                if shortterm_file:
+                    shortterm_file.content = json.dumps(shortterm_content).encode('utf-8')
+                    shortterm_file.size = len(shortterm_file.content)
+                else:
+                    # short_term_memory.json didn't exist for this user, create it now
+                    new_shortterm_file = DBFile(
+                        filename="short_term_memory.json",
+                        userId=user.userId,
+                        content=json.dumps(shortterm_content).encode('utf-8'),
+                        content_type="application/json"
+                    )
+                    new_shortterm_file.size = len(new_shortterm_file.content)
+                    db.add(new_shortterm_file)
                 db.commit()
         except FileNotFoundError as file_err:
             # Handle missing files in Vercel environment
