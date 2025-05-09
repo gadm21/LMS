@@ -117,11 +117,26 @@ def query_openai(
         )
 
         # Extract and return the AI's response
-        ai_response = response.choices[0].message.content
-        logging.info("Received response from OpenAI")
-        return ai_response
+        if response.choices and response.choices[0].message:
+            ai_content = response.choices[0].message.content
+            finish_reason = response.choices[0].finish_reason
+
+            if ai_content is not None:
+                logging.info("Received response content from OpenAI.")
+                return ai_content
+            else:
+                # Content is None, log finish_reason and the message object
+                logging.error(
+                    f"OpenAI response error: Message content is None. Finish reason: '{finish_reason}'. Message: {response.choices[0].message.model_dump_json()}"
+                )
+                return f"Error querying AI: OpenAI response message content is None. Finish reason: {finish_reason}."
+        else:
+            # Message object itself is None or no choices
+            logging.error(f"OpenAI response error: No choices or message object found. Full response: {response.model_dump_json()}")
+            return "Error querying AI: No choices or message object returned from OpenAI."
+
     except Exception as e:
-        logging.error(f"Error querying OpenAI: {e}")
+        logging.error(f"Error querying OpenAI: {e}", exc_info=True)
         return f"Error querying AI: {str(e)}"
 
 
