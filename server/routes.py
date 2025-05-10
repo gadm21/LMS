@@ -10,11 +10,11 @@ This module defines all the API endpoints for the LMS platform, including:
 
 import os
 import json
-from fastapi import APIRouter, Depends, HTTPException, UploadFile as FastAPIFile, File, Request, Header
+from fastapi import APIRouter, Depends, HTTPException, UploadFile as FastAPIFile, File, Request, Header, Form, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from typing import Dict, List, Optional
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, Response, FileResponse
 from .db import User, File as DBFile, Query, Session, SessionLocal, FileVersion, FileMetadata
 from .schemas import RegisterRequest, UserResponse
 from .auth import (
@@ -26,8 +26,13 @@ from typing import List
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import Body, Request
 import logging
+import re
+import uuid
 
-from aiagent.handler import query
+from aiagent.handler import query as ai_query_handler
+from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
+from aiagent.context.reference import read_references
+from .auth import get_db
 
 router = APIRouter()
 
@@ -955,4 +960,156 @@ def profile(current_user: User = Depends(get_current_user)):
     """
     # The current_user object (SQLAlchemy model) will be automatically
     # converted to a UserResponse Pydantic model by FastAPI.
-    return current_user
+    return UserResponse(
+        userId=current_user.userId,
+        username=current_user.username,
+        max_file_size=current_user.max_file_size,
+        role=current_user.role
+    )
+
+# --- Twilio Webhook Endpoints ---
+
+@router.post("/api/webhooks/twilio/incoming-message")
+async def handle_twilio_incoming_message(request: Request, From: str = Form(...), Body: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Handles incoming SMS messages from Twilio, processes them via AI, and sends a reply.
+    Twilio sends data as 'application/x-www-form-urlencoded'.
+    """
+    client_host = request.client.host if request.client else "unknown_client"
+    endpoint_name = "/api/webhooks/twilio/incoming-message"
+    log_request_start(endpoint_name, "POST", dict(request.headers), client_host)
+    logger.info(f"[{endpoint_name}] Twilio Incoming SMS from {From}: {Body}")
+
+    normalized_from_number = re.sub(r'\D', '', From)
+    user_query_text = Body
+
+    found_user: Optional[User] = None
+    users_in_db = db.query(User).all()
+    
+    for user_record in users_in_db:
+        longterm_file = db.query(DBFile).filter(
+            DBFile.userId == user_record.userId,
+            DBFile.filename == "long_term_memory.json"
+        ).first()
+        if longterm_file and longterm_file.content:
+            try:
+                ltm_content = json.loads(longterm_file.content.decode('utf-8'))
+                stored_phone = ltm_content.get("values", {}).get("phone_number", "")
+                normalized_stored_phone = re.sub(r'\D', '', stored_phone)
+                # Match suffix of numbers if one is shorter, common for international vs local
+                if normalized_stored_phone.endswith(normalized_from_number) or \
+                   normalized_from_number.endswith(normalized_stored_phone):
+                    found_user = user_record
+                    logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number} to user {found_user.username} (ID: {found_user.userId})")
+                    break
+            except json.JSONDecodeError:
+                logger.error(f"[{endpoint_name}] Could not parse long_term_memory for user {user_record.userId}")
+            except Exception as e:
+                logger.error(f"[{endpoint_name}] Error processing LTM for user {user_record.userId}: {e}")
+
+    if not found_user:
+        logger.warning(f"[{endpoint_name}] No user found for Twilio number {normalized_from_number} ({From}).")
+        twiml_response = "<Response><Message>Sorry, your phone number is not recognized in our system.</Message></Response>"
+        log_response(200, twiml_response, endpoint_name)
+        return Response(content=twiml_response, media_type="application/xml", status_code=200)
+
+    # User found, proceed with AI query
+    user = found_user
+    chat_id = f"sms_{normalized_from_number}" # Consistent chat ID for SMS user
+
+    try:
+        # Create a new query record in the database
+        db_query = Query(
+            userId=user.userId,
+            chatId=chat_id,
+            query_text=user_query_text
+        )
+        db.add(db_query)
+        db.commit()
+        db.refresh(db_query)
+        log_ai_call(user_query_text, "default_sms_model", endpoint_name)
+
+        # Retrieve memory files
+        shortterm_file_db = db.query(DBFile).filter(
+            DBFile.userId == user.userId, DBFile.filename == "short_term_memory.json"
+        ).first()
+        longterm_file_db = db.query(DBFile).filter(
+            DBFile.userId == user.userId, DBFile.filename == "long_term_memory.json"
+        ).first()
+
+        shortterm_content = json.loads(shortterm_file_db.content.decode('utf-8')) if shortterm_file_db and shortterm_file_db.content else {}
+        longterm_content = json.loads(longterm_file_db.content.decode('utf-8')) if longterm_file_db and longterm_file_db.content else {}
+
+        short_term_memory = ShortTermMemoryManager(memory_content=shortterm_content)
+        long_term_memory = LongTermMemoryManager(memory_content=longterm_content)
+
+        aux_data = {
+            "username": user.username,
+            "user_id": user.userId,
+            "chat_id": chat_id,
+            "query_id": db_query.queryId,
+            "client_info": {"model": "gpt-3.5-turbo", "max_tokens": 1024, "temperature": 0.7} # Default params
+        }
+        
+        references = read_references()
+
+        ai_response = ai_query_handler.query_openai(
+            query=user_query_text,
+            long_term_memory=long_term_memory,
+            short_term_memory=short_term_memory,
+            aux_data=aux_data,
+            references=references,
+            max_tokens=aux_data["client_info"]["max_tokens"],
+            temperature=aux_data["client_info"]["temperature"],
+        )
+        log_ai_response(ai_response, endpoint_name)
+
+        db_query.response_text = ai_response # Store AI response
+        db.commit()
+
+        if not ai_response.startswith("Error:"):
+            summary = ai_query_handler.summarize_conversation(user_query_text, ai_response)
+            updated_ltm = ai_query_handler.update_memory(user_query_text, ai_response, long_term_memory)
+
+            current_conversations = shortterm_content.get("conversations", [])
+            shortterm_content["conversations"] = current_conversations + [{
+                "query": user_query_text, "response": ai_response, "summary": summary
+            }]
+            
+            if shortterm_file_db:
+                shortterm_file_db.content = json.dumps(shortterm_content).encode('utf-8')
+                shortterm_file_db.size = len(shortterm_file_db.content)
+                db.add(shortterm_file_db)
+            else: # Should not happen if user registration creates it
+                logger.warning(f"[{endpoint_name}] short_term_memory.json not found for user {user.userId}, creating new.")
+                # Create if missing logic might be needed here
+
+            if updated_ltm and longterm_file_db:
+                longterm_file_db.content = json.dumps(long_term_memory.get_content()).encode('utf-8')
+                longterm_file_db.size = len(longterm_file_db.content)
+                db.add(longterm_file_db)
+            db.commit()
+        
+        twiml_reply = f"<Response><Message>{ai_response}</Message></Response>"
+        log_response(200, "TwiML reply sent", endpoint_name)
+        return Response(content=twiml_reply, media_type="application/xml", status_code=200)
+
+    except Exception as e:
+        logger.error(f"[{endpoint_name}] Error processing AI query for SMS: {e}", exc_info=True)
+        db.rollback() # Rollback any partial DB changes on error
+        twiml_error_reply = "<Response><Message>Sorry, an internal error occurred while processing your message.</Message></Response>"
+        return Response(content=twiml_error_reply, media_type="application/xml", status_code=500)
+
+@router.post("/api/webhooks/twilio/message-status")
+async def handle_twilio_message_status(request: Request, MessageSid: str = Form(...), MessageStatus: str = Form(...)):
+    """
+    Handles delivery status updates for outbound messages from Twilio.
+    """
+    client_host = request.client.host if request.client else "unknown_client"
+    log_request_start("/api/webhooks/twilio/message-status", "POST", dict(request.headers), client_host)
+    logger.info(f"[/api/webhooks/twilio/message-status] Twilio Message SID {MessageSid} status: {MessageStatus}")
+    
+    # --- Your logic here to update message status in your DB ---
+    
+    log_response(200, "OK", "/api/webhooks/twilio/message-status")
+    return Response(status_code=200)
