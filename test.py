@@ -130,14 +130,31 @@ def test_active_url_missing_url(base_url):
 
 def test_profile(base_url):
     logger.info("[test_profile] START")
-    resp = requests.get(f"{base_url}/profile")
+    user = registerUser(base_url) # Register a new user
+    token = loginUser(base_url, user) # Log in to get a token
+    headers = {"Authorization": f"Bearer {token}"} # Prepare auth header
+
+    resp = requests.get(f"{base_url}/profile", headers=headers) # Make authenticated request
     logger.info(f"[test_profile] Response status: {resp.status_code}, body: {resp.json()}")
     assert resp.status_code == 200, f"[test_profile] Failed: {resp.text}"
     data = resp.json()
-    assert data["name"] == "Gad Mohamed"
-    assert data["profession"] == "AI Engineer"
-    assert data["favorite_color"] == "Blue"
-    assert data["spirit_animal"] == "Owl"
+    
+    # Assert against the registered user's data
+    assert data["username"] == user["username"], f"Expected username {user['username']}, got {data['username']}"
+    assert "userId" in data
+    assert isinstance(data["userId"], int)
+    assert "max_file_size" in data
+    assert isinstance(data["max_file_size"], int)
+    assert "role" in data
+    assert isinstance(data["role"], int) # Assuming role is an int (e.g., 0 for user, 1 for admin)
+
+    # Clean up: delete user
+    # Construct correct URL for user deletion, ensuring username is part of the path
+    delete_url = f"{base_url}/user/{user['username']}"
+    delete_resp = requests.delete(delete_url, headers=headers)
+    logger.info(f"[test_profile] Cleanup delete response for {user['username']}: {delete_resp.status_code}")
+    # Optionally, assert delete_resp.status_code == 200 or 204 depending on API design
+
     logger.info("[test_profile] END")
 
 def testQueryEndpoint(base_url):

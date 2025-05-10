@@ -396,34 +396,27 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
         db.commit()
         db.refresh(db_query)
         
-        # Retrieve memory files from the database
-        shortterm_file = db.query(DBFile).filter(
-            DBFile.userId == user.userId,
-            DBFile.filename == "short_term_memory.json"
-        ).first()
+        # Load long-term memory from DB
+        longterm_memory_file = db.query(DBFile).filter(DBFile.userId == user.userId, DBFile.filename == "long_term_memory.json").first()
+        longterm_content_str = longterm_memory_file.content.decode('utf-8') if longterm_memory_file and longterm_memory_file.content else "{}"
+
+        # Load short-term memory from DB
+        shortterm_memory_file = db.query(DBFile).filter(DBFile.userId == user.userId, DBFile.filename == "short_term_memory.json").first()
+        shortterm_content_str = shortterm_memory_file.content.decode('utf-8') if shortterm_memory_file and shortterm_memory_file.content else "{}"
         
-        longterm_file = db.query(DBFile).filter(
-            DBFile.userId == user.userId,
-            DBFile.filename == "long_term_memory.json"
-        ).first()
-        
-        # Initialize memory managers with memory content from files
-        from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
-        
-        # Parse JSON content from files if they exist
-        shortterm_content = {}
-        longterm_content = {}
-        
-        if shortterm_file and shortterm_file.content:
-            shortterm_content = json.loads(shortterm_file.content.decode('utf-8'))
-        
-        if longterm_file and longterm_file.content:
-            longterm_content = json.loads(longterm_file.content.decode('utf-8'))
-        
-        # Initialize memory managers with the content
-        short_term_memory = ShortTermMemoryManager(memory_content=shortterm_content)
-        long_term_memory = LongTermMemoryManager(memory_content=longterm_content)
-        
+        # Initialize memory managers with parsed JSON content
+        try:
+            longterm_memory_data = json.loads(longterm_content_str)
+            shortterm_memory_data = json.loads(shortterm_content_str)
+        except json.JSONDecodeError as e:
+            logger.error(f"Error decoding memory content from DB for user {user.userId}: {e}. LTM content: '{longterm_content_str[:200]}', STM content: '{shortterm_content_str[:200]}'")
+            # Fallback to empty memory if JSON is corrupted
+            longterm_memory_data = {}
+            shortterm_memory_data = {}
+
+        long_term_memory = LongTermMemoryManager(memory_content=longterm_memory_data)
+        short_term_memory = ShortTermMemoryManager(memory_content=shortterm_memory_data)
+
         # Call your AI agent with try/except to handle Vercel environment limitations
         try:
             from aiagent.handler.query import query_openai
@@ -463,14 +456,14 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
             # If the query was successful, update the memory
             if not response.startswith("Error:"):
                 # Update shortterm memory
-                conversations = shortterm_content.get("conversations", [])
+                conversations = shortterm_memory_data.get("conversations", [])
                 # Create a summary
                 from aiagent.handler.query import summarize_conversation, update_memory
                 summary = summarize_conversation(user_query, response)
                 updated = update_memory(user_query, response, long_term_memory) 
                 
                 # Update conversations
-                shortterm_content["conversations"] = conversations + [{
+                shortterm_memory_data["conversations"] = conversations + [{
                     "query": user_query, 
                     "response": response, 
                     "summary": summary
@@ -479,11 +472,11 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                 # save updated longterm memory
                 if updated : 
                     log_something("Updated longterm memory:"+str(long_term_memory.get_content()), "queryEndpoint")
-                    if longterm_file:
+                    if longterm_memory_file:
                         updated_content = long_term_memory.get_content()
-                        longterm_file.content = json.dumps(updated_content).encode('utf-8')
-                        longterm_file.size = len(longterm_file.content)
-                        db.add(longterm_file)
+                        longterm_memory_file.content = json.dumps(updated_content).encode('utf-8')
+                        longterm_memory_file.size = len(longterm_memory_file.content)
+                        db.add(longterm_memory_file)
                         db.commit()
                     else:
 
@@ -501,15 +494,15 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                     log_something("Longterm memory not updated", "queryEndpoint")
                 
                 # Save updated shortterm memory back to the database
-                if shortterm_file:
-                    shortterm_file.content = json.dumps(shortterm_content).encode('utf-8')
-                    shortterm_file.size = len(shortterm_file.content)
+                if shortterm_memory_file:
+                    shortterm_memory_file.content = json.dumps(shortterm_memory_data).encode('utf-8')
+                    shortterm_memory_file.size = len(shortterm_memory_file.content)
                 else:
                     # short_term_memory.json didn't exist for this user, create it now
                     new_shortterm_file = DBFile(
                         filename="short_term_memory.json",
                         userId=user.userId,
-                        content=json.dumps(shortterm_content).encode('utf-8'),
+                        content=json.dumps(shortterm_memory_data).encode('utf-8'),
                         content_type="application/json"
                     )
                     new_shortterm_file.size = len(new_shortterm_file.content)
