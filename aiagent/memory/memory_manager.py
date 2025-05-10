@@ -10,9 +10,6 @@ class BaseMemoryManager:
     
     """
 
-    self._memory_content: Dict = {}
-
-
     def __init__(self, memory_content: Optional[Dict] = None):
         self._memory_content = memory_content if memory_content is not None else {}
 
