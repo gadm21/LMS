@@ -31,9 +31,7 @@ else:
     CLIENT_DIR = AI_AGENT_DIR
 
 DATA_DIR = os.path.join(CLIENT_DIR, "data")
-SHORT_TERM_MEMORY_FILE = os.path.join(DATA_DIR, "short_term_memory.json")
-LONG_TERM_MEMORY_FILE = os.path.join(DATA_DIR,  "long_term_memory.json")
-CONTEXT_FILE = os.path.join(DATA_DIR, "context.json")
+
 REFERENCES_DIR = os.path.join(DATA_DIR,  "references")
 
 # Create necessary directories if they don't exist
@@ -54,17 +52,11 @@ else:
     except Exception as e:
         logging.warning(f"Could not create directory structure: {e}")
 
-# Import public functions and variables for module-level access
-from aiagent.memory.loader import load_memory
 
-from aiagent.memory.saver import save_memory
 from aiagent.memory.memory_manager import BaseMemoryManager, ShortTermMemoryManager, LongTermMemoryManager
-from aiagent.memory.client import update_client
+
 
 __all__ = [
-    "update_client",
-    "load_memory",
-    "save_memory",
     "SHORT_TERM_MEMORY_FILE",
     "LONG_TERM_MEMORY_FILE",
     "BaseMemoryManager",

@@ -4,39 +4,17 @@ import os
 import logging
 from typing import Dict, List, Optional, Any
     
-from aiagent.memory import SHORT_TERM_MEMORY_FILE, LONG_TERM_MEMORY_FILE
-from aiagent.memory.loader import load_memory
-from aiagent.memory.saver import save_memory
-from aiagent.memory.client import update_client
-import aiagent.memory as memory
 
 
 class BaseMemoryManager:
     """
     Abstract base class for memory management.
-    Provides shared logic for loading and saving memory.
+    
     """
-    memory_file: str = None  # To be set by subclasses
 
-    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
-        if self.memory_file is None:
-            raise ValueError("memory_file must be defined in subclass")
+    def __init__(self ):
         self._memory_content = memory_content
 
-    def save(self, data: Dict) -> None:
-        """Save memory data to file."""
-        import logging
-        logging.info(f"[BaseMemoryManager.save] Saving memory_type={self.memory_type}")
-        save_memory(data, self.memory_file)
-
-    def load(self) -> Dict:
-        """Load memory data from file or provided content."""
-        import logging
-        logging.info(f"[BaseMemoryManager.load] Loading memory_type={self.memory_type}")
-        if hasattr(self, '_memory_content') and self._memory_content is not None:
-            logging.info(f"[BaseMemoryManager.load] Using provided memory_content for {self.memory_type}")
-            return self._memory_content
-        return load_memory(self.memory_type)
 
     @property
     def memory_type(self) -> str:
@@ -44,16 +22,14 @@ class BaseMemoryManager:
 
     def set(self, key: str, value: Any) -> None:
         """Set a specific field in memory."""
-        memory = self.load()
-        # safely update the memory
-        memory[key] = value
         
-        self.save(memory)
-
+        # safely update the memory, if the key does not exist, create it
+        self._memory_content.setdefault(key, {})[key] = value
+        
     def get(self, key: str) -> Optional[Any]:
         """Get a specific field from memory."""
-        memory = self.load()
-        return memory.get(key, None)
+        
+        return self._memory_content.get(key, None)
 
 class ShortTermMemoryManager(BaseMemoryManager):
     """Manages short-term memory operations.
@@ -66,15 +42,9 @@ class ShortTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the short-term memory storage file
     """
     
-    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
-        if client_dir:
-            update_client(client_dir)
-        super().__init__(client_dir, memory_content)
+    def __init__(self):
+        super().__init__( memory_content)
 
-    @property
-    def memory_file(self):
-        from aiagent.memory import SHORT_TERM_MEMORY_FILE
-        return SHORT_TERM_MEMORY_FILE
 
     @property
     def memory_type(self) -> str:
@@ -108,25 +78,15 @@ class LongTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the long-term memory storage file
     """
     
-    def __init__(self, client_dir: Optional[str] = None, memory_content: Optional[Dict] = None):
-        if client_dir:
-            update_client(client_dir)
-        super().__init__(client_dir, memory_content)
+    def __init__(self):
+        super().__init__(memory_content)
 
-    @property
-    def memory_file(self):
-        from aiagent.memory import LONG_TERM_MEMORY_FILE
-        return LONG_TERM_MEMORY_FILE
 
     @property
     def memory_type(self) -> str:
         return "long-term"
 
-    # You can add long-term specific methods here
 
-        self.save_memory(memory, self.short_term_memory_file)
-        
-     
 
     def _get_timestamp(self) -> str:
         """Get current timestamp."""

@@ -1,5 +1,105 @@
-[01:26:09] INFO Created directory structure: /Users/gadmohamed/Desktop/LMS/aiagent/data and /Users/gadmohamed/Desktop/LMS/aiagent/data/references
-[01:26:09] INFO Testing against: http://localhost:7050 (LOCAL)
-[01:26:09] INFO [testQueryEndpoint] START
-[01:26:09] INFO [registerUser] Registering user: None
-[01:26:09] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_abe2cbaf', 'password': 'testpass123'}
+[04:14:41] INFO Created directory structure: /Users/gadmohamed/Desktop/LMS/aiagent/data and /Users/gadmohamed/Desktop/LMS/aiagent/data/references
+[04:14:42] INFO Testing against: http://localhost:7050 (LOCAL)
+[04:14:42] INFO [test_server_health] Testing server health
+[04:14:42] INFO [test_server_health] Profile endpoint response: 200, {"name":"Gad Mohamed","profession":"AI Engineer","favorite_color":"Blue","spirit_animal":"Owl"}
+[04:14:42] INFO [test_server_health] Root endpoint response: 200, {"message":"LMS API is running"}
+[04:14:42] INFO [test_server_health] Server is responding to requests
+[04:14:42] INFO [test_upload_file] START
+[04:14:42] INFO [registerUser] Registering user: None
+[04:14:42] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_8de04646', 'password': 'testpass123'}
+[04:14:43] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":823}
+[04:14:43] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 823}
+[04:14:43] INFO [loginUser] Logging in user: {'username': 'testuser_8de04646', 'password': 'testpass123'}
+[04:14:44] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84ZGUwNDY0NiIsImV4cCI6MTc0Njg2ODQ4NH0.5TVSxch2DFRQ3jLqhPcCxihjoDipILdDrynVY8r5Ivw', 'token_type': 'bearer'}
+[04:14:44] INFO [test_upload_file] Uploading file: testfile.txt
+[04:14:45] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11, 'fileId': 323, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-10T08:14:44.496158'}
+[04:14:45] INFO [test_upload_file] END
+[04:14:45] INFO [test_active_url_success] START
+[04:14:45] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[04:14:45] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
+[04:14:45] INFO [test_active_url_success] END
+[04:14:45] INFO [test_active_url_missing_url] START
+[04:14:45] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
+[04:14:45] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
+[04:14:45] INFO [test_active_url_missing_url] END
+[04:14:45] INFO [test_profile] START
+[04:14:45] INFO [test_profile] Response status: 200, body: {'name': 'Gad Mohamed', 'profession': 'AI Engineer', 'favorite_color': 'Blue', 'spirit_animal': 'Owl'}
+[04:14:45] INFO [test_profile] END
+[04:14:45] INFO [testQueryEndpoint] START
+[04:14:45] INFO [registerUser] Registering user: None
+[04:14:45] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_30a0ecb9', 'password': 'testpass123'}
+[04:14:46] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":824}
+[04:14:46] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 824}
+[04:14:46] INFO [loginUser] Logging in user: {'username': 'testuser_30a0ecb9', 'password': 'testpass123'}
+[04:14:47] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zMGEwZWNiOSIsImV4cCI6MTc0Njg2ODQ4Nn0.uC1AULTSGAqImRPw3XRrsNGzsmvFbu7CU1DWAZl8fY8', 'token_type': 'bearer'}
+[04:14:47] INFO [testQueryEndpoint] Case 1: Missing JSON body
+[04:14:47] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Empty request body"}
+[04:14:47] INFO [testQueryEndpoint] Case 2: Missing 'query' field
+[04:14:47] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
+[04:14:47] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
+[04:14:47] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
+[04:14:47] INFO [testQueryEndpoint] Case 4: Valid request
+[04:14:50] INFO [testQueryEndpoint] Case 4 Response: 200, {"response":"That's great to hear! Updating your phone number is an important step to ensure that your contacts can reach you easily. If you need any assistance with updating your phone number on different platforms or services, feel free to ask!","query":"I have changed my phone number to 807-555-5555","chat_id":"chat1","queryId":63}
+[04:14:50] INFO [testQueryEndpoint] END
+[04:14:50] INFO [test_delete_user] START
+[04:14:50] INFO [test_delete_user] Registering user: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:50] INFO [registerUser] Registering user: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:50] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:51] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":825}
+[04:14:51] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 825}
+[04:14:51] INFO [loginUser] Logging in user: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:52] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yNzFhNDgyZCIsImV4cCI6MTc0Njg2ODQ5Mn0.84U4YpaCZ3uuVj1-rbEg1dtNn_7s6ZcxWLs09Y1pImg', 'token_type': 'bearer'}
+[04:14:52] INFO [test_delete_user] Deleting user testuser_271a482d (self-delete)
+[04:14:52] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_271a482d' deleted successfully."}
+[04:14:52] INFO [test_delete_user] Try deleting user testuser_271a482d again (should be not found/unauthorized)
+[04:14:52] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[04:14:52] INFO [test_delete_user] Re-registering user testuser_271a482d
+[04:14:52] INFO [registerUser] Registering user: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:52] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_271a482d', 'password': 'testpass123'}
+[04:14:53] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":826}
+[04:14:53] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 826}
+[04:14:53] INFO [test_delete_user] Registering second user: {'username': 'testuser_956318a1', 'password': 'testpass123'}
+[04:14:53] INFO [registerUser] Registering user: {'username': 'testuser_956318a1', 'password': 'testpass123'}
+[04:14:53] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_956318a1', 'password': 'testpass123'}
+[04:14:54] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":827}
+[04:14:54] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 827}
+[04:14:54] INFO [loginUser] Logging in user: {'username': 'testuser_956318a1', 'password': 'testpass123'}
+[04:14:55] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl85NTYzMThhMSIsImV4cCI6MTc0Njg2ODQ5NH0.kNrEkgYlkThDUcfiUoXz-mhqy9KIRnCnsU8DYuYEUWE', 'token_type': 'bearer'}
+[04:14:55] INFO [test_delete_user] Second user attempts to delete testuser_271a482d
+[04:14:55] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
+[04:14:55] INFO [test_delete_user] END
+[04:14:55] INFO [test_list_files] START
+[04:14:55] INFO [registerUser] Registering user: None
+[04:14:55] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_a300d64c', 'password': 'testpass123'}
+[04:14:56] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":828}
+[04:14:56] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 828}
+[04:14:56] INFO [loginUser] Logging in user: {'username': 'testuser_a300d64c', 'password': 'testpass123'}
+[04:14:56] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hMzAwZDY0YyIsImV4cCI6MTc0Njg2ODQ5Nn0.aVeIwiQB3UIA-V-TYyg7lsxmVqI46eueuBWKeM8cyzM', 'token_type': 'bearer'}
+[04:14:56] INFO [test_list_files] Listing files
+[04:14:56] INFO [test_list_files] Response status: 200, body: {'files': [{'fileId': 332, 'filename': 'short_term_memory.json', 'size': 39, 'uploaded_at': '2025-05-10T08:14:55.825130'}, {'fileId': 333, 'filename': 'long_term_memory.json', 'size': 247, 'uploaded_at': '2025-05-10T08:14:55.825139'}], 'count': 2}
+[04:14:57] INFO [test_list_files] END
+[04:14:57] INFO [test_download_file] START
+[04:14:57] INFO [registerUser] Registering user: None
+[04:14:57] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_25084a7a', 'password': 'testpass123'}
+[04:14:58] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":829}
+[04:14:58] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 829}
+[04:14:58] INFO [loginUser] Logging in user: {'username': 'testuser_25084a7a', 'password': 'testpass123'}
+[04:14:58] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yNTA4NGE3YSIsImV4cCI6MTc0Njg2ODQ5OH0.k8kioSuDruNxNQXhRl3wUV7ovzhcj2lCdTlrBiSd6kw', 'token_type': 'bearer'}
+[04:14:58] INFO [test_download_file] Uploading file: testfile.txt
+[04:14:59] INFO [test_download_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 336, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-10T08:14:58.875489'}
+[04:14:59] INFO [test_download_file] Downloading file with ID: 336
+[04:14:59] INFO [test_download_file] Response status: 200, length: 11
+[04:15:00] INFO [test_download_file] END
+[04:15:00] INFO [test_delete_file] START
+[04:15:00] INFO [registerUser] Registering user: None
+[04:15:00] INFO [registerUser] Sending request to http://localhost:7050/register with user data: {'username': 'testuser_30c29ebd', 'password': 'testpass123'}
+[04:15:01] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":830}
+[04:15:01] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 830}
+[04:15:01] INFO [loginUser] Logging in user: {'username': 'testuser_30c29ebd', 'password': 'testpass123'}
+[04:15:01] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zMGMyOWViZCIsImV4cCI6MTc0Njg2ODUwMX0.Q1G3-QVmIqi6afQfOqRBoh_eNmjVQcO_tGehEth7I0M', 'token_type': 'bearer'}
+[04:15:01] INFO [test_delete_file] Uploading file: testfile.txt
+[04:15:02] INFO [test_delete_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 339, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-10T08:15:02.004135'}
+[04:15:02] INFO [test_delete_file] Deleting file with ID: 339
+[04:15:02] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully.", 'fileId': 339}
+[04:15:03] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
+[04:15:03] INFO [test_delete_file] END

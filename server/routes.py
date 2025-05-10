@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional
 from fastapi.responses import StreamingResponse, JSONResponse
 from .db import User, File as DBFile, Query, Session, SessionLocal, FileVersion, FileMetadata
-from .schemas import RegisterRequest
+from .schemas import RegisterRequest, UserResponse
 from .auth import (
     get_db, get_password_hash, authenticate_user, create_access_token,
     get_current_user, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -75,6 +75,8 @@ def log_ai_call(query, model, endpoint):
     logger.info(f"[{endpoint}] AI call to {model} with query: {query}")
 def log_ai_response(response, endpoint):
     logger.info(f"[{endpoint}] AI response: {response}")
+def log_something(something, endpoint):
+    logger.info(f"[{endpoint}] Something: {something}")
 
 # Set ASSETS_FOLDER to /tmp/assets if on Vercel or read-only FS, else use 'assets'
 if os.environ.get("VERCEL") or os.environ.get("READ_ONLY_FS"):
@@ -117,7 +119,12 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     if db.query(User).filter(User.username == req.username).first():
         raise HTTPException(status_code=400, detail="User already exists")
     hashed_pw = get_password_hash(req.password)
-    user = User(username=req.username, hashed_password=hashed_pw)
+    
+    user_data = {"username": req.username, "hashed_password": hashed_pw}
+    if req.role is not None:
+        user_data["role"] = req.role
+    user = User(**user_data)
+    
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -126,7 +133,7 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     
     # Create shortterm and longterm memory files for the user
     shortterm_memory = {"conversations": [], "active_url": {}}
-    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"]}
+    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"], "phone_number": "807-555-1234"}
     
     # Save memory files to the database
     shortterm_memory_file = DBFile(
@@ -363,6 +370,10 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
             return JSONResponse(status_code=400, content={"error": "No chat ID provided"})
         
         user_query = body.get("query")
+        # check pageContent field
+        page_content = body.get("pageContent")
+        if page_content :
+            user_query += "\n\n" + "Here is the page content: " + page_content
         model = body.get("model", "gpt-3.5-turbo")
         max_tokens = body.get("max_tokens", 1024)
         temperature = body.get("temperature", 0.7)
@@ -449,8 +460,9 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                 # Update shortterm memory
                 conversations = shortterm_content.get("conversations", [])
                 # Create a summary
-                from aiagent.handler.query import summarize_conversation
+                from aiagent.handler.query import summarize_conversation, update_memory
                 summary = summarize_conversation(user_query, response)
+                updated = update_memory(user_query, response, long_term_memory) 
                 
                 # Update conversations
                 shortterm_content["conversations"] = conversations + [{
@@ -458,6 +470,30 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                     "response": response, 
                     "summary": summary
                 }]
+
+                # save updated longterm memory
+                if updated : 
+                    log_something("Updated longterm memory:"+str(long_term_memory.get_content()), "queryEndpoint")
+                    if longterm_file:
+                        updated_content = long_term_memory.get_content()
+                        longterm_file.content = json.dumps(updated_content).encode('utf-8')
+                        longterm_file.size = len(longterm_file.content)
+                        db.add(longterm_file)
+                        db.commit()
+                    else:
+
+                        # long_term_memory.json didn't exist for this user, create it now
+                        new_longterm_file = DBFile(
+                            filename="long_term_memory.json",
+                            userId=user.userId,
+                            content=json.dumps(long_term_memory.get_content()).encode('utf-8'),
+                            content_type="application/json"
+                        )
+                        new_longterm_file.size = len(new_longterm_file.content)
+                        db.add(new_longterm_file)
+                        db.commit()
+                else :
+                    log_something("Longterm memory not updated", "queryEndpoint")
                 
                 # Save updated shortterm memory back to the database
                 if shortterm_file:
@@ -474,6 +510,7 @@ async def queryEndpoint(request: Request, user: User = Depends(get_current_user)
                     new_shortterm_file.size = len(new_shortterm_file.content)
                     db.add(new_shortterm_file)
                 db.commit()
+
         except FileNotFoundError as file_err:
             # Handle missing files in Vercel environment
             log_error(f"AI agent file not found: {str(file_err)}", exc=file_err, endpoint="/query")
@@ -909,19 +946,13 @@ def delete_file(fileId: int, user: User = Depends(get_current_user), db: Session
         log_error(f"Error deleting file: {str(e)}", exc=e, endpoint=f"/delete/{fileId}")
         raise HTTPException(status_code=500, detail=f"Error deleting file: {str(e)}")
 
-@router.get('/profile')
-def profile():
-    """Get user profile information.
-    
-    This is a static endpoint that returns hardcoded profile information.
-    In a real application, this would fetch data from the database.
+@router.get('/profile', response_model=UserResponse)
+def profile(current_user: User = Depends(get_current_user)):
+    """Get profile information for the currently authenticated user.
     
     Returns:
-        dict: Profile information
+        UserResponse: The authenticated user's profile data, including their role.
     """
-    return {
-        "name": "Gad Mohamed",
-        "profession": "AI Engineer",
-        "favorite_color": "Blue",
-        "spirit_animal": "Owl"
-    }
+    # The current_user object (SQLAlchemy model) will be automatically
+    # converted to a UserResponse Pydantic model by FastAPI.
+    return current_user

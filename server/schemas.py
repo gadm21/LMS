@@ -5,7 +5,8 @@ serialization throughout the application. All models extend from Pydantic's
 BaseModel to provide automatic validation, serialization, and documentation.
 """
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 class RegisterRequest(BaseModel):
     """Schema for user registration request.
@@ -16,6 +17,26 @@ class RegisterRequest(BaseModel):
     Attributes:
         username: Unique identifier for the user
         password: User's password (will be hashed before storage)
+        role: Optional role for the user
     """
     username: str
     password: str
+    role: Optional[int] = None
+
+class UserResponse(BaseModel):
+    """Schema for returning user information.
+    
+    Excludes sensitive data like passwords.
+    
+    Attributes:
+        userId: Unique identifier for the user
+        username: User's username
+        max_file_size: Maximum allowed file size in bytes for the user
+        role: User's role
+    """
+    userId: int
+    username: str
+    max_file_size: int
+    role: int
+
+    model_config = ConfigDict(from_attributes=True) #  Ensures compatibility with SQLAlchemy models

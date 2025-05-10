@@ -172,7 +172,7 @@ def testQueryEndpoint(base_url):
 
     # Case 4: Valid request
     logger.info("[testQueryEndpoint] Case 4: Valid request")
-    resp = requests.post(url, headers=headers, json={"query": "What is hte age of the user?", "chatId": "chat1", "pageContent": "Some content"})
+    resp = requests.post(url, headers=headers, json={"query": "I have changed my phone number to 807-555-5555", "chatId": "chat1", "pageContent": "Some content"})
     logger.info(f"[testQueryEndpoint] Case 4 Response: {resp.status_code}, {resp.text}")
     assert resp.status_code in (200, 500), f"[testQueryEndpoint] Case 4 failed: {resp.text}"
     if resp.status_code == 200:

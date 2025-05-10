@@ -17,6 +17,8 @@ import json
 from dotenv import load_dotenv
 from openai import OpenAI
 
+
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -25,7 +27,7 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
-from aiagent.memory.memory_manager import LongTermMemoryManager, ShortTermMemoryManager
+from aiagent.memory.memory_manager import BaseMemoryManager, LongTermMemoryManager, ShortTermMemoryManager
 from aiagent.context.reference import read_references
 
 
@@ -88,7 +90,7 @@ def query_openai(
         messages.append(
             {
                 "role": "system",
-                "content": f"User Profile: {user_profile}\nPreferences: {preferences}\nValues: {values}\nBeliefs: {beliefs}\nAuxiliary Data: {aux_data_str}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
+                "content": f"Here are the user details: \nUser Profile: {user_profile}\nPreferences: {preferences}\nValues: {values}\nBeliefs: {beliefs}\nAuxiliary Data: {aux_data_str}\nPast Conversations: {past_conversations}\nActive URL: {active_url}"
             }
         )
 
@@ -197,7 +199,65 @@ def summarize_conversation(query: str, response: str) -> str:
         logging.error(f"Error generating conversation summary: {e}")
         return "Error generating summary."
 
+def update_memory(query: str, response: str, memory: BaseMemoryManager):
+    # Initialize client and check API key here
+    try:
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            logging.error(
+                "OpenAI API key not found. Please set the OPENAI_API_KEY environment variable."
+            )
+            return "Summary not available - OpenAI API key not found."
+        client = OpenAI(api_key=api_key)
+    except Exception as e:
+        logging.exception(f"Failed to initialize OpenAI client: {e}")
+        return f"Summary not available - Failed to initialize OpenAI client: {e}"
+    try:
+        updated = False 
+        # Create a prompt to summarize the conversation
+        summary_prompt = f"""Given the following query, response, and memory, suggest a field to be added or updated in the memory. 
+        Return only the field name and value. 
+        Ex. field_name: value 
+        if multiple fields are suggested, return them in a list separated by commas. 
+        Ex. field_name: value, field_name: value 
+        if no field is suggested, return None: None 
+        follow the format exactly as shown above (without quotes or brackets (no square brackets or curly brackets) or any other characters)
+        :
+        User: {query}
+        AI: {response}
+        Memory: {memory._memory_content}
+        """
 
+        # Make the API call with a low max_tokens to ensure brevity
+        completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "user", "content": summary_prompt}],
+            max_tokens=100,
+            temperature=0.5,
+        )
+
+        # Extract and clean up the summary
+        suggested_updates = completion.choices[0].message.content
+
+        # parse the suggested updates
+        updates = suggested_updates.split(",")
+
+        # update the memory
+        for update in updates:
+            update = update.strip()
+            if update.startswith("None"):
+                continue
+            key, value = update.split(":")
+            memory.set(key.strip(), value.strip())
+            updated = True
+
+        logging.info(f"Memory updated: {memory._memory_content}")
+        return updated
+    except Exception as e:
+        logging.exception(f"Failed to update memory: {e}")
+        return False
+
+    
 
 def ask_ai(
     query: str,
