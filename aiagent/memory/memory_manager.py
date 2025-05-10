@@ -1,10 +1,8 @@
-
 import json
 import os
 import logging
 from typing import Dict, List, Optional, Any
     
-
 
 class BaseMemoryManager:
     """
@@ -12,8 +10,11 @@ class BaseMemoryManager:
     
     """
 
-    def __init__(self ):
-        self._memory_content = memory_content
+    self._memory_content: Dict = {}
+
+
+    def __init__(self, memory_content: Optional[Dict] = None):
+        self._memory_content = memory_content if memory_content is not None else {}
 
 
     @property
@@ -42,8 +43,8 @@ class ShortTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the short-term memory storage file
     """
     
-    def __init__(self):
-        super().__init__( memory_content)
+    def __init__(self, memory_content: Optional[Dict] = None):
+        super().__init__(memory_content)
 
 
     @property
@@ -78,7 +79,7 @@ class LongTermMemoryManager(BaseMemoryManager):
         memory_file (str): Path to the long-term memory storage file
     """
     
-    def __init__(self):
+    def __init__(self, memory_content: Optional[Dict] = None):
         super().__init__(memory_content)
 
 
@@ -106,6 +107,3 @@ if __name__ == "__main__":
     # set a field
     short_term_memory.set("test", "value")
     print(short_term_memory.get("test"))
-
-    
-
