@@ -120,23 +120,32 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
         
     Raises:
         HTTPException: 400 error if username already exists
+        HTTPException: 400 error if phone number already exists
     """
-    if db.query(User).filter(User.username == req.username).first():
-        raise HTTPException(status_code=400, detail="User already exists")
-    hashed_pw = get_password_hash(req.password)
-    
-    user_data = {"username": req.username, "hashed_password": hashed_pw}
-    if req.role is not None:
-        user_data["role"] = req.role
+    # Check for existing user by username
+    existing_user = db.query(User).filter(User.username == req.username).first()
+    if existing_user:
+        logger.warning(f"[register] Registration attempt with existing username: {req.username}")
+        raise HTTPException(status_code=400, detail="Username already registered")
+
+    # Check for existing user by phone_number if provided
     if req.phone_number is not None:
-        user_data["phone_number"] = req.phone_number
-        
-    user = User(**user_data)
-    
-    db.add(user)
+        existing_user_by_phone = db.query(User).filter(User.phone_number == req.phone_number).first()
+        if existing_user_by_phone:
+            logger.warning(f"[register] Registration attempt with existing phone number: {req.phone_number}")
+            raise HTTPException(status_code=400, detail="Phone number already registered")
+
+    # Create new user
+    hashed_password = get_password_hash(req.password)
+    new_user = User(
+        username=req.username, 
+        hashed_password=hashed_password,
+        phone_number=req.phone_number # Ensure phone_number is assigned here
+    )
+    db.add(new_user)
     db.commit()
-    db.refresh(user)
-    user_folder = os.path.join(ASSETS_FOLDER, str(user.userId))
+    db.refresh(new_user)
+    user_folder = os.path.join(ASSETS_FOLDER, str(new_user.userId))
     os.makedirs(user_folder, exist_ok=True)
     
     # Create shortterm and longterm memory files for the user
@@ -146,7 +155,7 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     # Save memory files to the database
     shortterm_memory_file = DBFile(
         filename="short_term_memory.json",
-        userId=user.userId,
+        userId=new_user.userId,
         size=len(json.dumps(shortterm_memory)),
         content=json.dumps(shortterm_memory).encode('utf-8'),
         content_type="application/json"
@@ -154,7 +163,7 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     
     longterm_memory_file = DBFile(
         filename="long_term_memory.json",
-        userId=user.userId,
+        userId=new_user.userId,
         size=len(json.dumps(longterm_memory)),
         content=json.dumps(longterm_memory).encode('utf-8'),
         content_type="application/json"
@@ -164,7 +173,7 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     db.add(longterm_memory_file)
     db.commit()
     
-    return {"message": "Registered successfully", "userId": user.userId}
+    return {"message": "Registered successfully", "userId": new_user.userId}
 
 @router.delete("/user/{username}")
 def delete_user(username: str, current_user: User = Depends(get_current_user), db: SessionLocal = Depends(get_db)):
@@ -952,7 +961,7 @@ def profile(current_user: User = Depends(get_current_user)):
     """Get profile information for the currently authenticated user.
     
     Returns:
-        UserResponse: The authenticated user's profile data, including their role.
+        UserResponse: The authenticated user's profile data, including their role and phone number.
     """
     # The current_user object (SQLAlchemy model) will be automatically
     # converted to a UserResponse Pydantic model by FastAPI.
@@ -960,7 +969,8 @@ def profile(current_user: User = Depends(get_current_user)):
         userId=current_user.userId,
         username=current_user.username,
         max_file_size=current_user.max_file_size,
-        role=current_user.role
+        role=current_user.role,
+        phone_number=current_user.phone_number
     )
 
 # --- Twilio Webhook Endpoints ---
@@ -986,53 +996,72 @@ async def handle_twilio_incoming_message(request: Request, From: str = Form(...)
         log_response(200, twiml_response, endpoint_name)
         return Response(content=twiml_response, media_type="application/xml", status_code=200)
 
+    phone_number_to_lookup = None
     try:
-        # Attempt to convert the string of digits to an integer
-        # Twilio E.164 might start with '+', re.sub removes it, leaving digits.
-        # Our DB stores it as BigInteger, so direct comparison is fine.
-        # If there's a leading '1' for US numbers, it should be included in what's stored if it's part of the lookup.
-        # Assuming phone_number in DB is stored as a full international number without '+' but including country code.
         phone_number_to_lookup = int(normalized_from_number_str)
         found_user = db.query(User).filter(User.phone_number == phone_number_to_lookup).first()
         if found_user:
             logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number_str} (parsed as {phone_number_to_lookup}) to user {found_user.username} (ID: {found_user.userId}) via direct DB lookup.")
     except ValueError:
         logger.error(f"[{endpoint_name}] Could not convert normalized phone number '{normalized_from_number_str}' to int for DB lookup.")
+        found_user = None # Ensure found_user is None if conversion fails
     except Exception as e:
         logger.error(f"[{endpoint_name}] Error during direct DB lookup for phone number {normalized_from_number_str}: {e}")
+        found_user = None # Ensure found_user is None on other DB errors
 
-    # Fallback: If direct lookup fails or phone_number field is not populated for some users,
-    # try the old LTM-based lookup (optional, consider removing if all users will have phone_number in User table)
-    # For now, let's keep the LTM lookup as a fallback to maintain compatibility with older data.
+    # Only attempt LTM fallback if direct DB lookup failed AND phone_number_to_lookup was valid (i.e. parseable)
+    # This avoids LTM lookup for malformed 'From' numbers.
+    if not found_user and phone_number_to_lookup is not None: 
+        logger.info(f"[{endpoint_name}] User not found via direct DB lookup for {normalized_from_number_str}. LTM fallback for phone numbers is disabled if User.phone_number is primary identifier.")
+        # The LTM fallback for matching based on a phone number in the LTM JSON is problematic 
+        # if User.phone_number is the canonical source. We'll skip it to avoid false positives.
+        # If a user was found by phone_number in DB, found_user would be set. 
+        # If not, and the number is unknown, it should remain unknown.
+        pass # Explicitly doing nothing here for LTM phone fallback
+
+    # If still no user after direct DB lookup (LTM phone lookup is now skipped)
+    # The original LTM logic for users without any phone_number in DB might still be relevant
+    # for OTHER (non-phone based) identification if that was ever a feature, but for phone-based lookup, DB is king.
     if not found_user:
-        logger.info(f"[{endpoint_name}] User not found via direct DB lookup for {normalized_from_number_str}. Attempting LTM fallback.")
-        users_in_db = db.query(User).all()
-        for user_record in users_in_db:
+        # Fallback to checking LTM for users who DO NOT have a phone_number set in the database.
+        # This is to maintain compatibility for any users who might have been identified via LTM content previously
+        # AND do not have a phone_number in their User record.
+        logger.info(f"[{endpoint_name}] User not found by direct phone DB lookup. Checking LTM for users with NO DB phone_number.")
+        users_for_ltm_fallback = db.query(User).filter(User.phone_number.is_(None)).all()
+        
+        for user_record in users_for_ltm_fallback:
+            # IMPORTANT: This LTM check should NOT try to match by phone_number again here.
+            # It should only match if the LTM content itself identifies the user through some other means
+            # if that was an intended feature. For now, we assume if phone didn't match DB, and LTM is for non-phone users,
+            # it won't find this specific caller unless the LTM had a *different* identifier for them.
+            # To prevent false positives from the previous broad LTM check, we will *not* re-check ltm_phone_number here.
+            # The goal is if direct DB phone lookup fails, and it's an unknown number, it should be treated as such.
+            # This loop is more for users without phone numbers at all in the DB.
+
+            # Original LTM loading logic (if needed for other identification methods in LTM for users without DB phone numbers):
             longterm_file = db.query(DBFile).filter(
                 DBFile.userId == user_record.userId,
                 DBFile.filename == "long_term_memory.json"
             ).first()
-            if longterm_file and longterm_file.content:
+
+            if longterm_file:
                 try:
                     ltm_content = json.loads(longterm_file.content.decode('utf-8'))
-                    stored_phone = ltm_content.get("values", {}).get("phone_number", "")
-                    normalized_stored_phone = re.sub(r'\D', '', stored_phone) # Normalize LTM phone
-                    
-                    # Match suffix of numbers if one is shorter, common for international vs local
-                    # Or if numbers are identical after normalization
-                    if normalized_stored_phone == normalized_from_number_str or \
-                       (normalized_stored_phone.endswith(normalized_from_number_str) and len(normalized_from_number_str) < len(normalized_stored_phone)) or \
-                       (normalized_from_number_str.endswith(normalized_stored_phone) and len(normalized_stored_phone) < len(normalized_from_number_str)):
-                        found_user = user_record
-                        logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number_str} to user {found_user.username} (ID: {found_user.userId}) via LTM fallback.")
-                        break
+                    # If there was some OTHER field in LTM to identify a user (not phone_number)
+                    # that logic would go here. For this specific issue, we are focusing on phone_number lookups.
+                    # Example: if ltm_content.get('some_other_id') == expected_other_id:
+                    #    found_user = user_record
+                    #    logger.info(f"[{endpoint_name}] Matched LTM (non-phone criteria) to user {user_record.username}")
+                    #    break 
                 except json.JSONDecodeError:
-                    logger.error(f"[{endpoint_name}] Could not parse long_term_memory for user {user_record.userId} during LTM fallback.")
+                    logger.error(f"[{endpoint_name}] Could not decode LTM JSON for user {user_record.userId}.")
                 except Exception as e:
-                    logger.error(f"[{endpoint_name}] Error processing LTM for user {user_record.userId} during LTM fallback: {e}")
+                    logger.error(f"[{endpoint_name}] Error processing LTM for user {user_record.userId}: {e}")
+            if found_user: # if LTM (non-phone) check found a user
+                break
 
     if not found_user:
-        logger.warning(f"[{endpoint_name}] No user found for Twilio number {normalized_from_number_str} ({From}) after all lookups.")
+        logger.warning(f"[{endpoint_name}] No user found for Twilio number {normalized_from_number_str} ({From}) after all lookups. Sending 'not recognized' message.")
         twiml_response = "<Response><Message>Sorry, your phone number is not recognized in our system.</Message></Response>"
         log_response(200, twiml_response, endpoint_name)
         return Response(content=twiml_response, media_type="application/xml", status_code=200)

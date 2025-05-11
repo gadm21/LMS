@@ -90,12 +90,12 @@ def registerUser(base_url, user_payload=None):
     except Exception as e:
         logger.error(f"[registerUser] Error parsing response: {e}")
 
-def loginUser(base_url, user):
-    logger.info(f"[loginUser] Logging in user: {user['username']}") # user is now the payload
-    login_payload = {"username": user["username"], "password": user["password"]}
+def loginUser(base_url, user_payload_dict):
+    logger.info(f"[loginUser] Logging in user: {user_payload_dict['username']}") # user_payload_dict is the dict
+    login_data = {"username": user_payload_dict["username"], "password": user_payload_dict["password"]}
     resp = requests.post(
         f"{base_url}/token", 
-        data=login_payload, 
+        data=login_data, 
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
     logger.info(f"[loginUser] Response status: {resp.status_code}, body: {resp.json()}")
@@ -107,7 +107,7 @@ def test_upload_file(base_url):
     logger.info("[test_upload_file] START")
     user_payload, reg_resp = registerUser(base_url)
     assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
-    token = loginUser(base_url, user_payload)
+    token = loginUser(base_url, user_payload) # Pass the dict part
     headers = {"Authorization": f"Bearer {token}"}
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     logger.info(f"[test_upload_file] Uploading file: {TEST_FILE_NAME}")
@@ -185,7 +185,7 @@ def testQueryEndpoint(base_url):
     logger.info("[testQueryEndpoint] START")
     user_payload, reg_resp = registerUser(base_url)
     assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
-    token = loginUser(base_url, user_payload)
+    token = loginUser(base_url, user_payload) # Pass the dict part
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     url = f"{base_url}/query"
     # Case 1: Missing JSON body
@@ -245,9 +245,9 @@ def test_twilio_incoming_sms_known_number(base_url):
     assert "Sorry, your phone number is not recognized" not in resp.text # Should be an AI response or similar
     
     # Clean up
-    token = loginUser(base_url, registered_user)
-    auth_headers = {"Authorization": f"Bearer {token}"}
-    requests.delete(f"{base_url}/user/{registered_user['username']}", headers=auth_headers)
+    cleanup_token = loginUser(base_url, registered_user) 
+    auth_headers_cleanup = {"Authorization": f"Bearer {cleanup_token}"}
+    requests.delete(f"{base_url}/user/{registered_user['username']}", headers=auth_headers_cleanup)
     logger.info("[test_twilio_incoming_sms_known_number] END")
 
 def test_twilio_incoming_sms_unknown_number(base_url):
@@ -301,39 +301,35 @@ def test_delete_user(base_url):
     """
     logger.info("[test_delete_user] START")
     # Use a unique user for this test
-    user = getUniqueUser()
-    logger.info(f"[test_delete_user] Registering user: {user}")
-    # Register and login
-    registerUser(base_url, user)
-    token = loginUser(base_url, user)
-    headers = {"Authorization": f"Bearer {token}"}
-    username = user["username"]
+    user1_payload, reg_resp1 = registerUser(base_url, getUniqueUser())
+    assert reg_resp1.status_code == 200, f"user1 registration failed: {reg_resp1.text}"
+    token1 = loginUser(base_url, user1_payload)
+    headers1 = {"Authorization": f"Bearer {token1}"}
+
+    # Register user2 (will attempt to delete user1)
+    user2_payload, reg_resp2 = registerUser(base_url, getUniqueUser())
+    assert reg_resp2.status_code == 200, f"user2 registration failed: {reg_resp2.text}"
+    token2 = loginUser(base_url, user2_payload)
+    headers2 = {"Authorization": f"Bearer {token2}"}
+    username = user1_payload["username"]
     url = f"{base_url}/user/{username}"
 
     # Success: user deletes themselves
     logger.info(f"[test_delete_user] Deleting user {username} (self-delete)")
-    resp = requests.delete(url, headers=headers)
+    resp = requests.delete(url, headers=headers1)
     logger.info(f"[test_delete_user] Delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 200, f"[test_delete_user] Delete failed: {resp.text}"
     assert resp.json()["message"].startswith(f"User '{username}' deleted successfully.")
 
     # Not found: try deleting again
     logger.info(f"[test_delete_user] Try deleting user {username} again (should be not found/unauthorized)")
-    resp = requests.delete(url, headers=headers)
+    resp = requests.delete(url, headers=headers1)
     logger.info(f"[test_delete_user] Second delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 401, f"[test_delete_user] Second delete failed: {resp.text}"
 
     # Forbidden: another user tries to delete test user
-    logger.info(f"[test_delete_user] Re-registering user {username}")
-    registerUser(base_url, user)
-    # Register a second unique user
-    second_user = getUniqueUser()
-    logger.info(f"[test_delete_user] Registering second user: {second_user}")
-    registerUser(base_url, second_user)
-    other_token = loginUser(base_url, second_user)
-    other_headers = {"Authorization": f"Bearer {other_token}"}
     logger.info(f"[test_delete_user] Second user attempts to delete {username}")
-    resp = requests.delete(url, headers=other_headers)
+    resp = requests.delete(url, headers=headers2)
     logger.info(f"[test_delete_user] Forbidden delete response: {resp.status_code}, {resp.text}")
     assert resp.status_code == 403, f"[test_delete_user] Forbidden delete failed: {resp.text}"
     assert resp.json()["detail"] == "You can only delete your own account."
@@ -341,9 +337,16 @@ def test_delete_user(base_url):
 
 def test_list_files(base_url):
     logger.info("[test_list_files] START")
-    user = registerUser(base_url)
-    token = loginUser(base_url, user)
-    headers = {"Authorization": f"Bearer {token}"}
+    user_payload, reg_resp = registerUser(base_url)
+    assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
+    token = loginUser(base_url, user_payload) # Pass the dict part
+    headers = {'Authorization': f'Bearer {token}'}
+    
+    # Upload a file first to ensure there's something to list
+    files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
+    upload_resp = requests.post(f"{base_url}/upload", headers=headers, files=files)
+    assert upload_resp.status_code == 200, f"[test_list_files] Upload failed: {upload_resp.text}"
+    
     logger.info("[test_list_files] Listing files")
     resp = requests.get(f"{base_url}/files", headers=headers)
     logger.info(f"[test_list_files] Response status: {resp.status_code}, body: {resp.json()}")
@@ -354,17 +357,17 @@ def test_list_files(base_url):
     assert "files" in response_data
     assert isinstance(response_data["files"], list)
     # Clean up: delete user
-    requests.delete(f"{base_url}/user/{user['username']}", headers=headers)
+    requests.delete(f"{base_url}/user/{user_payload['username']}", headers=headers)
     logger.info("[test_list_files] END")
 
 def test_download_file(base_url):
     logger.info("[test_download_file] START")
-    user = registerUser(base_url)
-    token = loginUser(base_url, user)
-    headers = {"Authorization": f"Bearer {token}"}
+    user_payload, reg_resp = registerUser(base_url)
+    assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
+    token = loginUser(base_url, user_payload) # Pass the dict part
+    headers = {'Authorization': f'Bearer {token}'}
     
-    # First upload a file
-    logger.info(f"[test_download_file] Uploading file: {TEST_FILE_NAME}")
+    # Upload a file to download
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     upload_resp = requests.post(f"{base_url}/upload", headers=headers, files=files)
     assert upload_resp.status_code == 200, f"[test_download_file] Upload failed: {upload_resp.text}"
@@ -382,18 +385,18 @@ def test_download_file(base_url):
     assert resp.status_code == 200, f"[test_download_file] Download failed: {resp.text}"
     assert resp.content == TEST_FILE_CONTENT
     
-    # Clean up: delete user
-    requests.delete(f"{base_url}/user/{user['username']}", headers=headers)
+    # Clean up by deleting the user which should also handle file cleanup if implemented
+    requests.delete(f"{base_url}/user/{user_payload['username']}", headers=headers)
     logger.info("[test_download_file] END")
 
 def test_delete_file(base_url):
     logger.info("[test_delete_file] START")
-    user = registerUser(base_url)
-    token = loginUser(base_url, user)
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # First upload a file
-    logger.info(f"[test_delete_file] Uploading file: {TEST_FILE_NAME}")
+    user_payload, reg_resp = registerUser(base_url)
+    assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
+    token = loginUser(base_url, user_payload) # Pass the dict part
+    headers = {'Authorization': f'Bearer {token}'}
+
+    # Upload a file to delete
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     upload_resp = requests.post(f"{base_url}/upload", headers=headers, files=files)
     assert upload_resp.status_code == 200, f"[test_delete_file] Upload failed: {upload_resp.text}"
@@ -416,7 +419,7 @@ def test_delete_file(base_url):
     assert msg is not None and "deleted" in msg
     
     # Clean up: delete user
-    requests.delete(f"{base_url}/user/{user['username']}", headers=headers)
+    requests.delete(f"{base_url}/user/{user_payload['username']}", headers=headers)
     
     # Confirm file is gone by checking the files list
     resp = requests.get(f"{base_url}/files", headers=headers)
