@@ -1,124 +1,141 @@
-[22:57:50] INFO Created directory structure: /Users/gadmohamed/Desktop/LMS/aiagent/data and /Users/gadmohamed/Desktop/LMS/aiagent/data/references
-[22:57:51] INFO Testing against: https://lms-swart-five.vercel.app (VERCEL)
-[22:57:51] INFO [test_server_health] Testing server health
-[22:57:51] INFO [test_server_health] Profile endpoint response: 401, {"detail":"Not authenticated"}
-[22:57:52] INFO [test_server_health] Root endpoint response: 200, {"message":"LMS API is running"}
-[22:57:52] INFO [test_server_health] Server is responding to requests
-[22:57:52] INFO [test_upload_file] START
-[22:57:52] INFO [registerUser] Registering user with payload: None
-[22:57:52] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_4cb1b471', 'password': 'testpass123'}
-[22:57:53] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":911}
-[22:57:53] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 911}
-[22:57:53] INFO [loginUser] Logging in user: testuser_4cb1b471
-[22:57:54] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl80Y2IxYjQ3MSIsImV4cCI6MTc0NjkzNTg3NH0.esOt0ocSILe_VKl7F79kne_2JV6nA1lVleldEX6srW8', 'token_type': 'bearer'}
-[22:57:54] INFO [test_upload_file] Uploading file: testfile.txt
-[22:57:54] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11, 'fileId': 527, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T02:57:54.623767'}
-[22:57:54] INFO [test_upload_file] END
-[22:57:54] INFO [test_active_url_success] START
-[22:57:54] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
-[22:57:54] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
-[22:57:54] INFO [test_active_url_success] END
-[22:57:54] INFO [test_active_url_missing_url] START
-[22:57:54] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
-[22:57:55] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
-[22:57:55] INFO [test_active_url_missing_url] END
-[22:57:55] INFO [test_profile] START
-[22:57:55] INFO [registerUser] Registering user with payload: {'username': 'testuser_207980f0', 'password': 'testpass123', 'phone_number': 1986465921}
-[22:57:55] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_207980f0', 'password': 'testpass123', 'phone_number': 1986465921}
-[22:57:55] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":912}
-[22:57:55] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 912}
-[22:57:55] INFO [loginUser] Logging in user: testuser_207980f0
-[22:57:56] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yMDc5ODBmMCIsImV4cCI6MTc0NjkzNTg3Nn0.qpCRTaeja9CnKCUWa-UGvBLCYq3loeC1eFtmD-768JA', 'token_type': 'bearer'}
-[22:57:57] INFO [test_profile] Profile response (with phone): 200, body: {'userId': 912, 'username': 'testuser_207980f0', 'max_file_size': 524288000, 'role': 0, 'phone_number': None}
-[22:57:57] INFO [testQueryEndpoint] START
-[22:57:57] INFO [registerUser] Registering user with payload: None
-[22:57:57] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_afa2a937', 'password': 'testpass123'}
-[22:57:58] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":913}
-[22:57:58] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 913}
-[22:57:58] INFO [loginUser] Logging in user: testuser_afa2a937
-[22:57:58] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hZmEyYTkzNyIsImV4cCI6MTc0NjkzNTg3OX0.I2iCl-hh6ts3V6BVBgoAOKilJPI4DQ4iKWZX_o16LtU', 'token_type': 'bearer'}
-[22:57:58] INFO [testQueryEndpoint] Case 1: Missing JSON body
-[22:57:59] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Empty request body"}
-[22:57:59] INFO [testQueryEndpoint] Case 2: Missing 'query' field
-[22:57:59] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
-[22:57:59] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
-[22:57:59] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
-[22:57:59] INFO [testQueryEndpoint] Case 4: Valid request
-[22:58:02] INFO [testQueryEndpoint] Case 4 Response: 200, {"response":"Got it, I've noted down your new phone number. Is there anything specific you'd like assistance with regarding the page content you mentioned?","query":"I have changed my phone number to 807-555-5555\n\nHere is the page content: Some content","chat_id":"chat1","queryId":85}
-[22:58:02] INFO [testQueryEndpoint] END
-[22:58:02] INFO [test_twilio_incoming_sms_known_number] START
-[22:58:02] INFO [registerUser] Registering user with payload: {'username': 'testuser_3557a623', 'password': 'testpass123', 'phone_number': 18005551212}
-[22:58:02] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_3557a623', 'password': 'testpass123', 'phone_number': 18005551212}
-[22:58:03] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":914}
-[22:58:03] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 914}
-[22:58:03] INFO [test_twilio_incoming_sms_known_number] Sending Twilio webhook simulation: {'From': '+18005551212', 'Body': 'Hello from Twilio test'}
-[22:58:05] INFO [test_twilio_incoming_sms_known_number] Response: 200, Content-Type: application/xml, Text: <Response><Message>Hello! How can I assist you today?</Message></Response>
-[22:58:05] INFO [loginUser] Logging in user: testuser_3557a623
-[22:58:05] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zNTU3YTYyMyIsImV4cCI6MTc0NjkzNTg4Nn0.TvsxFiChRwkDcKc5gq7uxCVs2huUK4473yOn3JK1v8s', 'token_type': 'bearer'}
-[22:58:06] INFO [test_twilio_incoming_sms_known_number] END
-[22:58:06] INFO [test_twilio_incoming_sms_unknown_number] START
-[22:58:06] INFO [test_twilio_incoming_sms_unknown_number] Sending Twilio webhook simulation for unknown number: {'From': '+19998887777', 'Body': 'Who dis?'}
-[22:58:07] INFO [test_twilio_incoming_sms_unknown_number] Response: 200, Content-Type: application/xml, Text: <Response><Message>Hello! I'm an AI assistant here to help you. How can I assist you today?</Message></Response>
-[22:58:07] INFO [test_register_duplicate_phone_number] START
-[22:58:07] INFO [registerUser] Registering user with payload: {'username': 'testuser_a11c3226', 'password': 'testpass123', 'phone_number': 18005551234}
-[22:58:07] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_a11c3226', 'password': 'testpass123', 'phone_number': 18005551234}
-[22:58:08] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":915}
-[22:58:08] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 915}
-[22:58:08] INFO [registerUser] Registering user with payload: {'username': 'testuser_e72536d7', 'password': 'testpass123', 'phone_number': 18005551234}
-[22:58:08] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_e72536d7', 'password': 'testpass123', 'phone_number': 18005551234}
-[22:58:09] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":916}
-[22:58:09] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 916}
-[22:58:09] INFO [test_register_duplicate_phone_number] Response for user2 (duplicate phone): 200, {"message":"Registered successfully","userId":916}
-[22:58:09] INFO [test_delete_user] START
-[22:58:09] INFO [registerUser] Registering user with payload: {'username': 'testuser_33169c96', 'password': 'testpass123'}
-[22:58:09] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_33169c96', 'password': 'testpass123'}
-[22:58:10] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":917}
-[22:58:10] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 917}
-[22:58:10] INFO [loginUser] Logging in user: testuser_33169c96
-[22:58:11] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8zMzE2OWM5NiIsImV4cCI6MTc0NjkzNTg5MX0.JugkGPPFBSLCTacO_Qlz_H_3u_iTlajhUQ4wg21ZoLk', 'token_type': 'bearer'}
-[22:58:11] INFO [registerUser] Registering user with payload: {'username': 'testuser_efa9524e', 'password': 'testpass123'}
-[22:58:11] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_efa9524e', 'password': 'testpass123'}
-[22:58:12] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":918}
-[22:58:12] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 918}
-[22:58:12] INFO [loginUser] Logging in user: testuser_efa9524e
-[22:58:12] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9lZmE5NTI0ZSIsImV4cCI6MTc0NjkzNTg5M30.0tpMIHtrKzpvKDO4HLDAvFkbf3ZuP6jxnhGGPYH_ZtI', 'token_type': 'bearer'}
-[22:58:12] INFO [test_delete_user] Deleting user testuser_33169c96 (self-delete)
-[22:58:13] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_33169c96' deleted successfully."}
-[22:58:13] INFO [test_delete_user] Try deleting user testuser_33169c96 again (should be not found/unauthorized)
-[22:58:13] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
-[22:58:13] INFO [test_delete_user] Second user attempts to delete testuser_33169c96
-[22:58:13] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
-[22:58:13] INFO [test_delete_user] END
-[22:58:13] INFO [test_list_files] START
-[22:58:13] INFO [registerUser] Registering user with payload: None
-[22:58:13] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_81522548', 'password': 'testpass123'}
-[22:58:14] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":919}
-[22:58:14] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 919}
-[22:58:14] INFO [loginUser] Logging in user: testuser_81522548
-[22:58:15] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84MTUyMjU0OCIsImV4cCI6MTc0NjkzNTg5NX0.aqrqQ2KRRcmj6tNldSHCUsWB2FSkht1joMrkm1pYaKo', 'token_type': 'bearer'}
-[22:58:15] INFO [test_list_files] Listing files
-[22:58:15] INFO [test_list_files] Response status: 200, body: {'files': [{'fileId': 542, 'filename': 'short_term_memory.json', 'size': 39, 'uploaded_at': '2025-05-11T02:58:14.535620'}, {'fileId': 543, 'filename': 'long_term_memory.json', 'size': 269, 'uploaded_at': '2025-05-11T02:58:14.535625'}, {'fileId': 544, 'filename': 'testfile.txt', 'size': 11, 'uploaded_at': '2025-05-11T02:58:15.684462'}], 'count': 3}
-[22:58:16] INFO [test_list_files] END
-[22:58:16] INFO [test_download_file] START
-[22:58:16] INFO [registerUser] Registering user with payload: None
-[22:58:16] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_1b820ad4', 'password': 'testpass123'}
-[22:58:16] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":920}
-[22:58:16] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 920}
-[22:58:16] INFO [loginUser] Logging in user: testuser_1b820ad4
-[22:58:17] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8xYjgyMGFkNCIsImV4cCI6MTc0NjkzNTg5N30.dLK8CCfR5Wq0YzqnZpZcJjVHfYlX8Xo61a1EeJEM8oU', 'token_type': 'bearer'}
-[22:58:17] INFO [test_download_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 547, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T02:58:18.082006'}
-[22:58:17] INFO [test_download_file] Downloading file with ID: 547
-[22:58:18] INFO [test_download_file] Response status: 200, length: 11
-[22:58:18] INFO [test_download_file] END
-[22:58:18] INFO [test_delete_file] START
-[22:58:18] INFO [registerUser] Registering user with payload: None
-[22:58:18] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_f7fa7c29', 'password': 'testpass123'}
-[22:58:19] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":921}
-[22:58:19] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 921}
-[22:58:19] INFO [loginUser] Logging in user: testuser_f7fa7c29
-[22:58:19] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9mN2ZhN2MyOSIsImV4cCI6MTc0NjkzNTkwMH0.JKJqsvLaBXfsayrvzNo3_nasFXvCqrctr39h7dsfghE', 'token_type': 'bearer'}
-[22:58:20] INFO [test_delete_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 550, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T02:58:20.567882'}
-[22:58:20] INFO [test_delete_file] Deleting file with ID: 550
-[22:58:20] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully.", 'fileId': 550}
-[22:58:21] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
-[22:58:21] INFO [test_delete_file] END
+[23:04:48] INFO Created directory structure: /Users/gadmohamed/Desktop/LMS/aiagent/data and /Users/gadmohamed/Desktop/LMS/aiagent/data/references
+[23:04:50] INFO Testing against: https://lms-swart-five.vercel.app (VERCEL)
+[23:04:50] INFO [test_server_health] Testing server health
+[23:04:50] INFO [test_server_health] Profile endpoint response: 401, {"detail":"Not authenticated"}
+[23:04:50] INFO [test_server_health] Root endpoint response: 200, {"message":"LMS API is running"}
+[23:04:50] INFO [test_server_health] Server is responding to requests
+[23:04:50] INFO [test_upload_file] START
+[23:04:50] INFO [registerUser] Registering user with payload: None
+[23:04:50] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_4a575667', 'password': 'testpass123'}
+[23:04:51] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":942}
+[23:04:51] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 942}
+[23:04:51] INFO [loginUser] Logging in user: testuser_4a575667
+[23:04:52] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl80YTU3NTY2NyIsImV4cCI6MTc0NjkzNjI5Mn0.-E7d2N7U_UzQ9T8pH7WZo2IqabZLfBY5F6ejwvjwr3w', 'token_type': 'bearer'}
+[23:04:52] INFO [test_upload_file] Uploading file: testfile.txt
+[23:04:52] INFO [test_upload_file] Response status: 200, body: {'filename': 'testfile.txt', 'size': 11, 'fileId': 601, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T03:04:52.600624'}
+[23:04:52] INFO [test_upload_file] END
+[23:04:52] INFO [test_active_url_success] START
+[23:04:52] INFO [test_active_url_success] Payload: {'url': 'https://example.com', 'title': 'Example Page'}
+[23:04:52] INFO [test_active_url_success] Response status: 200, body: {'data': {'status': 'success'}}
+[23:04:52] INFO [test_active_url_success] END
+[23:04:53] INFO [test_active_url_missing_url] START
+[23:04:53] INFO [test_active_url_missing_url] Payload: {'title': 'Example Page'}
+[23:04:53] INFO [test_active_url_missing_url] Response status: 400, body: {'error': 'Missing URL'}
+[23:04:53] INFO [test_active_url_missing_url] END
+[23:04:53] INFO [test_profile] START
+[23:04:53] INFO [registerUser] Registering user with payload: {'username': 'testuser_af9e9ba3', 'password': 'testpass123', 'phone_number': 1777614447}
+[23:04:53] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_af9e9ba3', 'password': 'testpass123', 'phone_number': 1777614447}
+[23:04:54] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":943}
+[23:04:54] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 943}
+[23:04:54] INFO [loginUser] Logging in user: testuser_af9e9ba3
+[23:04:55] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hZjllOWJhMyIsImV4cCI6MTc0NjkzNjI5NX0._xxOOH6NWDnMUg85MCI2wttsXxOEUUIjtwGNkV53Cac', 'token_type': 'bearer'}
+[23:04:55] INFO [test_profile] Profile response (with phone): 200, body: {'userId': 943, 'username': 'testuser_af9e9ba3', 'max_file_size': 524288000, 'role': 0, 'phone_number': 1777614447}
+[23:04:55] INFO [registerUser] Registering user with payload: {'username': 'testuser_8d2e9707', 'password': 'testpass123'}
+[23:04:55] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_8d2e9707', 'password': 'testpass123'}
+[23:04:56] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":944}
+[23:04:56] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 944}
+[23:04:56] INFO [loginUser] Logging in user: testuser_8d2e9707
+[23:04:56] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl84ZDJlOTcwNyIsImV4cCI6MTc0NjkzNjI5Nn0.pWZhDRzByQDO7o3WNM80rXUeC8IVgFl8uYqU58yit9A', 'token_type': 'bearer'}
+[23:04:57] INFO [test_profile] Profile response (no phone): 200, body: {'userId': 944, 'username': 'testuser_8d2e9707', 'max_file_size': 524288000, 'role': 0, 'phone_number': None}
+[23:04:57] INFO [test_profile] END
+[23:04:57] INFO [testQueryEndpoint] START
+[23:04:57] INFO [registerUser] Registering user with payload: None
+[23:04:57] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_f33dd0c2', 'password': 'testpass123'}
+[23:04:58] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":945}
+[23:04:58] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 945}
+[23:04:58] INFO [loginUser] Logging in user: testuser_f33dd0c2
+[23:04:59] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9mMzNkZDBjMiIsImV4cCI6MTc0NjkzNjI5OX0.cgZfAYp2SYZF8Aqv2UX51zqyiDNyI62RAG6I_4e_sXM', 'token_type': 'bearer'}
+[23:04:59] INFO [testQueryEndpoint] Case 1: Missing JSON body
+[23:04:59] INFO [testQueryEndpoint] Case 1 Response: 400, {"error":"Empty request body"}
+[23:04:59] INFO [testQueryEndpoint] Case 2: Missing 'query' field
+[23:04:59] INFO [testQueryEndpoint] Case 2 Response: 400, {"error":"No query provided"}
+[23:04:59] INFO [testQueryEndpoint] Case 3: Missing 'chatId' field
+[23:05:00] INFO [testQueryEndpoint] Case 3 Response: 400, {"error":"No chat ID provided"}
+[23:05:00] INFO [testQueryEndpoint] Case 4: Valid request
+[23:05:03] INFO [testQueryEndpoint] Case 4 Response: 200, {"response":"I see that you have updated your phone number to 807-555-5555. How can I assist you with the page content you provided?","query":"I have changed my phone number to 807-555-5555\n\nHere is the page content: Some content","chat_id":"chat1","queryId":92}
+[23:05:03] INFO [testQueryEndpoint] END
+[23:05:03] INFO [test_twilio_incoming_sms_known_number] START
+[23:05:03] INFO [registerUser] Registering user with payload: {'username': 'testuser_a86d62ac', 'password': 'testpass123', 'phone_number': 18005551212}
+[23:05:03] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_a86d62ac', 'password': 'testpass123', 'phone_number': 18005551212}
+[23:05:04] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":946}
+[23:05:04] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 946}
+[23:05:04] INFO [test_twilio_incoming_sms_known_number] Sending Twilio webhook simulation: {'From': '+18005551212', 'Body': 'Hello from Twilio test'}
+[23:05:06] INFO [test_twilio_incoming_sms_known_number] Response: 200, Content-Type: application/xml, Text: <Response><Message>Hello! How can I assist you today?</Message></Response>
+[23:05:06] INFO [loginUser] Logging in user: testuser_a86d62ac
+[23:05:07] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hODZkNjJhYyIsImV4cCI6MTc0NjkzNjMwN30.sglqMK06WbPT8323crEECZbj4eGFMX-iixrGFgKCLPc', 'token_type': 'bearer'}
+[23:05:07] INFO [test_twilio_incoming_sms_known_number] END
+[23:05:07] INFO [test_twilio_incoming_sms_unknown_number] START
+[23:05:07] INFO [test_twilio_incoming_sms_unknown_number] Sending Twilio webhook simulation for unknown number: {'From': '+19998887777', 'Body': 'Who dis?'}
+[23:05:08] INFO [test_twilio_incoming_sms_unknown_number] Response: 200, Content-Type: application/xml, Text: <Response><Message>Sorry, your phone number is not recognized in our system.</Message></Response>
+[23:05:08] INFO [test_twilio_incoming_sms_unknown_number] END
+[23:05:08] INFO [test_register_duplicate_phone_number] START
+[23:05:08] INFO [registerUser] Registering user with payload: {'username': 'testuser_d7d13279', 'password': 'testpass123', 'phone_number': 1077857035}
+[23:05:08] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_d7d13279', 'password': 'testpass123', 'phone_number': 1077857035}
+[23:05:08] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":947}
+[23:05:08] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 947}
+[23:05:08] INFO [test_register_duplicate_phone_number] User1 testuser_d7d13279 registered successfully with phone 1077857035
+[23:05:08] INFO [test_register_duplicate_phone_number] Attempting to register user2 testuser_b241622d with duplicate phone 1077857035
+[23:05:08] INFO [registerUser] Registering user with payload: {'username': 'testuser_b241622d', 'password': 'testpass123', 'phone_number': 1077857035}
+[23:05:08] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_b241622d', 'password': 'testpass123', 'phone_number': 1077857035}
+[23:05:09] INFO [registerUser] Response status: 400, raw response: {"detail":"Phone number already registered"}
+[23:05:09] WARNING [registerUser] Registration did not return 200. Status: 400, Response: {"detail":"Phone number already registered"}
+[23:05:09] INFO [test_register_duplicate_phone_number] Response for user2 (attempting duplicate phone): 400, {"detail":"Phone number already registered"}
+[23:05:09] INFO [test_register_duplicate_phone_number] Correctly received 400 for user2 with duplicate phone.
+[23:05:09] INFO [test_register_duplicate_phone_number] Cleaning up user1: testuser_d7d13279
+[23:05:09] INFO [loginUser] Logging in user: testuser_d7d13279
+[23:05:10] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9kN2QxMzI3OSIsImV4cCI6MTc0NjkzNjMxMH0.lk6Y-4qhIkDw-zN_Lt3S9lsm3SruK5PgRDYRjkSTccw', 'token_type': 'bearer'}
+[23:05:10] INFO [test_register_duplicate_phone_number] Cleanup delete response for testuser_d7d13279: 200
+[23:05:10] INFO [test_register_duplicate_phone_number] END
+[23:05:10] INFO [test_delete_user] START
+[23:05:10] INFO [registerUser] Registering user with payload: {'username': 'testuser_cd89d8a8', 'password': 'testpass123'}
+[23:05:10] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_cd89d8a8', 'password': 'testpass123'}
+[23:05:11] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":948}
+[23:05:11] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 948}
+[23:05:11] INFO [loginUser] Logging in user: testuser_cd89d8a8
+[23:05:12] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9jZDg5ZDhhOCIsImV4cCI6MTc0NjkzNjMxMn0.A2OTTd7p3AnI1DSuThcj0CFlmJR1GutrOXqPVdUwcf0', 'token_type': 'bearer'}
+[23:05:12] INFO [registerUser] Registering user with payload: {'username': 'testuser_27e74e84', 'password': 'testpass123'}
+[23:05:12] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_27e74e84', 'password': 'testpass123'}
+[23:05:12] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":949}
+[23:05:12] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 949}
+[23:05:12] INFO [loginUser] Logging in user: testuser_27e74e84
+[23:05:13] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yN2U3NGU4NCIsImV4cCI6MTc0NjkzNjMxM30._26t5wlldRBf0_yTPn8d5FLJoowLipAZmv1JN9INl1I', 'token_type': 'bearer'}
+[23:05:13] INFO [test_delete_user] Deleting user testuser_cd89d8a8 (self-delete)
+[23:05:13] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_cd89d8a8' deleted successfully."}
+[23:05:13] INFO [test_delete_user] Try deleting user testuser_cd89d8a8 again (should be not found/unauthorized)
+[23:05:14] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[23:05:14] INFO [test_delete_user] Second user attempts to delete testuser_cd89d8a8
+[23:05:14] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
+[23:05:14] INFO [test_delete_user] END
+[23:05:14] INFO [test_list_files] START
+[23:05:14] INFO [registerUser] Registering user with payload: None
+[23:05:14] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_b79eea5c', 'password': 'testpass123'}
+[23:05:15] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":950}
+[23:05:15] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 950}
+[23:05:15] INFO [loginUser] Logging in user: testuser_b79eea5c
+[23:05:16] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9iNzllZWE1YyIsImV4cCI6MTc0NjkzNjMxNn0.ou2e6fo1OXRb6fsEKWa5OJGmK5Pung6R__uIAazd_30', 'token_type': 'bearer'}
+[23:05:16] INFO [test_list_files] Listing files
+[23:05:16] INFO [test_list_files] Response status: 200, body: {'files': [{'fileId': 616, 'filename': 'short_term_memory.json', 'size': 39, 'uploaded_at': '2025-05-11T03:05:15.610913'}, {'fileId': 617, 'filename': 'long_term_memory.json', 'size': 269, 'uploaded_at': '2025-05-11T03:05:15.610918'}, {'fileId': 618, 'filename': 'testfile.txt', 'size': 11, 'uploaded_at': '2025-05-11T03:05:16.628012'}], 'count': 3}
+[23:05:17] INFO [test_list_files] END
+[23:05:17] INFO [test_download_file] START
+[23:05:17] INFO [registerUser] Registering user with payload: None
+[23:05:17] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_da7d1ae7', 'password': 'testpass123'}
+[23:05:18] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":951}
+[23:05:18] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 951}
+[23:05:18] INFO [loginUser] Logging in user: testuser_da7d1ae7
+[23:05:18] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9kYTdkMWFlNyIsImV4cCI6MTc0NjkzNjMxOX0.9lJhsGfyXX-1M_s3wClBjoK7z71JWVJwCBi4vLhuN2Q', 'token_type': 'bearer'}
+[23:05:19] INFO [test_download_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 621, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T03:05:19.284516'}
+[23:05:19] INFO [test_download_file] Downloading file with ID: 621
+[23:05:19] INFO [test_download_file] Response status: 200, length: 11
+[23:05:20] INFO [test_download_file] END
+[23:05:20] INFO [test_delete_file] START
+[23:05:20] INFO [registerUser] Registering user with payload: None
+[23:05:20] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_f56e4f7e', 'password': 'testpass123'}
+[23:05:20] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":952}
+[23:05:20] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 952}
+[23:05:20] INFO [loginUser] Logging in user: testuser_f56e4f7e
+[23:05:21] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9mNTZlNGY3ZSIsImV4cCI6MTc0NjkzNjMyMX0.nt7mNz_Y8E1rt17tQBK2idzLnO3jS0wsyndqks19qxY', 'token_type': 'bearer'}
+[23:05:21] INFO [test_delete_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 624, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-11T03:05:22.028525'}
+[23:05:21] INFO [test_delete_file] Deleting file with ID: 624
+[23:05:22] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully.", 'fileId': 624}
+[23:05:22] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
+[23:05:22] INFO [test_delete_file] END

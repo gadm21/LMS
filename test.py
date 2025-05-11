@@ -268,32 +268,54 @@ def test_twilio_incoming_sms_unknown_number(base_url):
 
 def test_register_duplicate_phone_number(base_url):
     logger.info("[test_register_duplicate_phone_number] START")
-    phone_number_int = 18005551234 # Shared phone number
+    
+    # Step 1: Create and register the first user with a unique phone number.
+    # This user will establish the phone number to be tested for duplication.
+    user1_payload = getUniqueUser(with_phone_number=True)
+    phone_to_test_duplication = user1_payload["phone_number"]
+    
+    # This first registration MUST succeed.
+    # registerUser returns (payload_passed_in, response_object)
+    _, reg_resp1 = registerUser(base_url, user1_payload)
+    assert reg_resp1.status_code == 200, f"Registration of user1 (with unique phone {phone_to_test_duplication}) failed: {reg_resp1.text}"
+    logger.info(f"[test_register_duplicate_phone_number] User1 {user1_payload['username']} registered successfully with phone {phone_to_test_duplication}")
 
-    user1_payload = getUniqueUser()
-    user1_payload["phone_number"] = phone_number_int
-    registered_user1, reg_resp1 = registerUser(base_url, user1_payload)
-    assert reg_resp1.status_code == 200, f"Registration of user1 failed: {reg_resp1.text}"
+    try:
+        # Step 2: Create a second user payload with a different username but the SAME phone number.
+        user2_payload = getUniqueUser() # Ensures different username from user1
+        while user2_payload['username'] == user1_payload['username']:
+            user2_payload = getUniqueUser() # Make sure username is truly different
+        user2_payload["phone_number"] = phone_to_test_duplication # Use phone from user1
 
-    user2_payload = getUniqueUser() # Different username
-    user2_payload["phone_number"] = phone_number_int # Same phone number
-    _ , reg_resp2 = registerUser(base_url, user2_payload)
+        # Step 3: Attempt to register the second user. This registration MUST FAIL.
+        logger.info(f"[test_register_duplicate_phone_number] Attempting to register user2 {user2_payload['username']} with duplicate phone {phone_to_test_duplication}")
+        _, reg_resp2 = registerUser(base_url, user2_payload)
+        
+        logger.info(f"[test_register_duplicate_phone_number] Response for user2 (attempting duplicate phone): {reg_resp2.status_code}, {reg_resp2.text}")
+        
+        assert reg_resp2.status_code == 400, f"Expected 400 error for duplicate phone, got {reg_resp2.status_code}"
+        response_json = reg_resp2.json()
+        assert "detail" in response_json, "Error response JSON should contain 'detail' key"
+        assert response_json["detail"].lower() == "phone number already registered", \
+               f"Unexpected error detail: {response_json['detail']}"
+        logger.info(f"[test_register_duplicate_phone_number] Correctly received 400 for user2 with duplicate phone.")
 
-    logger.info(f"[test_register_duplicate_phone_number] Response for user2 (duplicate phone): {reg_resp2.status_code}, {reg_resp2.text}")
-    # Expecting a 500 if the DB constraint is hit and not gracefully handled
-    # or a 400/409 if the application logic checks for duplicate phone numbers.
-    # Since User.phone_number is unique=True, a direct save without prior check would lead to IntegrityError -> 500 by default in FastAPI.
-    assert reg_resp2.status_code == 500 or reg_resp2.status_code == 400 # Allowing for either general DB error or specific app error
-    if reg_resp2.status_code == 500:
-        assert "Internal Server Error" in reg_resp2.text or "could not execute statement" in reg_resp2.text.lower() or "unique constraint" in reg_resp2.text.lower()
-    elif reg_resp2.status_code == 400:
-         assert "already exists" in reg_resp2.text.lower() # Or similar message if app handles it
+    finally:
+        # Step 4: Clean up - delete the first user (user1).
+        # user1_payload contains the username and password for login.
+        logger.info(f"[test_register_duplicate_phone_number] Cleaning up user1: {user1_payload['username']}")
+        token1 = loginUser(base_url, user1_payload) # user1_payload is the dict with 'username' and 'password'
+        if token1:
+            headers1 = {"Authorization": f"Bearer {token1}"}
+            delete_resp = requests.delete(f"{base_url}/user/{user1_payload['username']}", headers=headers1)
+            logger.info(f"[test_register_duplicate_phone_number] Cleanup delete response for {user1_payload['username']}: {delete_resp.status_code}")
+            if delete_resp.status_code != 200:
+                 logger.warning(f"[test_register_duplicate_phone_number] Cleanup of user {user1_payload['username']} failed with status {delete_resp.status_code}: {delete_resp.text}")       
+        else:
+            logger.warning(f"[test_register_duplicate_phone_number] Could not obtain token for cleanup of user: {user1_payload['username']}")
 
-    # Clean up user1
-    token1 = loginUser(base_url, registered_user1)
-    headers1 = {"Authorization": f"Bearer {token1}"}
-    requests.delete(f"{base_url}/user/{registered_user1['username']}", headers=headers1)
     logger.info("[test_register_duplicate_phone_number] END")
+
 
 def test_delete_user(base_url):
     """
