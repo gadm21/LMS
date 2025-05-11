@@ -57,3 +57,56 @@
 [13:03:27] INFO [loginUser] Logging in user: {'username': 'testuser_02688088', 'password': 'testpass123'}
 [13:03:28] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8wMjY4ODA4OCIsImV4cCI6MTc0NjkwMDIwOH0.QJdErkUzYviBUEkSGX2vb6agg99tRwr-rXlcZ1Gjhck', 'token_type': 'bearer'}
 [13:03:28] INFO [test_delete_user] Deleting user testuser_02688088 (self-delete)
+[13:03:29] INFO [test_delete_user] Delete response: 200, {"message":"User 'testuser_02688088' deleted successfully."}
+[13:03:29] INFO [test_delete_user] Try deleting user testuser_02688088 again (should be not found/unauthorized)
+[13:03:29] INFO [test_delete_user] Second delete response: 401, {"detail":"Invalid credentials"}
+[13:03:29] INFO [test_delete_user] Re-registering user testuser_02688088
+[13:03:29] INFO [registerUser] Registering user: {'username': 'testuser_02688088', 'password': 'testpass123'}
+[13:03:29] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_02688088', 'password': 'testpass123'}
+[13:03:30] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":874}
+[13:03:30] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 874}
+[13:03:30] INFO [test_delete_user] Registering second user: {'username': 'testuser_481390ee', 'password': 'testpass123'}
+[13:03:30] INFO [registerUser] Registering user: {'username': 'testuser_481390ee', 'password': 'testpass123'}
+[13:03:30] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_481390ee', 'password': 'testpass123'}
+[13:03:31] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":875}
+[13:03:31] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 875}
+[13:03:31] INFO [loginUser] Logging in user: {'username': 'testuser_481390ee', 'password': 'testpass123'}
+[13:03:32] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl80ODEzOTBlZSIsImV4cCI6MTc0NjkwMDIxMn0.gg7nSO5GCAjClNuvJZhUGJ7MhxdDwCR7ai0_gJoaEwA', 'token_type': 'bearer'}
+[13:03:32] INFO [test_delete_user] Second user attempts to delete testuser_02688088
+[13:03:32] INFO [test_delete_user] Forbidden delete response: 403, {"detail":"You can only delete your own account."}
+[13:03:32] INFO [test_delete_user] END
+[13:03:32] INFO [test_list_files] START
+[13:03:32] INFO [registerUser] Registering user: None
+[13:03:32] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_ac867881', 'password': 'testpass123'}
+[13:03:33] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":876}
+[13:03:33] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 876}
+[13:03:33] INFO [loginUser] Logging in user: {'username': 'testuser_ac867881', 'password': 'testpass123'}
+[13:03:33] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9hYzg2Nzg4MSIsImV4cCI6MTc0NjkwMDIxNH0.6G7YchxrOtDB-ata2ym4zI3RKjGLQPNsALzruXbWzQo', 'token_type': 'bearer'}
+[13:03:33] INFO [test_list_files] Listing files
+[13:03:34] INFO [test_list_files] Response status: 200, body: {'files': [{'fileId': 445, 'filename': 'short_term_memory.json', 'size': 39, 'uploaded_at': '2025-05-10T17:03:33.287189'}, {'fileId': 446, 'filename': 'long_term_memory.json', 'size': 279, 'uploaded_at': '2025-05-10T17:03:33.287195'}], 'count': 2}
+[13:03:34] INFO [test_list_files] END
+[13:03:34] INFO [test_download_file] START
+[13:03:34] INFO [registerUser] Registering user: None
+[13:03:34] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_d2d9436c', 'password': 'testpass123'}
+[13:03:35] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":877}
+[13:03:35] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 877}
+[13:03:35] INFO [loginUser] Logging in user: {'username': 'testuser_d2d9436c', 'password': 'testpass123'}
+[13:03:35] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl9kMmQ5NDM2YyIsImV4cCI6MTc0NjkwMDIxNn0.X37uib5XFrqBkTUmcrhaYG-bdVaX3MOQlGpPIHvd-q4', 'token_type': 'bearer'}
+[13:03:35] INFO [test_download_file] Uploading file: testfile.txt
+[13:03:36] INFO [test_download_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 449, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-10T17:03:36.375044'}
+[13:03:36] INFO [test_download_file] Downloading file with ID: 449
+[13:03:36] INFO [test_download_file] Response status: 200, length: 11
+[13:03:36] INFO [test_download_file] END
+[13:03:36] INFO [test_delete_file] START
+[13:03:36] INFO [registerUser] Registering user: None
+[13:03:36] INFO [registerUser] Sending request to https://lms-swart-five.vercel.app/register with user data: {'username': 'testuser_2deed560', 'password': 'testpass123'}
+[13:03:37] INFO [registerUser] Response status: 200, raw response: {"message":"Registered successfully","userId":878}
+[13:03:37] INFO [registerUser] JSON response: {'message': 'Registered successfully', 'userId': 878}
+[13:03:37] INFO [loginUser] Logging in user: {'username': 'testuser_2deed560', 'password': 'testpass123'}
+[13:03:38] INFO [loginUser] Response status: 200, body: {'access_token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlcl8yZGVlZDU2MCIsImV4cCI6MTc0NjkwMDIxOH0.knuuKAc4V-NoKau1rC3pV5DHER7SLW481CCIHC8dgFI', 'token_type': 'bearer'}
+[13:03:38] INFO [test_delete_file] Uploading file: testfile.txt
+[13:03:38] INFO [test_delete_file] Upload response: {'filename': 'testfile.txt', 'size': 11, 'fileId': 452, 'content_type': 'text/plain', 'version': 1, 'uploaded_at': '2025-05-10T17:03:38.917655'}
+[13:03:38] INFO [test_delete_file] Deleting file with ID: 452
+[13:03:38] INFO [test_delete_file] Delete response: 200, {'message': "File 'testfile.txt' deleted successfully.", 'fileId': 452}
+[13:03:39] INFO [test_delete_file] File list after delete: {'detail': 'Invalid credentials'}
+[13:03:39] INFO [test_delete_file] END

@@ -128,6 +128,9 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     user_data = {"username": req.username, "hashed_password": hashed_pw}
     if req.role is not None:
         user_data["role"] = req.role
+    if req.phone_number is not None:
+        user_data["phone_number"] = req.phone_number
+        
     user = User(**user_data)
     
     db.add(user)
@@ -138,7 +141,7 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     
     # Create shortterm and longterm memory files for the user
     shortterm_memory = {"conversations": [], "active_url": {}}
-    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"], "phone_number": "807-555-1234"}
+    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"], "phone_number": req.phone_number if req.phone_number is not None else None}
     
     # Save memory files to the database
     shortterm_memory_file = DBFile(
@@ -973,42 +976,70 @@ async def handle_twilio_incoming_message(request: Request, From: str = Form(...)
     log_request_start(endpoint_name, "POST", dict(request.headers), client_host)
     logger.info(f"[{endpoint_name}] Twilio Incoming SMS from {From}: {Body}")
 
-    normalized_from_number = re.sub(r'\D', '', From)
+    normalized_from_number_str = re.sub(r'\D', '', From)
     user_query_text = Body
-
     found_user: Optional[User] = None
-    users_in_db = db.query(User).all()
-    
-    for user_record in users_in_db:
-        longterm_file = db.query(DBFile).filter(
-            DBFile.userId == user_record.userId,
-            DBFile.filename == "long_term_memory.json"
-        ).first()
-        if longterm_file and longterm_file.content:
-            try:
-                ltm_content = json.loads(longterm_file.content.decode('utf-8'))
-                stored_phone = ltm_content.get("values", {}).get("phone_number", "")
-                normalized_stored_phone = re.sub(r'\D', '', stored_phone)
-                # Match suffix of numbers if one is shorter, common for international vs local
-                if normalized_stored_phone.endswith(normalized_from_number) or \
-                   normalized_from_number.endswith(normalized_stored_phone):
-                    found_user = user_record
-                    logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number} to user {found_user.username} (ID: {found_user.userId})")
-                    break
-            except json.JSONDecodeError:
-                logger.error(f"[{endpoint_name}] Could not parse long_term_memory for user {user_record.userId}")
-            except Exception as e:
-                logger.error(f"[{endpoint_name}] Error processing LTM for user {user_record.userId}: {e}")
+
+    if not normalized_from_number_str:
+        logger.warning(f"[{endpoint_name}] Received empty or invalid 'From' number: {From}. Cannot look up user.")
+        twiml_response = "<Response><Message>Sorry, we could not identify your phone number.</Message></Response>"
+        log_response(200, twiml_response, endpoint_name)
+        return Response(content=twiml_response, media_type="application/xml", status_code=200)
+
+    try:
+        # Attempt to convert the string of digits to an integer
+        # Twilio E.164 might start with '+', re.sub removes it, leaving digits.
+        # Our DB stores it as BigInteger, so direct comparison is fine.
+        # If there's a leading '1' for US numbers, it should be included in what's stored if it's part of the lookup.
+        # Assuming phone_number in DB is stored as a full international number without '+' but including country code.
+        phone_number_to_lookup = int(normalized_from_number_str)
+        found_user = db.query(User).filter(User.phone_number == phone_number_to_lookup).first()
+        if found_user:
+            logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number_str} (parsed as {phone_number_to_lookup}) to user {found_user.username} (ID: {found_user.userId}) via direct DB lookup.")
+    except ValueError:
+        logger.error(f"[{endpoint_name}] Could not convert normalized phone number '{normalized_from_number_str}' to int for DB lookup.")
+    except Exception as e:
+        logger.error(f"[{endpoint_name}] Error during direct DB lookup for phone number {normalized_from_number_str}: {e}")
+
+    # Fallback: If direct lookup fails or phone_number field is not populated for some users,
+    # try the old LTM-based lookup (optional, consider removing if all users will have phone_number in User table)
+    # For now, let's keep the LTM lookup as a fallback to maintain compatibility with older data.
+    if not found_user:
+        logger.info(f"[{endpoint_name}] User not found via direct DB lookup for {normalized_from_number_str}. Attempting LTM fallback.")
+        users_in_db = db.query(User).all()
+        for user_record in users_in_db:
+            longterm_file = db.query(DBFile).filter(
+                DBFile.userId == user_record.userId,
+                DBFile.filename == "long_term_memory.json"
+            ).first()
+            if longterm_file and longterm_file.content:
+                try:
+                    ltm_content = json.loads(longterm_file.content.decode('utf-8'))
+                    stored_phone = ltm_content.get("values", {}).get("phone_number", "")
+                    normalized_stored_phone = re.sub(r'\D', '', stored_phone) # Normalize LTM phone
+                    
+                    # Match suffix of numbers if one is shorter, common for international vs local
+                    # Or if numbers are identical after normalization
+                    if normalized_stored_phone == normalized_from_number_str or \
+                       (normalized_stored_phone.endswith(normalized_from_number_str) and len(normalized_from_number_str) < len(normalized_stored_phone)) or \
+                       (normalized_from_number_str.endswith(normalized_stored_phone) and len(normalized_stored_phone) < len(normalized_from_number_str)):
+                        found_user = user_record
+                        logger.info(f"[{endpoint_name}] Matched Twilio number {normalized_from_number_str} to user {found_user.username} (ID: {found_user.userId}) via LTM fallback.")
+                        break
+                except json.JSONDecodeError:
+                    logger.error(f"[{endpoint_name}] Could not parse long_term_memory for user {user_record.userId} during LTM fallback.")
+                except Exception as e:
+                    logger.error(f"[{endpoint_name}] Error processing LTM for user {user_record.userId} during LTM fallback: {e}")
 
     if not found_user:
-        logger.warning(f"[{endpoint_name}] No user found for Twilio number {normalized_from_number} ({From}).")
+        logger.warning(f"[{endpoint_name}] No user found for Twilio number {normalized_from_number_str} ({From}) after all lookups.")
         twiml_response = "<Response><Message>Sorry, your phone number is not recognized in our system.</Message></Response>"
         log_response(200, twiml_response, endpoint_name)
         return Response(content=twiml_response, media_type="application/xml", status_code=200)
 
     # User found, proceed with AI query
     user = found_user
-    chat_id = f"sms_{normalized_from_number}" # Consistent chat ID for SMS user
+    chat_id = f"sms_{normalized_from_number_str}" # Consistent chat ID for SMS user
 
     try:
         # Create a new query record in the database
@@ -1044,16 +1075,16 @@ async def handle_twilio_incoming_message(request: Request, From: str = Form(...)
             "client_info": {"model": "gpt-3.5-turbo", "max_tokens": 1024, "temperature": 0.7} # Default params
         }
         
-        references = read_references()
+        # references = read_references()
 
         ai_response = ai_query_handler.query_openai(
             query=user_query_text,
             long_term_memory=long_term_memory,
             short_term_memory=short_term_memory,
             aux_data=aux_data,
-            references=references,
             max_tokens=aux_data["client_info"]["max_tokens"],
             temperature=aux_data["client_info"]["temperature"],
+            # references=references,
         )
         log_ai_response(ai_response, endpoint_name)
 
@@ -1072,7 +1103,6 @@ async def handle_twilio_incoming_message(request: Request, From: str = Form(...)
             if shortterm_file_db:
                 shortterm_file_db.content = json.dumps(shortterm_content).encode('utf-8')
                 shortterm_file_db.size = len(shortterm_file_db.content)
-                db.add(shortterm_file_db)
             else: # Should not happen if user registration creates it
                 logger.warning(f"[{endpoint_name}] short_term_memory.json not found for user {user.userId}, creating new.")
                 # Create if missing logic might be needed here
@@ -1092,6 +1122,7 @@ async def handle_twilio_incoming_message(request: Request, From: str = Form(...)
         db.rollback() # Rollback any partial DB changes on error
         twiml_error_reply = "<Response><Message>Sorry, an internal error occurred while processing your message.</Message></Response>"
         return Response(content=twiml_error_reply, media_type="application/xml", status_code=500)
+
 
 @router.post("/api/webhooks/twilio/message-status")
 async def handle_twilio_message_status(request: Request, MessageSid: str = Form(...), MessageStatus: str = Form(...)):

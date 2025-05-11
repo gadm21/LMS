@@ -6,7 +6,7 @@ It includes the User model and database connection configuration.
 
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, LargeBinary, UniqueConstraint, SmallInteger
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, ForeignKey, Text, LargeBinary, UniqueConstraint, SmallInteger, BigInteger
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 
 # Load environment variables from .env if present
@@ -44,6 +44,7 @@ class User(Base):
         hashed_password: Bcrypt hash of the user's password
         max_file_size: Maximum allowed file size in bytes (default: 500MB)
         role: User's role (int2 with default 0)
+        phone_number: User's phone number
         files: Relationship to File objects uploaded by this user
         queries: Relationship to Query objects created by this user
         sessions: Relationship to Session objects for this user
@@ -54,6 +55,7 @@ class User(Base):
     hashed_password = Column(String)
     max_file_size = Column(Integer, default=524288000)  # 500MB default max file size
     role = Column(SmallInteger, default=0)  # Added user's role, int2 with default 0
+    phone_number = Column(BigInteger, nullable=True, unique=True, index=True) # Added phone number
     
     # Relationships
     files = relationship("File", back_populates="user")

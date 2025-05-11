@@ -35,9 +35,9 @@ def query_openai(
     query: str,
     long_term_memory: LongTermMemoryManager,
     short_term_memory: ShortTermMemoryManager,
-    references: Dict[str, str],
     max_tokens: int = 1024,
     temperature: float = 0.7,
+    references: Dict[str, str] = {},
     aux_data: Optional[Dict[str, Any]] = None
 ) -> str:
     """Send a query to OpenAI's GPT-3.5-turbo with context.

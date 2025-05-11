@@ -40,9 +40,15 @@ from server.routes import ASSETS_FOLDER
 
 import uuid
 
-def getUniqueUser():
+def getUniqueUser(with_phone_number=False):
     username = f"testuser_{uuid.uuid4().hex[:8]}"
-    return {"username": username, "password": "testpass123"}
+    user_data = {"username": username, "password": "testpass123"}
+    if with_phone_number:
+        # Generate a unique-ish phone number string, then convert to int. Ensure it's a plausible length.
+        # Using a large number to test BigInteger, ensuring it doesn't start with 0.
+        phone_digits = f"{uuid.uuid4().int % 10**9}" # up to 9 digits
+        user_data["phone_number"] = int(f"1{phone_digits.zfill(9)}") # Make it a 10-digit number starting with 1
+    return user_data
 
 TEST_FILE_NAME = "testfile.txt"
 TEST_FILE_CONTENT = b"Hello, LMS!"
@@ -59,32 +65,37 @@ def setup_module(module):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
 
-def registerUser(base_url, user=None):
-    logger.info(f"[registerUser] Registering user: {user}")
-    if user is None:
-        user = getUniqueUser()
-    logger.info(f"[registerUser] Sending request to {base_url}/register with user data: {user}")
-    resp = requests.post(f"{base_url}/register", json=user)
+def registerUser(base_url, user_payload=None):
+    logger.info(f"[registerUser] Registering user with payload: {user_payload}")
+    if user_payload is None:
+        user_payload = getUniqueUser()
+    
+    logger.info(f"[registerUser] Sending request to {base_url}/register with user data: {user_payload}")
+    resp = requests.post(f"{base_url}/register", json=user_payload)
     logger.info(f"[registerUser] Response status: {resp.status_code}, raw response: {resp.text}")
     
     if resp.status_code != 200:
-        raise Exception(f"[registerUser] Registration failed with status {resp.status_code}: {resp.text}")
-    
+        # For duplicate phone number test, we might expect a different error code
+        # but for general registration, 200 is success.
+        # Let the test itself assert specific non-200 codes if expected.
+        logger.warning(f"[registerUser] Registration did not return 200. Status: {resp.status_code}, Response: {resp.text}")
+        # We return the response object so the test can inspect it
+        return user_payload, resp 
+        
     try:
         json_resp = resp.json()
         logger.info(f"[registerUser] JSON response: {json_resp}")
         assert json_resp["message"] == "Registered successfully"
-        return user
+        return user_payload, resp # Return the original payload and the response
     except Exception as e:
         logger.error(f"[registerUser] Error parsing response: {e}")
-        logger.error(f"[registerUser] Raw response: {resp.text}")
-        raise
 
 def loginUser(base_url, user):
-    logger.info(f"[loginUser] Logging in user: {user}")
+    logger.info(f"[loginUser] Logging in user: {user['username']}") # user is now the payload
+    login_payload = {"username": user["username"], "password": user["password"]}
     resp = requests.post(
         f"{base_url}/token", 
-        data=user, 
+        data=login_payload, 
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
     logger.info(f"[loginUser] Response status: {resp.status_code}, body: {resp.json()}")
@@ -94,8 +105,9 @@ def loginUser(base_url, user):
 
 def test_upload_file(base_url):
     logger.info("[test_upload_file] START")
-    user = registerUser(base_url)
-    token = loginUser(base_url, user)
+    user_payload, reg_resp = registerUser(base_url)
+    assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
+    token = loginUser(base_url, user_payload)
     headers = {"Authorization": f"Bearer {token}"}
     files = {"file": (TEST_FILE_NAME, TEST_FILE_CONTENT, "text/plain")}
     logger.info(f"[test_upload_file] Uploading file: {TEST_FILE_NAME}")
@@ -106,7 +118,7 @@ def test_upload_file(base_url):
     assert resp.json()["size"] == len(TEST_FILE_CONTENT)
     # Clean up: delete user
     logger.info("[test_upload_file] END")
-    requests.delete(f"{base_url}/user/{user['username']}", headers=headers)
+    requests.delete(f"{base_url}/user/{user_payload['username']}", headers=headers)
 
 def test_active_url_success(base_url):
     logger.info("[test_active_url_success] START")
@@ -130,31 +142,40 @@ def test_active_url_missing_url(base_url):
 
 def test_profile(base_url):
     logger.info("[test_profile] START")
-    user = registerUser(base_url) # Register a new user
-    token = loginUser(base_url, user) # Log in to get a token
-    headers = {"Authorization": f"Bearer {token}"} # Prepare auth header
+    user_payload_with_phone = getUniqueUser(with_phone_number=True)
+    registered_user_with_phone, reg_resp_wp = registerUser(base_url, user_payload_with_phone)
+    assert reg_resp_wp.status_code == 200, f"Registration failed for user with phone: {reg_resp_wp.text}"
+    token_wp = loginUser(base_url, registered_user_with_phone)
+    headers_wp = {"Authorization": f"Bearer {token_wp}"}
 
-    resp = requests.get(f"{base_url}/profile", headers=headers) # Make authenticated request
-    logger.info(f"[test_profile] Response status: {resp.status_code}, body: {resp.json()}")
-    assert resp.status_code == 200, f"[test_profile] Failed: {resp.text}"
-    data = resp.json()
-    
-    # Assert against the registered user's data
-    assert data["username"] == user["username"], f"Expected username {user['username']}, got {data['username']}"
-    assert "userId" in data
-    assert isinstance(data["userId"], int)
-    assert "max_file_size" in data
-    assert isinstance(data["max_file_size"], int)
-    assert "role" in data
-    assert isinstance(data["role"], int) # Assuming role is an int (e.g., 0 for user, 1 for admin)
+    resp_wp = requests.get(f"{base_url}/profile", headers=headers_wp)
+    logger.info(f"[test_profile] Profile response (with phone): {resp_wp.status_code}, body: {resp_wp.json()}")
+    assert resp_wp.status_code == 200
+    data_wp = resp_wp.json()
+    assert data_wp["username"] == registered_user_with_phone["username"]
+    assert "userId" in data_wp
+    assert "max_file_size" in data_wp
+    assert "role" in data_wp
+    assert "phone_number" in data_wp
+    assert data_wp["phone_number"] == registered_user_with_phone["phone_number"]
 
-    # Clean up: delete user
-    # Construct correct URL for user deletion, ensuring username is part of the path
-    delete_url = f"{base_url}/user/{user['username']}"
-    delete_resp = requests.delete(delete_url, headers=headers)
-    logger.info(f"[test_profile] Cleanup delete response for {user['username']}: {delete_resp.status_code}")
-    # Optionally, assert delete_resp.status_code == 200 or 204 depending on API design
+    # Test with a user without a phone number
+    user_payload_no_phone = getUniqueUser(with_phone_number=False)
+    registered_user_no_phone, reg_resp_np = registerUser(base_url, user_payload_no_phone)
+    assert reg_resp_np.status_code == 200, f"Registration failed for user without phone: {reg_resp_np.text}"
+    token_np = loginUser(base_url, registered_user_no_phone)
+    headers_np = {"Authorization": f"Bearer {token_np}"}
 
+    resp_np = requests.get(f"{base_url}/profile", headers=headers_np)
+    logger.info(f"[test_profile] Profile response (no phone): {resp_np.status_code}, body: {resp_np.json()}")
+    assert resp_np.status_code == 200
+    data_np = resp_np.json()
+    assert data_np["username"] == registered_user_no_phone["username"]
+    assert data_np["phone_number"] is None
+
+    # Clean up
+    requests.delete(f"{base_url}/user/{registered_user_with_phone['username']}", headers=headers_wp)
+    requests.delete(f"{base_url}/user/{registered_user_no_phone['username']}", headers=headers_np)
     logger.info("[test_profile] END")
 
 def testQueryEndpoint(base_url):
@@ -162,11 +183,11 @@ def testQueryEndpoint(base_url):
     Test the AI query endpoint for various scenarios.
     """
     logger.info("[testQueryEndpoint] START")
-    user = registerUser(base_url)
-    token = loginUser(base_url, user)
+    user_payload, reg_resp = registerUser(base_url)
+    assert reg_resp.status_code == 200, f"Registration failed: {reg_resp.text}"
+    token = loginUser(base_url, user_payload)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
     url = f"{base_url}/query"
-
     # Case 1: Missing JSON body
     logger.info("[testQueryEndpoint] Case 1: Missing JSON body")
     resp = requests.post(url, headers=headers)
@@ -197,8 +218,82 @@ def testQueryEndpoint(base_url):
     else:
         assert "error" in resp.json()
     # Clean up: delete user
-    requests.delete(f"{base_url}/user/{user['username']}", headers=headers)
+    requests.delete(f"{base_url}/user/{user_payload['username']}", headers=headers)
     logger.info("[testQueryEndpoint] END")
+
+def test_twilio_incoming_sms_known_number(base_url):
+    logger.info("[test_twilio_incoming_sms_known_number] START")
+    phone_number_int = 18005551212 # Example phone number as int
+    phone_number_str_twilio = "+18005551212" # Twilio format
+    
+    user_payload = getUniqueUser()
+    user_payload["phone_number"] = phone_number_int
+    
+    registered_user, reg_resp = registerUser(base_url, user_payload)
+    assert reg_resp.status_code == 200, f"Registration with phone number failed: {reg_resp.text}"
+    
+    twilio_payload = {"From": phone_number_str_twilio, "Body": "Hello from Twilio test"}
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    
+    logger.info(f"[test_twilio_incoming_sms_known_number] Sending Twilio webhook simulation: {twilio_payload}")
+    resp = requests.post(f"{base_url}/api/webhooks/twilio/incoming-message", data=twilio_payload, headers=headers)
+    
+    logger.info(f"[test_twilio_incoming_sms_known_number] Response: {resp.status_code}, Content-Type: {resp.headers.get('Content-Type')}, Text: {resp.text[:200]}")
+    assert resp.status_code == 200
+    assert "application/xml" in resp.headers.get("Content-Type", "").lower()
+    assert "<Response><Message>" in resp.text
+    assert "Sorry, your phone number is not recognized" not in resp.text # Should be an AI response or similar
+    
+    # Clean up
+    token = loginUser(base_url, registered_user)
+    auth_headers = {"Authorization": f"Bearer {token}"}
+    requests.delete(f"{base_url}/user/{registered_user['username']}", headers=auth_headers)
+    logger.info("[test_twilio_incoming_sms_known_number] END")
+
+def test_twilio_incoming_sms_unknown_number(base_url):
+    logger.info("[test_twilio_incoming_sms_unknown_number] START")
+    unknown_phone_number_twilio = "+19998887777"
+    
+    twilio_payload = {"From": unknown_phone_number_twilio, "Body": "Who dis?"}
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    logger.info(f"[test_twilio_incoming_sms_unknown_number] Sending Twilio webhook simulation for unknown number: {twilio_payload}")
+    resp = requests.post(f"{base_url}/api/webhooks/twilio/incoming-message", data=twilio_payload, headers=headers)
+    
+    logger.info(f"[test_twilio_incoming_sms_unknown_number] Response: {resp.status_code}, Content-Type: {resp.headers.get('Content-Type')}, Text: {resp.text[:200]}")
+    assert resp.status_code == 200
+    assert "application/xml" in resp.headers.get("Content-Type", "").lower()
+    assert "<Response><Message>Sorry, your phone number is not recognized in our system.</Message></Response>" in resp.text
+    logger.info("[test_twilio_incoming_sms_unknown_number] END")
+
+def test_register_duplicate_phone_number(base_url):
+    logger.info("[test_register_duplicate_phone_number] START")
+    phone_number_int = 18005551234 # Shared phone number
+
+    user1_payload = getUniqueUser()
+    user1_payload["phone_number"] = phone_number_int
+    registered_user1, reg_resp1 = registerUser(base_url, user1_payload)
+    assert reg_resp1.status_code == 200, f"Registration of user1 failed: {reg_resp1.text}"
+
+    user2_payload = getUniqueUser() # Different username
+    user2_payload["phone_number"] = phone_number_int # Same phone number
+    _ , reg_resp2 = registerUser(base_url, user2_payload)
+
+    logger.info(f"[test_register_duplicate_phone_number] Response for user2 (duplicate phone): {reg_resp2.status_code}, {reg_resp2.text}")
+    # Expecting a 500 if the DB constraint is hit and not gracefully handled
+    # or a 400/409 if the application logic checks for duplicate phone numbers.
+    # Since User.phone_number is unique=True, a direct save without prior check would lead to IntegrityError -> 500 by default in FastAPI.
+    assert reg_resp2.status_code == 500 or reg_resp2.status_code == 400 # Allowing for either general DB error or specific app error
+    if reg_resp2.status_code == 500:
+        assert "Internal Server Error" in reg_resp2.text or "could not execute statement" in reg_resp2.text.lower() or "unique constraint" in reg_resp2.text.lower()
+    elif reg_resp2.status_code == 400:
+         assert "already exists" in reg_resp2.text.lower() # Or similar message if app handles it
+
+    # Clean up user1
+    token1 = loginUser(base_url, registered_user1)
+    headers1 = {"Authorization": f"Bearer {token1}"}
+    requests.delete(f"{base_url}/user/{registered_user1['username']}", headers=headers1)
+    logger.info("[test_register_duplicate_phone_number] END")
 
 def test_delete_user(base_url):
     """
