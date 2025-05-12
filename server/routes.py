@@ -140,7 +140,8 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     new_user = User(
         username=req.username, 
         hashed_password=hashed_password,
-        phone_number=req.phone_number # Ensure phone_number is assigned here
+        phone_number=req.phone_number, # Ensure phone_number is assigned here
+        role=req.role  # Assign role from request
     )
     db.add(new_user)
     db.commit()
@@ -150,7 +151,16 @@ def register(req: RegisterRequest, db: SessionLocal = Depends(get_db)):
     
     # Create shortterm and longterm memory files for the user
     shortterm_memory = {"conversations": [], "active_url": {}}
-    longterm_memory = {"user_profile": {"username": req.username}, "preferences": {"language": "English"}, "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"}, "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"], "phone_number": req.phone_number if req.phone_number is not None else None}
+    longterm_memory = {
+        "user_profile": {
+            "username": new_user.username,  # Use username from the persisted user object
+            "role": new_user.role          # Add user's role from persisted user object
+        },
+        "preferences": {"language": "English"},
+        "values": {"age": "25", "gender": "male", "country": "Canada", "city": "London"},
+        "beliefs": ["patient", "caring", "helpful", "knowledgeable", "friendly"],
+        "phone_number": new_user.phone_number  # Use phone_number from persisted user object
+    }
     
     # Save memory files to the database
     shortterm_memory_file = DBFile(
