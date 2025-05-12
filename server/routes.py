@@ -983,6 +983,63 @@ def profile(current_user: User = Depends(get_current_user)):
         phone_number=current_user.phone_number
     )
 
+# --- Admin User Management Endpoints ---
+
+@router.get("/admin/users", response_model=List[UserResponse])
+async def get_all_users_admin(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Retrieve all users. Only accessible by admin users."""
+    endpoint_name = "get_all_users_admin"
+    logger.info(f"[{endpoint_name}] Attempt by user {current_user.username} (Role: {current_user.role})")
+
+    # Assuming role '2' is admin. Adjust if this mapping is different.
+    if current_user.role != 2:
+        logger.warning(f"[{endpoint_name}] Unauthorized access attempt by user {current_user.username}.")
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to access this resource. Admin privileges required."
+        )
+    
+    users = db.query(User).all()
+    logger.info(f"[{endpoint_name}] Successfully retrieved {len(users)} users for admin {current_user.username}.")
+    return users
+
+@router.delete("/admin/users/{user_id}", status_code=204)
+async def delete_user_admin(user_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Delete a user by their ID. Only accessible by admin users."""
+    endpoint_name = "delete_user_admin"
+    logger.info(f"[{endpoint_name}] Attempt by admin {current_user.username} (Role: {current_user.role}) to delete user ID {user_id}")
+
+    # Assuming role '2' is admin. Adjust if this mapping is different.
+    if current_user.role != 2:
+        logger.warning(f"[{endpoint_name}] Unauthorized delete attempt by user {current_user.username}.")
+        raise HTTPException(
+            status_code=403,
+            detail="Not authorized to perform this action. Admin privileges required."
+        )
+
+    if current_user.userId == user_id:
+        logger.warning(f"[{endpoint_name}] Admin user {current_user.username} attempted to delete themselves.")
+        raise HTTPException(
+            status_code=400,
+            detail="Admin users cannot delete their own account through this endpoint."
+        )
+
+    user_to_delete = db.query(User).filter(User.userId == user_id).first()
+
+    if not user_to_delete:
+        logger.warning(f"[{endpoint_name}] User with ID {user_id} not found for deletion by admin {current_user.username}.")
+        raise HTTPException(
+            status_code=404,
+            detail=f"User with ID {user_id} not found."
+        )
+    
+    # TODO: Consider cascading deletes or handling related data (e.g., files, queries) if necessary.
+    # For now, direct delete of the user record.
+    db.delete(user_to_delete)
+    db.commit()
+    logger.info(f"[{endpoint_name}] User ID {user_id} (Username: {user_to_delete.username}) successfully deleted by admin {current_user.username}.")
+    return # FastAPI will return 204 No Content for status_code=204
+
 # --- Twilio Webhook Endpoints ---
 
 @router.post("/api/webhooks/twilio/incoming-message")
