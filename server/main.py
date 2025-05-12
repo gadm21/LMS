@@ -20,7 +20,8 @@ app.add_middleware(
         "https://lms-swart-five.vercel.app",  # Vercel frontend domain
         "https://lms-30o7ryg5m-gads-projects-02bd6234.vercel.app",  # Vercel backend domain (if needed)
         "https://walnut-b8q7yopih-gads-projects-02bd6234.vercel.app", # Previous Vercel frontend domain
-        "https://walnut-nu.vercel.app", # New Vercel frontend domain
+        "https://walnut-nu.vercel.app", # Previous Vercel frontend domain
+        "https://walnut-hw9o7jl6c-gads-projects-02bd6234.vercel.app", # New Vercel frontend domain
     ],
     allow_credentials=True,
     allow_methods=["*"],
